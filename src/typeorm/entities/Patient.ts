@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Gender } from 'src/common/enums/Gender';
 
 @Entity({ name: 'Patients' })
 export class Patient {
@@ -18,7 +25,7 @@ export class Patient {
   dateOfBirth: Date;
 
   @Column({ name: 'gender' })
-  gender: string;
+  gender: Gender;
 
   @Column({ name: 'address' })
   address: string;
@@ -26,12 +33,12 @@ export class Patient {
   @Column({ name: 'phone_number' })
   phoneNumber: string;
 
-  @Column({ name: 'overview' })
+  @Column({ name: 'overview', type: 'text' })
   overview: string;
 
-  @Column({ name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @Column({ name: 'updated_at', nullable: true })
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

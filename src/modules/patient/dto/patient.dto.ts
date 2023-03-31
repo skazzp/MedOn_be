@@ -6,7 +6,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Gender } from 'src/enums/Gender';
+import { Gender } from 'src/common/enums/Gender';
 
 export class PatientDto {
   @ApiProperty({ description: 'First name of the patient', example: 'Adam' })
