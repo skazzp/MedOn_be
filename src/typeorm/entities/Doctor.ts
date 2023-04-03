@@ -1,0 +1,55 @@
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Role } from '../../common/enums/Role';
+import { Speciality } from './Speciality';
+
+@Entity({ name: 'doctor' })
+export class Doctor {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ name: 'first_name' })
+  firstName: string;
+
+  @Column({ name: 'last_name' })
+  lastName: string;
+
+  @Column({ name: 'email', unique: true })
+  email: string;
+
+  @Column({ name: 'password' })
+  password: string;
+
+  @Column({ name: 'token' })
+  token: string;
+
+  @Column({ name: 'photo' })
+  photo: string;
+
+  @Column({ name: 'date_of_birth', type: 'datetime' })
+  dateOfBirth: Date;
+
+  @Column({ name: 'role', type: 'enum', enum: Role })
+  role: Role;
+
+  @Column({ name: 'is_verified', type: 'boolean', default: false })
+  isVerified: boolean;
+
+  @Column({ name: 'time_zone' })
+  timeZone: string;
+
+  @ManyToOne(() => Speciality, (speciality) => speciality.doctors)
+  speciality: Speciality;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+}

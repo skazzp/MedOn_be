@@ -9,18 +9,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from 'src/common/enums/Gender';
 
 export class PatientDto {
-  @ApiProperty({ description: 'First name of the patient', example: 'Adam' })
+  @ApiProperty({ description: 'First name of the patients', example: 'Adam' })
   @IsString()
   @IsNotEmpty()
   firstName: string;
 
-  @ApiProperty({ description: 'Last name of the patient', example: 'Smith' })
+  @ApiProperty({ description: 'Last name of the patients', example: 'Smith' })
   @IsString()
   @IsNotEmpty()
   lastName: string;
 
   @ApiProperty({
-    description: 'Email of the patient',
+    description: 'Email of the patients',
     example: 'adam@gmail.com',
   })
   @IsEmail()
@@ -28,7 +28,7 @@ export class PatientDto {
   email: string;
 
   @ApiProperty({
-    description: 'Date of birth of the patient',
+    description: 'Date of birth of the patients',
     example: '1985-03-28',
   })
   @IsDateString()

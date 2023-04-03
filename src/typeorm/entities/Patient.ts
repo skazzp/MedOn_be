@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Gender } from 'src/common/enums/Gender';
 
-@Entity({ name: 'Patients' })
+@Entity({ name: 'patient' })
 export class Patient {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,10 +21,10 @@ export class Patient {
   @Column({ name: 'email', unique: true })
   email: string;
 
-  @Column({ name: 'date_of_birth' })
+  @Column({ name: 'date_of_birth', type: 'datetime' })
   dateOfBirth: Date;
 
-  @Column({ name: 'gender' })
+  @Column({ name: 'gender', type: 'enum', enum: Gender })
   gender: Gender;
 
   @Column({ name: 'address' })

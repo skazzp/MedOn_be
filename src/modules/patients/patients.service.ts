@@ -5,7 +5,7 @@ import { Patient } from '../../typeorm/entities/Patient';
 import { PatientDto } from './dto/patient.dto';
 
 @Injectable()
-export class PatientService {
+export class PatientsService {
   constructor(
     @InjectRepository(Patient) private patientsRepo: Repository<Patient>,
   ) {}
@@ -17,7 +17,7 @@ export class PatientService {
   getPatientById(id: number): Promise<Patient> {
     return this.patientsRepo
       .createQueryBuilder('Patients')
-      .where('Patients.id = :id', { id })
+      .where('Patient.id = :id', { id })
       .getOne();
   }
 
