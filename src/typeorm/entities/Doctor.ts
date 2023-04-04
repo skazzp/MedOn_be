@@ -5,7 +5,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  JoinColumn,
 } from 'typeorm';
+
 import { Role } from '../../common/enums/Role';
 import { Speciality } from './Speciality';
 
@@ -26,10 +28,10 @@ export class Doctor {
   @Column({ name: 'password' })
   password: string;
 
-  @Column({ name: 'token' })
+  @Column({ name: 'token', nullable: true })
   token: string;
 
-  @Column({ name: 'photo' })
+  @Column({ name: 'photo', nullable: true })
   photo: string;
 
   @Column({ name: 'date_of_birth', type: 'datetime' })
@@ -44,7 +46,11 @@ export class Doctor {
   @Column({ name: 'time_zone' })
   timeZone: string;
 
+  @Column({ name: 'speciality_id' })
+  specialityId: number;
+
   @ManyToOne(() => Speciality, (speciality) => speciality.doctors)
+  @JoinColumn({ name: 'speciality_id' })
   speciality: Speciality;
 
   @CreateDateColumn({ name: 'created_at' })

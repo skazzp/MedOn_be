@@ -6,6 +6,8 @@ import { PatientsModule } from './modules/patients/patients.module';
 import { EmailModule } from './modules/email/email.module';
 import { SpecialitiesModule } from './modules/specialities/specialities.module';
 import { Speciality } from './typeorm/entities/Speciality';
+import { DoctorsModule } from './modules/doctors/doctors.module';
+import { Doctor } from './typeorm/entities/Doctor';
 
 @Module({
   imports: [
@@ -19,7 +21,7 @@ import { Speciality } from './typeorm/entities/Speciality';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [Patient, Speciality],
+        entities: [Patient, Speciality, Doctor],
         synchronize: true,
         autoLoadEntities: true,
       }),
@@ -28,6 +30,7 @@ import { Speciality } from './typeorm/entities/Speciality';
     PatientsModule,
     SpecialitiesModule,
     EmailModule,
+    DoctorsModule,
   ],
 })
 export class AppModule {}

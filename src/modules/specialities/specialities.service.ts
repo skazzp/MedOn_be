@@ -10,7 +10,7 @@ export class SpecialitiesService {
     private specialityRepo: Repository<Speciality>,
   ) {}
 
-  getAllSpecialities() {
+  getAllSpecialities(): Promise<Speciality[]> {
     return this.specialityRepo.find();
   }
 }

@@ -7,22 +7,22 @@ import { PatientDto } from './dto/patient.dto';
 @Injectable()
 export class PatientsService {
   constructor(
-    @InjectRepository(Patient) private patientsRepo: Repository<Patient>,
+    @InjectRepository(Patient) private patientRepo: Repository<Patient>,
   ) {}
 
   getAllPatients(): Promise<Patient[]> {
-    return this.patientsRepo.find();
+    return this.patientRepo.find();
   }
 
   getPatientById(id: number): Promise<Patient> {
-    return this.patientsRepo
+    return this.patientRepo
       .createQueryBuilder('Patients')
       .where('Patient.id = :id', { id })
       .getOne();
   }
 
   createPatient(dto: PatientDto): Promise<Patient> {
-    const patient = this.patientsRepo.create(dto);
-    return this.patientsRepo.save(patient);
+    const patient = this.patientRepo.create(dto);
+    return this.patientRepo.save(patient);
   }
 }
