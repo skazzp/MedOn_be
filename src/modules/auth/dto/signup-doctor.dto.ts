@@ -11,7 +11,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../../common/enums/Role';
 
-export class DoctorDto {
+export class SignupDoctorDto {
   @ApiProperty({ description: "Doctor's first name", example: 'Edward' })
   @IsString()
   @IsNotEmpty()
@@ -58,6 +58,14 @@ export class DoctorDto {
   @IsString()
   @IsNotEmpty()
   timeZone: string;
+
+  @ApiProperty({
+    description: "Doctor's address",
+    example: 'Kingston, New York 12401, United States',
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
 
   @ApiProperty({ description: "Doctor's speciality Id", example: 1 })
   @IsInt()

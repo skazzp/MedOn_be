@@ -41,7 +41,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       default:
         status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = 'Unknown server Error!';
+        message =
+          (exception as HttpException).message || 'Unknown server Error!';
     }
 
     response.status(status).json({

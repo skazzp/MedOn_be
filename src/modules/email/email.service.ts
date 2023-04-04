@@ -9,14 +9,14 @@ export class EmailService {
     private configService: ConfigService,
   ) {}
 
-  public sendConfirmationLink() {
+  public sendConfirmationLink(to, link) {
     return this.mailerService.sendMail({
-      to: 'jurchenko.a@gmail.com',
+      to,
       from: this.configService.get('EMAIL_SENDER'),
       subject: 'Please confirm your registration in MedOn System',
       template: 'welcome',
       context: {
-        link: 'http://link_example/1387253671256',
+        link,
       },
     });
   }

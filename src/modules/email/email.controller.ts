@@ -6,8 +6,7 @@ export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
   @Get()
-  async sendMail() {
-    const result = await this.emailService.sendConfirmationLink();
-    return result;
+  async sendMail(to, link) {
+    return this.emailService.sendConfirmationLink(to, link);
   }
 }
