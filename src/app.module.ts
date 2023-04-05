@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Patient } from '@entities/Patient';
 import { Speciality } from '@entities/Speciality';
 import { Doctor } from '@entities/Doctor';
-import { PatientsModule } from './modules/patients/patients.module';
 import { SpecialitiesModule } from './modules/specialities/specialities.module';
 import { AuthModule } from './modules/auth/auth.module';
 
@@ -26,7 +25,6 @@ import { AuthModule } from './modules/auth/auth.module';
       }),
       inject: [ConfigService],
     }),
-    PatientsModule,
     SpecialitiesModule,
     AuthModule,
   ],
