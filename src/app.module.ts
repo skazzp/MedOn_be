@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Patient } from './typeorm/entities/Patient';
 import { PatientsModule } from './modules/patients/patients.module';
-import { EmailModule } from './modules/email/email.module';
 import { SpecialitiesModule } from './modules/specialities/specialities.module';
 import { Speciality } from './typeorm/entities/Speciality';
 import { Doctor } from './typeorm/entities/Doctor';
@@ -29,7 +28,6 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     PatientsModule,
     SpecialitiesModule,
-    EmailModule,
     AuthModule,
   ],
 })

@@ -4,15 +4,15 @@ import { Repository } from 'typeorm';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { MailerService } from '@nestjs-modules/mailer';
 import { SignupDoctorDto } from './dto/signup-doctor.dto';
 import { Doctor } from '../../typeorm/entities/Doctor';
-import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
-    private email: EmailService,
+    private email: MailerService,
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
@@ -29,7 +29,7 @@ export class AuthService {
     });
 
     await this.doctorRepo.save(doctor);
-    await this.email.sendConfirmationLink(dto.email, link);
+    await this.sendConfirmationLink(dto.email, link);
 
     return link;
   }
@@ -51,7 +51,7 @@ export class AuthService {
       .execute()
       .then((response) => {
         if (!response.affected)
-          throw new UnauthorizedException('Invalid verification link!');
+          throw new UnauthorizedException('Invalid confirmation link!');
       });
   }
 
@@ -67,7 +67,7 @@ export class AuthService {
         updatedAt: new Date(),
       })
       .where('doctor.email = :email', { email: dto.email })
-      .andWhere('doctor.isVerified = false')
+      .andWhere('doctor.is_verified = 0')
       .execute()
       .then((response) => {
         if (!response.affected)
@@ -76,15 +76,27 @@ export class AuthService {
           );
       });
 
-    await this.email.sendConfirmationLink(dto.email, link);
+    await this.sendConfirmationLink(dto.email, link);
 
     return link;
   }
 
   async getToken(payload): Promise<string> {
     return this.jwt.signAsync(payload, {
-      expiresIn: '2h',
+      expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
+    });
+  }
+
+  public sendConfirmationLink(to, link) {
+    return this.email.sendMail({
+      to,
+      from: this.config.get('EMAIL_SENDER'),
+      subject: 'Please confirm your registration in MedOn System',
+      template: 'welcome',
+      context: {
+        link,
+      },
     });
   }
 }

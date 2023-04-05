@@ -1,17 +1,38 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { Doctor } from '../../typeorm/entities/Doctor';
 import { Speciality } from '../../typeorm/entities/Speciality';
-import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Doctor, Speciality]),
     JwtModule.register({}),
-    EmailModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get('SMTP_SERVER'),
+          auth: {
+            user: configService.get('SMTP_LOGIN'),
+            pass: configService.get('SMTP_PASS'),
+          },
+        },
+        template: {
+          dir: `${__dirname}/templates`,
+          adapter: new PugAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService],
