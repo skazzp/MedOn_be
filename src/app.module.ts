@@ -6,6 +6,7 @@ import { Speciality } from '@entities/Speciality';
 import { Doctor } from '@entities/Doctor';
 import { SpecialitiesModule } from './modules/specialities/specialities.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ResetPasswordModule } from './modules/reset-password/reset-password.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AuthModule } from './modules/auth/auth.module';
     }),
     SpecialitiesModule,
     AuthModule,
+    ResetPasswordModule,
   ],
 })
 export class AppModule {}
