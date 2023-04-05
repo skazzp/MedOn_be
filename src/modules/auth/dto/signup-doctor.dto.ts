@@ -15,11 +15,17 @@ export class SignupDoctorDto {
   @ApiProperty({ description: "Doctor's first name", example: 'Edward' })
   @IsString()
   @IsNotEmpty()
+  @Matches(/^[a-zA-Z]+$/, {
+    message: 'Incorrect first name!',
+  })
   firstName: string;
 
   @ApiProperty({ description: "Doctor's last name", example: 'Jenner' })
   @IsString()
   @IsNotEmpty()
+  @Matches(/^[a-zA-Z]+$/, {
+    message: 'Incorrect last name!',
+  })
   lastName: string;
 
   @ApiProperty({
@@ -36,7 +42,7 @@ export class SignupDoctorDto {
   })
   @MinLength(6)
   @IsString()
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/(?=.*\d)(?=.*\W+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'Password too weak!',
   })
   password: string;
@@ -60,12 +66,20 @@ export class SignupDoctorDto {
   timeZone: string;
 
   @ApiProperty({
-    description: "Doctor's address",
-    example: 'Kingston, New York 12401, United States',
+    description: "Doctor's country",
+    example: 'United States',
   })
   @IsString()
   @IsNotEmpty()
-  address: string;
+  country: string;
+
+  @ApiProperty({
+    description: "Doctor's city",
+    example: 'Kingston',
+  })
+  @IsString()
+  @IsNotEmpty()
+  city: string;
 
   @ApiProperty({ description: "Doctor's speciality Id", example: 1 })
   @IsInt()

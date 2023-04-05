@@ -25,8 +25,11 @@ export class Doctor {
   @Column({ name: 'email', unique: true })
   email: string;
 
-  @Column({ name: 'address' })
+  @Column({ name: 'city' })
   address: string;
+
+  @Column({ name: 'country' })
+  country: string;
 
   @Column({ name: 'password' })
   password: string;
