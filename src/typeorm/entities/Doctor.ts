@@ -26,7 +26,7 @@ export class Doctor {
   email: string;
 
   @Column({ name: 'city' })
-  address: string;
+  city: string;
 
   @Column({ name: 'country' })
   country: string;
