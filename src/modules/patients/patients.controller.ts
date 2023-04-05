@@ -36,7 +36,7 @@ export class PatientsController {
 
   @Post()
   @ApiOperation({ summary: 'Create patients' })
-  async createPatient(@Body() dto: PatientDto): Promise<Patient> {
+  createPatient(@Body() dto: PatientDto): Promise<Patient> {
     return this.patientService.createPatient(dto);
   }
 }

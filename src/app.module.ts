@@ -6,8 +6,8 @@ import { PatientsModule } from './modules/patients/patients.module';
 import { EmailModule } from './modules/email/email.module';
 import { SpecialitiesModule } from './modules/specialities/specialities.module';
 import { Speciality } from './typeorm/entities/Speciality';
-import { AuthModule } from './modules/auth/auth.module';
 import { Doctor } from './typeorm/entities/Doctor';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [

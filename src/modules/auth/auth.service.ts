@@ -17,29 +17,24 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async signup(dto: SignupDoctorDto): Promise<{ confirmationLink: string }> {
+  async signup(dto: SignupDoctorDto): Promise<string> {
     const hash = await argon.hash(dto.password);
-    const verificationToken = await this.jwt.signAsync(
-      { email: dto.email },
-      { expiresIn: '2h', secret: this.config.get('JWT_SECRET') },
-    );
+    const token = await this.getToken({ email: dto.email });
+    const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
+
     const doctor = this.doctorRepo.create({
       ...dto,
       password: hash,
-      token: verificationToken,
+      token,
     });
 
-    const doctorSaved = await this.doctorRepo.save(doctor);
-    const confirmationLink = `${this.config.get(
-      'BASE_SERVER_URL',
-    )}/auth/confirm/${doctorSaved.token}`;
+    await this.doctorRepo.save(doctor);
+    await this.email.sendConfirmationLink(dto.email, link);
 
-    await this.email.sendConfirmationLink(doctorSaved.email, confirmationLink);
-
-    return { confirmationLink };
+    return link;
   }
 
-  async confirm(token): Promise<{ account_confirmed: boolean }> {
+  async confirm(token): Promise<void> {
     await this.jwt.verifyAsync(token, {
       secret: this.config.get('JWT_SECRET'),
     });
@@ -56,11 +51,40 @@ export class AuthService {
       .execute()
       .then((response) => {
         if (!response.affected)
+          throw new UnauthorizedException('Invalid verification link!');
+      });
+  }
+
+  async reconfirm(dto): Promise<string> {
+    const token = await this.getToken({ email: dto.email });
+    const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
+
+    await this.doctorRepo
+      .createQueryBuilder('doctor')
+      .update(Doctor)
+      .set({
+        token,
+        updatedAt: new Date(),
+      })
+      .where('doctor.email = :email', { email: dto.email })
+      .andWhere('doctor.isVerified = false')
+      .execute()
+      .then((response) => {
+        if (!response.affected)
           throw new UnauthorizedException(
-            'You have already confirmed your account!',
+            "You don't need to verify you account.",
           );
       });
 
-    return { account_confirmed: true };
+    await this.email.sendConfirmationLink(dto.email, link);
+
+    return link;
+  }
+
+  async getToken(payload): Promise<string> {
+    return this.jwt.signAsync(payload, {
+      expiresIn: '2h',
+      secret: this.config.get('JWT_SECRET'),
+    });
   }
 }
