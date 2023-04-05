@@ -1,7 +1,7 @@
 import { Controller, Get, NotFoundException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Speciality } from '@entities/Speciality';
 import { SpecialitiesService } from './specialities.service';
-import { Speciality } from '../../typeorm/entities/Speciality';
 
 @ApiTags('specialities')
 @Controller('specialities')

@@ -82,6 +82,10 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@common/(.*)$": "<rootDir>/../src/common/$1",
+      "^@entities/(.*)$": "<rootDir>/../src/typeorm/entities/$1"
+    }
   }
 }

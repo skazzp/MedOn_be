@@ -9,7 +9,7 @@ import {
   IsInt,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../../common/enums/Role';
+import { Role } from '@common/enums/Role';
 
 export class SignupDoctorDto {
   @ApiProperty({ description: "Doctor's first name", example: 'Edward' })

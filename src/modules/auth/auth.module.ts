@@ -4,10 +4,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
+import { Doctor } from '@entities/Doctor';
+import { Speciality } from '@entities/Speciality';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { Doctor } from '../../typeorm/entities/Doctor';
-import { Speciality } from '../../typeorm/entities/Speciality';
 
 @Module({
   imports: [

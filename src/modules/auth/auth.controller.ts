@@ -1,9 +1,9 @@
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthService } from './auth.service';
 import { SignupDoctorDto } from './dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
-import { IServerResponse } from '../../common/interfaces/serverResponses';
 
 @ApiTags('auth')
 @Controller('auth')

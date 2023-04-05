@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Patient } from './typeorm/entities/Patient';
+import { Patient } from '@entities/Patient';
+import { Speciality } from '@entities/Speciality';
+import { Doctor } from '@entities/Doctor';
 import { PatientsModule } from './modules/patients/patients.module';
 import { SpecialitiesModule } from './modules/specialities/specialities.module';
-import { Speciality } from './typeorm/entities/Speciality';
-import { Doctor } from './typeorm/entities/Doctor';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({

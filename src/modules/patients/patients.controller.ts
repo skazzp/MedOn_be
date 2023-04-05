@@ -7,9 +7,9 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Patient } from '@entities/Patient';
 import { PatientDto } from './dto/patient.dto';
 import { PatientsService } from './patients.service';
-import { Patient } from '../../typeorm/entities/Patient';
 
 @ApiTags('patients')
 @Controller('patients')

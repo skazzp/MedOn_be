@@ -4,9 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { createMock } from '@golevelup/ts-jest';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
-import { Doctor } from '../../typeorm/entities/Doctor';
+import { Doctor } from '@entities/Doctor';
+import { Role } from '@common/enums/Role';
 import { AuthService } from './auth.service';
-import { Role } from '../../common/enums/Role';
 
 describe('AuthService', () => {
   let service: AuthService;
