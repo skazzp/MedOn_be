@@ -1,5 +1,5 @@
 import { Controller, Get, NotFoundException } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Speciality } from '@entities/Speciality';
 import { SpecialitiesService } from './specialities.service';
 
@@ -10,6 +10,10 @@ export class SpecialitiesController {
 
   @Get()
   @ApiOperation({ summary: "Get all doctor's specialities" })
+  @ApiResponse({
+    status: 201,
+    description: 'List of all possible specialities',
+  })
   async getAll(): Promise<Speciality[]> {
     const specialities = await this.specialitiesService.getAllSpecialities();
     if (!specialities)

@@ -6,7 +6,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Doctor } from '@entities/Doctor';
+import { SentMessageInfo } from 'nodemailer';
 import { SignupDoctorDto } from './dto/signup-doctor.dto';
+import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +36,7 @@ export class AuthService {
     return link;
   }
 
-  async confirm(token): Promise<void> {
+  async confirm(token: string): Promise<void> {
     await this.jwt.verifyAsync(token, {
       secret: this.config.get('JWT_SECRET'),
     });
@@ -55,7 +57,7 @@ export class AuthService {
       });
   }
 
-  async reconfirm(dto): Promise<string> {
+  async reconfirm(dto: ReconfirmDoctorDto): Promise<string> {
     const token = await this.getToken({ email: dto.email });
     const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
 
@@ -81,14 +83,17 @@ export class AuthService {
     return link;
   }
 
-  async getToken(payload): Promise<string> {
+  async getToken(payload: string | object | Buffer): Promise<string> {
     return this.jwt.signAsync(payload, {
       expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
     });
   }
 
-  public sendConfirmationLink(to, link) {
+  public sendConfirmationLink(
+    to: string,
+    link: string,
+  ): Promise<SentMessageInfo> {
     return this.email.sendMail({
       to,
       from: this.config.get('EMAIL_SENDER'),

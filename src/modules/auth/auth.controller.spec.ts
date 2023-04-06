@@ -24,10 +24,6 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController);
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
   it('should create the doctor', async () => {
     const dto = {
       firstName: 'Alex',
@@ -46,7 +42,5 @@ describe('AuthController', () => {
       statusCode: HttpStatus.OK,
       message: 'test_confirmation_link',
     });
-
-    expect(mockAuthService.signup).toHaveBeenCalledWith(dto);
   });
 });

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthService } from './auth.service';
 import { SignupDoctorDto } from './dto/signup-doctor.dto';
@@ -12,6 +12,10 @@ export class AuthController {
 
   @Post('singup')
   @ApiOperation({ summary: 'New doctor registration' })
+  @ApiResponse({
+    status: 201,
+    description: 'Doctor was created, verification link was sent.',
+  })
   async signup(@Body() dto: SignupDoctorDto): Promise<IServerResponse> {
     const confirmLink = await this.authService.signup(dto);
     return { statusCode: HttpStatus.OK, message: confirmLink };
@@ -19,6 +23,14 @@ export class AuthController {
 
   @Post('re-confirm')
   @ApiOperation({ summary: 'Request for new confirmation link' })
+  @ApiResponse({
+    status: 201,
+    description: 'Verification link was sent.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Verification link request was rejected',
+  })
   async reConfirm(@Body() dto: ReconfirmDoctorDto): Promise<IServerResponse> {
     const confirmLink = await this.authService.reconfirm(dto);
     return {
@@ -29,8 +41,16 @@ export class AuthController {
 
   @Get('confirm/:token')
   @ApiOperation({ summary: "Doctor's account verification" })
-  async confirm(@Param() { token }): Promise<IServerResponse> {
-    await this.authService.confirm(token);
+  @ApiResponse({
+    status: 201,
+    description: 'User was confirmed by email',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid confirmation link',
+  })
+  async confirm(@Param() params: { token: string }): Promise<IServerResponse> {
+    await this.authService.confirm(params.token);
     return {
       statusCode: HttpStatus.OK,
       message: 'Account was successfully confirmed!',

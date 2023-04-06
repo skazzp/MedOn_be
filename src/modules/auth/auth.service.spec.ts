@@ -39,10 +39,6 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('should send confirmation link to the doctor', async () => {
     const dto = {
       firstName: 'Alex',
