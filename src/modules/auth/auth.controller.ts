@@ -1,59 +1,37 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
-import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthService } from './auth.service';
-import { SignupDoctorDto } from './dto/signup-doctor.dto';
-import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
+import { LoginDoctorDto } from './dto/login-doctor.dto';
+import { AuthGuard } from '@nestjs/passport';
+
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
-  @Post('singup')
-  @ApiOperation({ summary: 'New doctor registration' })
+  @Post('login')
+  @ApiOperation({ summary: 'Doctor login' })
   @ApiResponse({
-    status: 201,
-    description: 'Doctor was created, verification link was sent.',
-  })
-  async signup(@Body() dto: SignupDoctorDto): Promise<IServerResponse> {
-    const confirmLink = await this.authService.signup(dto);
-    return { statusCode: HttpStatus.OK, message: confirmLink };
-  }
-
-  @Post('re-confirm')
-  @ApiOperation({ summary: 'Request for new confirmation link' })
-  @ApiResponse({
-    status: 201,
-    description: 'Verification link was sent.',
+    status: 200,
+    description: 'Doctor was logged in',
   })
   @ApiResponse({
     status: 401,
-    description: 'Verification link request was rejected',
+    description: 'Invalid email or password',
   })
-  async reConfirm(@Body() dto: ReconfirmDoctorDto): Promise<IServerResponse> {
-    const confirmLink = await this.authService.reconfirm(dto);
-    return {
-      statusCode: HttpStatus.OK,
-      message: confirmLink,
-    };
+
+  async login(
+    @Body() dto: LoginDoctorDto,
+  ): Promise<{ access_token: string } | { message: string }> {
+    try {
+      const token = await this.authService.login(dto);
+      return token;
+    } catch (error) {
+      return {
+        message: error.message,
+      };
+    }
   }
 
-  @Get('confirm/:token')
-  @ApiOperation({ summary: "Doctor's account verification" })
-  @ApiResponse({
-    status: 201,
-    description: 'User was confirmed by email',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid confirmation link',
-  })
-  async confirm(@Param() params: { token: string }): Promise<IServerResponse> {
-    await this.authService.confirm(params.token);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Account was successfully confirmed!',
-    };
-  }
 }

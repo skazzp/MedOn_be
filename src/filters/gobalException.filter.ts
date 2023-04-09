@@ -21,7 +21,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     let message: string | string[];
     let status: HttpStatus;
-
+    console.log(exception)
     switch (true) {
       case exception instanceof HttpException:
         status = (exception as HttpException).getStatus();

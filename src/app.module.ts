@@ -4,7 +4,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Patient } from '@entities/Patient';
 import { Speciality } from '@entities/Speciality';
 import { Doctor } from '@entities/Doctor';
-import { SpecialitiesModule } from './modules/specialities/specialities.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
@@ -25,8 +24,7 @@ import { AuthModule } from './modules/auth/auth.module';
       }),
       inject: [ConfigService],
     }),
-    SpecialitiesModule,
     AuthModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
