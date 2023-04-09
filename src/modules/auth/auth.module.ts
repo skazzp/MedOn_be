@@ -7,10 +7,9 @@ import { PassportModule } from '@nestjs/passport';
 
 import { Doctor } from '@entities/Doctor';
 import { Speciality } from '@entities/Speciality';
-import { AuthService } from '@modules/auth.service';
 import { AuthController } from '@modules/auth.controller';
 import { JwtStrategy } from '@modules/strategy/jwt.strategy';
-
+import { AuthService } from '@modules/auth.service';
 
 @Module({
   imports: [

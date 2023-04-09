@@ -9,11 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
+import { Doctor } from '@entities/Doctor';
 import { AuthService } from '@modules/auth.service';
 import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Doctor } from '@entities/Doctor';
+
 
 @ApiTags('auth')
 @Controller('auth')
@@ -31,9 +32,7 @@ export class AuthController {
     description: 'Invalid email or password',
   })
 
-  async login(
-    @Body() dto: LoginDoctorDto,
-  ) {
+  async login(@Body() dto: LoginDoctorDto) {
     const token = await this.authService.login(dto);
     return token;
   }
@@ -41,6 +40,6 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   getMe(@Req() req: Request & { user: Doctor }) {
-    return req.user
+    return req.user;
   }
 }
