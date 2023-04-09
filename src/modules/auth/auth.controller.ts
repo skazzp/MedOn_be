@@ -1,9 +1,19 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
-import { LoginDoctorDto } from './dto/login-doctor.dto';
-import { AuthGuard } from '@nestjs/passport';
 
+import { AuthService } from '@modules/auth.service';
+import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Doctor } from '@entities/Doctor';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -23,15 +33,14 @@ export class AuthController {
 
   async login(
     @Body() dto: LoginDoctorDto,
-  ): Promise<{ access_token: string } | { message: string }> {
-    try {
-      const token = await this.authService.login(dto);
-      return token;
-    } catch (error) {
-      return {
-        message: error.message,
-      };
-    }
+  ) {
+    const token = await this.authService.login(dto);
+    return token;
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get('profile')
+  getMe(@Req() req: Request & { user: Doctor }) {
+    return req.user
+  }
 }

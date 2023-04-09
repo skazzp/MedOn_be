@@ -3,34 +3,21 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
+import { PassportModule } from '@nestjs/passport';
+
 import { Doctor } from '@entities/Doctor';
 import { Speciality } from '@entities/Speciality';
 import { AuthService } from '@modules/auth.service';
 import { AuthController } from '@modules/auth.controller';
-import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from '../../common/strategy/jwt.strategy';
-import { DoctorController } from 'src/doctor/doctor.controller';
-
+import { JwtStrategy } from '@modules/strategy/jwt.strategy';
 
 
 @Module({
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([Doctor, Speciality]),
-    // JwtModule.register({}),
     PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get('JWT_EXPIRATION_TIME'),
-          algorithm: 'HS256',
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    JwtModule.register({}),
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -46,7 +33,7 @@ import { DoctorController } from 'src/doctor/doctor.controller';
     }),
     PassportModule,
   ],
-  controllers: [AuthController, DoctorController],
+  controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   exports: [JwtModule, AuthService],
 })

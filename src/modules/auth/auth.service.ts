@@ -8,9 +8,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+
 import { Doctor } from '@entities/Doctor';
 import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
-
 
 @Injectable()
 export class AuthService {
@@ -30,10 +30,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email');
     }
 
-    const pwMatches = await argon.verify(
-      doctor.password,
-      dto.password
-    );
+    const pwMatches = await argon.verify(doctor.password, dto.password);
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
@@ -45,17 +42,17 @@ export class AuthService {
 
   private async generateAccessToken(
     doctorId: number,
-    email: string
+    email: string,
   ): Promise<string> {
     const payload = {
       sub: doctorId,
-      email: email,
+      email,
     };
     const secret = this.config.get('JWT_SECRET');
     const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
     const accessToken = await this.jwt.signAsync(payload, {
-      secret: secret,
-      expiresIn: expiresIn,
+      secret,
+      expiresIn,
     });
     return accessToken;
   }
