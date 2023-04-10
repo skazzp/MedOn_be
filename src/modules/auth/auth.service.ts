@@ -7,8 +7,8 @@ import { Repository } from 'typeorm';
 import { SentMessageInfo } from 'nodemailer';
 import * as argon from 'argon2';
 import { Doctor } from '@entities/Doctor';
-import { ReconfirmDoctorDto } from '@modules/dto/reconfirm-doctor.dto';
-import { SignupDoctorDto } from '@modules/dto/signup-doctor.dto';
+import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 
 @Injectable()
 export class AuthService {

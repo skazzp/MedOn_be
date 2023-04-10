@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@common/*": ["src/common/*"],
-      "@modules/*": ["src/modules/auth/*"],
+      "@modules/*": ["src/modules/*"],
       "@entities/*": ["src/typeorm/entities/*"]
     }
   }

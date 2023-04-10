@@ -13,12 +13,12 @@ import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
 import {
   ForgetPasswordDoctorDto,
   ResetPasswordDoctorDto,
-} from '@modules/dto/recoveryPassword-doctor.dto';
+} from '@modules/auth/dto/recoveryPassword-doctor.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
-import { AuthService } from '@modules/auth.service';
-import { SignupDoctorDto } from '@modules/dto/signup-doctor.dto';
-import { ReconfirmDoctorDto } from '@modules/dto/reconfirm-doctor.dto';
-import { AuthGuard } from '@modules/auth.guard';
+import { AuthService } from '@modules/auth/auth.service';
+import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
+import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { AuthGuard } from '@modules/auth/auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
