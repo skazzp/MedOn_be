@@ -1,14 +1,14 @@
-import { Repository } from 'typeorm';
-import * as argon from 'argon2';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Doctor } from '@entities/Doctor';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Repository } from 'typeorm';
 import { SentMessageInfo } from 'nodemailer';
-import { SignupDoctorDto } from './dto/signup-doctor.dto';
-import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
+import * as argon from 'argon2';
+import { Doctor } from '@entities/Doctor';
+import { ReconfirmDoctorDto } from '@modules/dto/reconfirm-doctor.dto';
+import { SignupDoctorDto } from '@modules/dto/signup-doctor.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,13 +23,11 @@ export class AuthService {
     const hash = await argon.hash(dto.password);
     const token = await this.getToken({ email: dto.email });
     const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
-
     const doctor = this.doctorRepo.create({
       ...dto,
       password: hash,
       token,
     });
-
     await this.doctorRepo.save(doctor);
     await this.sendConfirmationLink(dto.email, link);
 
@@ -79,7 +77,6 @@ export class AuthService {
       });
 
     await this.sendConfirmationLink(dto.email, link);
-
     return link;
   }
 
@@ -88,6 +85,29 @@ export class AuthService {
       expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
     });
+  }
+
+  async forgetPassword(email: string): Promise<void> {
+    await this.doctorRepo.findOne({
+      where: { email },
+    });
+    const token = await this.getToken({ email });
+    const link = `${this.config.get('BASE_FRONT_URL')}/reset-password/${token}`;
+    await this.sendForgetPasswordLink(email, link);
+  }
+
+  async resetUpdatePassword(dto: {
+    email: string;
+    newPassword: string;
+  }): Promise<void> {
+    await this.doctorRepo.update(
+      {
+        email: dto.email,
+      },
+      {
+        password: await argon.hash(dto.newPassword),
+      },
+    );
   }
 
   public sendConfirmationLink(
@@ -99,6 +119,21 @@ export class AuthService {
       from: this.config.get('EMAIL_SENDER'),
       subject: 'Please confirm your registration in MedOn System',
       template: 'welcome',
+      context: {
+        link,
+      },
+    });
+  }
+
+  public sendForgetPasswordLink(
+    to: string,
+    link: string,
+  ): Promise<SentMessageInfo> {
+    return this.email.sendMail({
+      to,
+      from: this.config.get('EMAIL_SENDER'),
+      subject: 'Please update your password in MedOn System',
+      template: 'reset',
       context: {
         link,
       },
