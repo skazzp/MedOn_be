@@ -28,4 +28,4 @@ import { AuthModule } from '@modules/auth.module';
     AuthModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

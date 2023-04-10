@@ -15,11 +15,10 @@ import { Doctor } from '@entities/Doctor';
 import { AuthService } from '@modules/auth.service';
 import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
 
-
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Doctor login' })
@@ -31,7 +30,6 @@ export class AuthController {
     status: 401,
     description: 'Invalid email or password',
   })
-
   async login(@Body() dto: LoginDoctorDto) {
     const token = await this.authService.login(dto);
     return token;

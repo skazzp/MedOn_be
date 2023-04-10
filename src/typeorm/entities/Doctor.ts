@@ -11,7 +11,6 @@ import {
 import { Speciality } from '@entities/Speciality';
 import { Role } from '@common/enums/Role';
 
-
 @Entity({ name: 'doctor' })
 export class Doctor {
   @PrimaryGeneratedColumn()

@@ -12,15 +12,13 @@ import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
 import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
 
-
-
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
     private jwt: JwtService,
     private config: ConfigService,
-  ) { }
+  ) {}
 
   async login(dto: LoginDoctorDto) {
     const doctor = await this.doctorRepo.findOne({
