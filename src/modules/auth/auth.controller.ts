@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
-import { IForgetPasswordRequest } from '@common/interfaces/forgetPasswordResponse';
+import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
 import {
   ForgetPasswordDoctorDto,
   ResetPasswordDoctorDto,
@@ -104,10 +104,10 @@ export class AuthController {
     description: 'Invalid email',
   })
   async resetPassword(
-    @Request() req: IForgetPasswordRequest,
+    @Request() req: IResetPasswordRequest,
     @Body() dto: ResetPasswordDoctorDto,
   ): Promise<IServerResponse> {
-    await this.authService.resetUpdatePassword({
+    await this.authService.resetPassword({
       email: req.doctor?.email,
       newPassword: dto.newPassword,
     });

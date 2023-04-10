@@ -96,7 +96,7 @@ export class AuthService {
     await this.sendForgetPasswordLink(email, link);
   }
 
-  async resetUpdatePassword(dto: {
+  async resetPassword(dto: {
     email: string;
     newPassword: string;
   }): Promise<void> {
