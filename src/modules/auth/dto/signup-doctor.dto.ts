@@ -7,6 +7,7 @@ import {
   MinLength,
   Matches,
   IsInt,
+  IsOptional,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@common/enums/Role';
@@ -83,6 +84,6 @@ export class SignupDoctorDto {
 
   @ApiProperty({ description: "Doctor's speciality Id", example: 1 })
   @IsInt()
-  @IsNotEmpty()
+  @IsOptional()
   specialityId: number;
 }

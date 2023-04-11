@@ -10,7 +10,7 @@ import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('singup')
+  @Post('signup')
   @ApiOperation({ summary: 'New doctor registration' })
   @ApiResponse({
     status: 201,
