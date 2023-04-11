@@ -4,9 +4,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { MailerService } from '@nestjs-modules/mailer';
 import { Doctor } from '@entities/Doctor';
-import { SentMessageInfo } from 'nodemailer';
+import { EmailService } from '@modules/email/email.service';
 import { SignupDoctorDto } from './dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
 
@@ -14,7 +13,7 @@ import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
 export class AuthService {
   constructor(
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
-    private email: MailerService,
+    private email: EmailService,
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
@@ -31,7 +30,7 @@ export class AuthService {
     });
 
     await this.doctorRepo.save(doctor);
-    await this.sendConfirmationLink(dto.email, link);
+    await this.email.sendConfirmationLink(dto.email, link);
 
     return link;
   }
@@ -78,7 +77,7 @@ export class AuthService {
           );
       });
 
-    await this.sendConfirmationLink(dto.email, link);
+    await this.email.sendConfirmationLink(dto.email, link);
 
     return link;
   }
@@ -87,21 +86,6 @@ export class AuthService {
     return this.jwt.signAsync(payload, {
       expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
-    });
-  }
-
-  public sendConfirmationLink(
-    to: string,
-    link: string,
-  ): Promise<SentMessageInfo> {
-    return this.email.sendMail({
-      to,
-      from: this.config.get('EMAIL_SENDER'),
-      subject: 'Please confirm your registration in MedOn System',
-      template: 'welcome',
-      context: {
-        link,
-      },
     });
   }
 }
