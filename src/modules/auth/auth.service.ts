@@ -88,9 +88,13 @@ export class AuthService {
   }
 
   async forgetPassword(email: string): Promise<void> {
-    await this.doctorRepo.findOne({
-      where: { email },
-    });
+    await this.doctorRepo
+      .findOne({
+        where: { email },
+      })
+      .then((doctor) => {
+        if (!doctor) throw new UnauthorizedException('Doctor not found!');
+      });
     const token = await this.getToken({ email });
     const link = `${this.config.get('BASE_FRONT_URL')}/reset-password/${token}`;
     await this.sendForgetPasswordLink(email, link);
