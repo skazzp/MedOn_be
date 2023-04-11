@@ -5,7 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Patient } from './typeorm/entities/Patient';
 import { PatientModule } from './modules/patient/patient.module';
-import { GoogleAuthModule } from './google-auth/google-auth.module';
+import { GoogleAuthModule } from './auth/google/google-auth.module';
 
 @Module({
   imports: [
