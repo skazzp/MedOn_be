@@ -24,7 +24,7 @@ import { AuthController } from './auth.controller';
           },
         },
         template: {
-          dir: `${__dirname}/templates`,
+          dir: 'src/common/email-templates',
           adapter: new PugAdapter(),
           options: {
             strict: true,
