@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GoogleUser } from 'src/typeorm/entities/GoogleUser';
-import { GoogleStrategy } from '../strategies/google.strategy';
-import { GoogleAuthController } from './google-auth.controller';
-import { AuthService } from '../auth.service';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { GoogleAuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GoogleUser])],
