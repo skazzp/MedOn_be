@@ -9,18 +9,18 @@ import { GlobalExceptionFilter } from './filters/gobalException.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  const configService = app.get(ConfigService);
   const config = new DocumentBuilder().setTitle('Medon API').build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
   app.setGlobalPrefix('api');
   app.use(
     session({
-      secret: 'secret',
+      secret: configService.get('SECRET'),
       saveUninitialized: false,
       resave: false,
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        maxAge: configService.get('MAX_AGE'),
       },
     }),
   );
