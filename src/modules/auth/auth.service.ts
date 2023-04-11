@@ -1,20 +1,21 @@
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { SentMessageInfo } from 'nodemailer';
 import * as argon from 'argon2';
 import { Doctor } from '@entities/Doctor';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
+import { EmailService } from '@modules/email/email.service';
+import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
+import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
-    private email: MailerService,
+    private email: EmailService,
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
@@ -29,7 +30,7 @@ export class AuthService {
       token,
     });
     await this.doctorRepo.save(doctor);
-    await this.sendConfirmationLink(dto.email, link);
+    await this.email.sendConfirmationLink(dto.email, link);
 
     return link;
   }
@@ -76,7 +77,7 @@ export class AuthService {
           );
       });
 
-    await this.sendConfirmationLink(dto.email, link);
+    await this.email.sendConfirmationLink(dto.email, link);
     return link;
   }
 
@@ -87,23 +88,20 @@ export class AuthService {
     });
   }
 
-  async forgetPassword(email: string): Promise<void> {
+  async forgetPassword(dto: ForgetPasswordDoctorDto): Promise<void> {
     await this.doctorRepo
       .findOne({
-        where: { email },
+        where: { email: dto.email },
       })
       .then((doctor) => {
         if (!doctor) throw new UnauthorizedException('Doctor not found!');
       });
-    const token = await this.getToken({ email });
+    const token = await this.getToken({ email: dto.email });
     const link = `${this.config.get('BASE_FRONT_URL')}/reset-password/${token}`;
-    await this.sendForgetPasswordLink(email, link);
+    await this.email.sendForgetPasswordLink(dto.email, link);
   }
 
-  async resetPassword(dto: {
-    email: string;
-    newPassword: string;
-  }): Promise<void> {
+  async resetPassword(dto: ResetPasswordDoctorDto): Promise<void> {
     await this.doctorRepo.update(
       {
         email: dto.email,
@@ -112,35 +110,5 @@ export class AuthService {
         password: await argon.hash(dto.newPassword),
       },
     );
-  }
-
-  public sendConfirmationLink(
-    to: string,
-    link: string,
-  ): Promise<SentMessageInfo> {
-    return this.email.sendMail({
-      to,
-      from: this.config.get('EMAIL_SENDER'),
-      subject: 'Please confirm your registration in MedOn System',
-      template: 'welcome',
-      context: {
-        link,
-      },
-    });
-  }
-
-  public sendForgetPasswordLink(
-    to: string,
-    link: string,
-  ): Promise<SentMessageInfo> {
-    return this.email.sendMail({
-      to,
-      from: this.config.get('EMAIL_SENDER'),
-      subject: 'Please update your password in MedOn System',
-      template: 'reset',
-      context: {
-        link,
-      },
-    });
   }
 }

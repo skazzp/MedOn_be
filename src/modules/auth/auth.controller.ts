@@ -10,10 +10,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
-import {
-  ForgetPasswordDoctorDto,
-  ResetPasswordDoctorDto,
-} from '@modules/auth/dto/recoveryPassword-doctor.dto';
+import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
+import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthService } from '@modules/auth/auth.service';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
@@ -85,7 +83,7 @@ export class AuthController {
   async forgetPassword(
     @Body() dto: ForgetPasswordDoctorDto,
   ): Promise<IServerResponse> {
-    await this.authService.forgetPassword(dto.email);
+    await this.authService.forgetPassword({ email: dto.email });
     return {
       statusCode: HttpStatus.OK,
       message: 'Email was sent',
