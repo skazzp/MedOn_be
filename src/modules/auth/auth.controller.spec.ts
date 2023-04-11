@@ -3,19 +3,25 @@ import { HttpStatus } from '@nestjs/common';
 import { Role } from '@common/enums/Role';
 import { AuthService } from '@modules/auth/auth.service';
 import { AuthController } from '@modules/auth/auth.controller';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
 
 describe('AuthController', () => {
   let controller: AuthController;
+
   const mockAuthService = {
     signup: jest.fn(() => {
       return 'test_confirmation_link';
     }),
+    forgetPassword: jest.fn(() => {}),
+    resetPassword: jest.fn(() => {}),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService],
+      providers: [AuthService, JwtService, ConfigService],
     })
       .overrideProvider(AuthService)
       .useValue(mockAuthService)
@@ -41,6 +47,32 @@ describe('AuthController', () => {
     expect(await controller.signup(dto)).toEqual({
       statusCode: HttpStatus.OK,
       message: 'test_confirmation_link',
+    });
+  });
+
+  describe('forget and reset', () => {
+    it('should return email was sent', async () => {
+      const dto = {
+        email: 'fakemail@gmail.com',
+      };
+      expect(await controller.forgetPassword(dto)).toEqual({
+        statusCode: HttpStatus.OK,
+        message: 'Email was sent',
+      });
+    });
+    it('should return password was updated', async () => {
+      const req = {
+        doctor: {
+          email: 'fakemail@gmail.com',
+        },
+      } as IResetPasswordRequest;
+      const dto = {
+        newPassword: 'fakepass',
+      };
+      expect(await controller.resetPassword(req, dto)).toEqual({
+        statusCode: HttpStatus.OK,
+        message: 'Password was updated',
+      });
     });
   });
 });
