@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GoogleUser } from 'src/typeorm/entities/GoogleUser';
 import { GoogleUserDetails } from 'src/utils/types';
 import { Repository } from 'typeorm';
+import { GoogleUser } from '../typeorm/entities/GoogleUser';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +11,7 @@ export class AuthService {
     private readonly userRepository: Repository<GoogleUser>,
   ) {}
 
-  async validateGoogleUser(details: GoogleUserDetails) {
+  async validateGoogleUser(details: GoogleUserDetails): Promise<GoogleUser> {
     try {
       const user = await this.userRepository.findOneBy({
         email: details.email,
@@ -24,7 +24,7 @@ export class AuthService {
     }
   }
 
-  async findUser(email: string) {
+  async findUser(email: string): Promise<GoogleUser | undefined> {
     try {
       const user = await this.userRepository.findOneBy({ email });
       return user;
