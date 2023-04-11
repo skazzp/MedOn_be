@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Patient } from './typeorm/entities/Patient';
 import { PatientModule } from './modules/patient/patient.module';
+import { GoogleAuthModule } from './google-auth/google-auth.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PatientModule } from './modules/patient/patient.module';
       inject: [ConfigService],
     }),
     PatientModule,
+    GoogleAuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
