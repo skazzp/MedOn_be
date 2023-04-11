@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { Patient } from './typeorm/entities/Patient';
 import { PatientModule } from './modules/patient/patient.module';
 import { GoogleAuthModule } from './auth/google/google-auth.module';
+import { GoogleUser } from './typeorm/entities/GoogleUser';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { GoogleAuthModule } from './auth/google/google-auth.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [Patient],
+        entities: [Patient, GoogleUser],
         synchronize: true,
       }),
       inject: [ConfigService],
