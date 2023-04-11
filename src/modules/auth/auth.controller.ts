@@ -101,7 +101,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Invalid email',
+    description: 'Invalid token',
   })
   async resetPassword(
     @Request() req: IResetPasswordRequest,
