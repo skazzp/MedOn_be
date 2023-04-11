@@ -17,4 +17,9 @@ export class AuthService {
     const newUser = this.userRepository.create(details);
     return this.userRepository.save(newUser);
   }
+
+  async findUser(email: string) {
+    const user = await this.userRepository.findOneBy({ email });
+    return user;
+  }
 }
