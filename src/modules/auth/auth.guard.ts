@@ -16,7 +16,9 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException('Unauthorized');
+      throw new UnauthorizedException(
+        'Not possible to do the action because the link is corrupted',
+      );
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -24,7 +26,9 @@ export class AuthGuard implements CanActivate {
       });
       request['doctor'] = payload;
     } catch {
-      throw new UnauthorizedException('Unauthorized');
+      throw new UnauthorizedException(
+        'Not possible to do the action because the link has expired',
+      );
     }
     return true;
   }
