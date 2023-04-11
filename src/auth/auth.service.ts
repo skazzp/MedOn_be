@@ -11,8 +11,10 @@ export class AuthService {
     private readonly userRepository: Repository<GoogleUser>,
   ) {}
 
-  validateGoogleUser(details: GoogleUserDetails) {
-    console.log('AuthService');
-    console.log(details);
+  async validateGoogleUser(details: GoogleUserDetails) {
+    const user = await this.userRepository.findOneBy({ email: details.email });
+    if (user) return user;
+    const newUser = this.userRepository.create(details);
+    return this.userRepository.save(newUser);
   }
 }
