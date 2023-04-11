@@ -10,8 +10,8 @@ async function bootstrap() {
 
   const config = new DocumentBuilder().setTitle('Medon API').build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-
+  SwaggerModule.setup('docs', app, document); // route for swagger
+  app.setGlobalPrefix('api'); // Set prefix for all routes
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.listen(app.get(ConfigService).get('PORT'));
