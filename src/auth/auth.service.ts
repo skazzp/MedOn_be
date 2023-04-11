@@ -12,14 +12,24 @@ export class AuthService {
   ) {}
 
   async validateGoogleUser(details: GoogleUserDetails) {
-    const user = await this.userRepository.findOneBy({ email: details.email });
-    if (user) return user;
-    const newUser = this.userRepository.create(details);
-    return this.userRepository.save(newUser);
+    try {
+      const user = await this.userRepository.findOneBy({
+        email: details.email,
+      });
+      if (user) return user;
+      const newUser = this.userRepository.create(details);
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new Error('Error validating Google user');
+    }
   }
 
   async findUser(email: string) {
-    const user = await this.userRepository.findOneBy({ email });
-    return user;
+    try {
+      const user = await this.userRepository.findOneBy({ email });
+      return user;
+    } catch (error) {
+      throw new Error('Error finding user');
+    }
   }
 }

@@ -12,15 +12,15 @@ async function bootstrap() {
 
   const config = new DocumentBuilder().setTitle('Medon API').build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document); // route for swagger
-  app.setGlobalPrefix('api'); // Set prefix for all routes
+  SwaggerModule.setup('docs', app, document);
+  app.setGlobalPrefix('api');
   app.use(
     session({
-      secret: 'secret', // random string used to encrypt/decrypt cookies
+      secret: 'secret',
       saveUninitialized: false,
       resave: false,
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days just per example. You can set whatever you want.
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       },
     }),
   );

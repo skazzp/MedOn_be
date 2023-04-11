@@ -24,7 +24,11 @@ export class SessionSerializer extends PassportSerializer {
     payload: GoogleUser,
     done: (err: AuthError, user: GoogleUser) => void,
   ) {
-    const user = await this.authService.findUser(payload.email);
-    return user ? done(null, user) : done(null, null);
+    try {
+      const user = await this.authService.findUser(payload.email);
+      return user ? done(null, user) : done(null, null);
+    } catch (error) {
+      return done(error, null);
+    }
   }
 }
