@@ -25,7 +25,7 @@ async function bootstrap() {
     }),
   );
   app.use(passport.initialize());
-  app.use(session());
+  app.use(passport.session());
   app.useGlobalFilters(new GlobalExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   await app.listen(app.get(ConfigService).get('PORT'));
