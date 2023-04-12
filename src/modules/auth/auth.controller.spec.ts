@@ -67,6 +67,7 @@ describe('AuthController', () => {
         },
       } as IResetPasswordRequest;
       const dto = {
+        email: req.doctor.email,
         newPassword: 'fakepass',
       };
       expect(await controller.resetPassword(req, dto)).toEqual({

@@ -12,8 +12,8 @@ import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 
 import { Doctor } from '@entities/Doctor';
-import { AuthService } from '@modules/auth.service';
-import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
+import { AuthService } from '@modules/auth/auth.service';
+import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 
 import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
@@ -22,11 +22,10 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 
-
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Doctor login' })
@@ -93,9 +92,8 @@ export class AuthController {
     status: 401,
     description: 'Invalid token',
   })
-
   async resetPassword(
-    @Request() req: IResetPasswordRequest,
+    @Req() req: IResetPasswordRequest,
     @Body() dto: ResetPasswordDoctorDto,
   ): Promise<IServerResponse> {
     await this.authService.resetPassword({

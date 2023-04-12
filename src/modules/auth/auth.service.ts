@@ -10,14 +10,12 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
 import { Doctor } from '@entities/Doctor';
-import { LoginDoctorDto } from '@modules/dto/login-doctor.dto';
+import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
-
-@Injectable()
 
 @Injectable()
 export class AuthService {
@@ -26,7 +24,7 @@ export class AuthService {
     private email: EmailService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) { }
+  ) {}
 
   async login(dto: LoginDoctorDto) {
     const doctor = await this.doctorRepo.findOne({
@@ -37,17 +35,16 @@ export class AuthService {
     if (!doctor) {
       throw new UnauthorizedException('Invalid email');
     }
+
     const pwMatches = await argon.verify(doctor.password, dto.password);
     if (!pwMatches) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException('Invalid  password');
     }
     const accessToken = await this.generateAccessToken(doctor.id, doctor.email);
     return {
       access_token: accessToken,
     };
   }
-
-
 
   async signup(dto: SignupDoctorDto): Promise<string> {
     const hash = await argon.hash(dto.password);
@@ -114,9 +111,8 @@ export class AuthService {
     return this.jwt.signAsync(payload, {
       expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
-    })
+    });
   }
-
 
   private async generateAccessToken(
     doctorId: number,
@@ -133,7 +129,7 @@ export class AuthService {
       expiresIn,
     });
     return accessToken;
-  };
+  }
 
   async forgetPassword(dto: ForgetPasswordDoctorDto): Promise<void> {
     await this.doctorRepo

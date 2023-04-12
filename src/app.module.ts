@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
 import { Speciality } from '@entities/Speciality';
-import { AuthModule } from '@modules/auth.module';
+import { AuthModule } from '@modules/auth/auth.module';
 
 @Module({
   imports: [
