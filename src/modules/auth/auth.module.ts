@@ -10,10 +10,12 @@ import { Speciality } from '@entities/Speciality';
 import { AuthController } from '@modules/auth.controller';
 import { JwtStrategy } from '@modules/strategy/jwt.strategy';
 import { AuthService } from '@modules/auth.service';
+import { EmailModule } from '@modules/email/email.module';
+
 
 @Module({
   imports: [
-    ConfigModule,
+    EmailModule,
     TypeOrmModule.forFeature([Doctor, Speciality]),
     PassportModule,
     JwtModule.register({}),
@@ -36,4 +38,4 @@ import { AuthService } from '@modules/auth.service';
   providers: [AuthService, JwtStrategy],
   exports: [JwtModule, AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }
