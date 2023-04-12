@@ -1,8 +1,93 @@
 doctype html
 html(lang='en')
     head
-        title Confirmation link
+        meta(charset='UTF-8')
+        meta(name='viewport' content='width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0')
+        meta(http-equiv='X-UA-Compatible' content='ie=edge')
+        title Confirmation link request
+        style.
+            body {
+                font-family: "Roboto", sans-serif;
+                font-size: 14px;
+                line-height: 20px;
+                letter-spacing: 0.8px;
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 0px;
+                line-height: 22px;
+            }
+            .container {
+                background: #FAFAFB;
+                width: 60%;
+                min-width: 600px;
+                box-sizing: border-box;
+                margin: 80px auto 20px;
+                padding: 80px;
+            }
+            img {
+                width: 175px;
+                margin-bottom: 40px;
+            }
+            button {
+                width: fit-content;
+                background: #4D84E7;
+                cursor: pointer;
+                padding: 20px 60px;
+                color: #FFF;
+                border: none;
+                border-radius: 4px;
+                box-shadow: 2px 6px 14px -9px rgba(0, 0, 0, 0.75);
+                margin-top: 20px;
+                margin-bottom: 40px;
+            }
+            .text-decorator {
+                color: #4D84E7;
+            }
+            a, a:hover, a:active, a:visited {
+                color: #4D84E7;
+            }
+            hr {
+                margin: 40px 0px;
+                height: 1px;
+                background: lightgray;
+                border: none;
+            }
+            footer {
+                width: 60%;
+                min-width: 600px;
+                margin: auto;
+            }
+            .fl {
+                float: left;
+            }
+            .fr {
+                float: right;
+            }
     body
-        h1 Please confirm your registration!
-        div.remark
-            p Please follow the link to verify your account #{link}
+        .container
+            img(src='https://otrada-tour.com.ua/logo.png' alt='Logo' title='Logo' style='display:block')
+            h1
+                | Email Confirmation, before
+                span.text-decorator  we get started...
+            p
+                | Thank you for registering on MedON, to finish your registration please confirm
+                | your email by clicking on the button below:
+            a(href=link)
+                button CONFIRM YOUR ACCOUNT
+            p
+                | Didn't sign up for MedON?
+                a(href='mailto:info@medon.com')  Let us know.
+            hr
+            p
+                | If you’re having trouble with the button above, copy and paste the URL below into your
+                | web browser.
+            a(href=link) #{link}
+        footer
+            div
+                .fl
+                    span Email send by MedON
+            div
+                .fr
+                    span Terms and conditions
+                    span.policy • Privacy policy
