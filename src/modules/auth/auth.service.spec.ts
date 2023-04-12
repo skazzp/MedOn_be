@@ -6,7 +6,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
 import { Role } from '@common/enums/Role';
-import { AuthService } from './auth.service';
+import { AuthService } from '@modules/auth/auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;

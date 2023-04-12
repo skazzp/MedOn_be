@@ -1,13 +1,15 @@
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as argon from 'argon2';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
+import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
-import { SignupDoctorDto } from './dto/signup-doctor.dto';
-import { ReconfirmDoctorDto } from './dto/reconfirm-doctor.dto';
+import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
+import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,13 +24,11 @@ export class AuthService {
     const hash = await argon.hash(dto.password);
     const token = await this.getToken({ email: dto.email });
     const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
-
     const doctor = this.doctorRepo.create({
       ...dto,
       password: hash,
       token,
     });
-
     await this.doctorRepo.save(doctor);
     await this.email.sendConfirmationLink(dto.email, link);
 
@@ -88,4 +88,29 @@ export class AuthService {
       secret: this.config.get('JWT_SECRET'),
     });
   }
+
+  async forgetPassword(dto: ForgetPasswordDoctorDto): Promise<void> {
+    await this.doctorRepo
+      .findOne({
+        where: { email: dto.email },
+      })
+      .then((doctor) => {
+        if (!doctor) throw new UnauthorizedException('Doctor not found!');
+      });
+    const token = await this.getToken({ email: dto.email });
+    const link = `${this.config.get('BASE_FRONT_URL')}/reset-password/${token}`;
+    await this.email.sendForgetPasswordLink(dto.email, link);
+  }
+
+  async resetPassword(dto: ResetPasswordDoctorDto): Promise<void> {
+    await this.doctorRepo.update(
+      {
+        email: dto.email,
+      },
+      {
+        password: await argon.hash(dto.newPassword),
+      },
+    );
+  }
+
 }

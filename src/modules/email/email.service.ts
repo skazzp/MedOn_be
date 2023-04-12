@@ -21,4 +21,20 @@ export class EmailService {
       },
     });
   }
+
+  public sendForgetPasswordLink(
+    to: string,
+    link: string,
+  ): Promise<SentMessageInfo> {
+    return this.email.sendMail({
+      to,
+      from: this.config.get('EMAIL_SENDER'),
+      subject: 'Please update your password in MedOn System',
+      template: 'reset',
+      context: {
+        link,
+      },
+    });
+  }
+
 }
