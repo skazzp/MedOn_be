@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Param,
   Post,
   Req,
   UseGuards,
@@ -20,7 +19,6 @@ import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
-import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 
 @ApiTags('auth')
 @Controller('auth')
