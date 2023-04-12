@@ -7,6 +7,7 @@ import { GlobalExceptionFilter } from './filters/gobalException.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
   const config = new DocumentBuilder().setTitle('Medon API').build();
   const document = SwaggerModule.createDocument(app, config);

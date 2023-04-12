@@ -1,3 +1,9 @@
+import { Request, Response } from 'express';
+import {
+  QueryFailedError,
+  EntityNotFoundError,
+  CannotCreateEntityIdMapError,
+} from 'typeorm';
 import {
   ArgumentsHost,
   Catch,
@@ -5,12 +11,6 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
-import {
-  QueryFailedError,
-  EntityNotFoundError,
-  CannotCreateEntityIdMapError,
-} from 'typeorm';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -41,7 +41,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       default:
         status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message = 'Unknown server Error!';
+        message =
+          (exception as HttpException).message || 'Unknown server Error!';
     }
 
     response.status(status).json({

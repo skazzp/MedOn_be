@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { Patient } from './typeorm/entities/Patient';
-import { PatientModule } from './modules/patient/patient.module';
+import { Patient } from '@entities/Patient';
+import { Speciality } from '@entities/Speciality';
+import { Doctor } from '@entities/Doctor';
+import { SpecialitiesModule } from './modules/specialities/specialities.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -18,14 +19,14 @@ import { PatientModule } from './modules/patient/patient.module';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [Patient],
+        entities: [Patient, Speciality, Doctor],
         synchronize: true,
+        autoLoadEntities: true,
       }),
       inject: [ConfigService],
     }),
-    PatientModule,
+    SpecialitiesModule,
+    AuthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
