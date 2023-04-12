@@ -6,6 +6,7 @@ import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
 import { Speciality } from '@entities/Speciality';
 import { AuthModule } from '@modules/auth/auth.module';
+import { EmailModule } from '@modules/email/email.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from '@modules/auth/auth.module';
       inject: [ConfigService],
     }),
     AuthModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

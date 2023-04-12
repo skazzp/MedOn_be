@@ -99,10 +99,11 @@ export class AuthService {
       });
 
     await this.email.sendConfirmationLink(dto.email, link);
+
     return link;
   }
 
-  async getToken(payload: string | object | Buffer): Promise<string> {
+  async getToken(payload: { email: string }): Promise<string> {
     return this.jwt.signAsync(payload, {
       expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),

@@ -52,7 +52,7 @@ export class Doctor {
   @Column({ name: 'time_zone' })
   timeZone: string;
 
-  @Column({ name: 'speciality_id' })
+  @Column({ name: 'speciality_id', nullable: true })
   specialityId: number;
 
   @ManyToOne(() => Speciality, (speciality) => speciality.doctors)
