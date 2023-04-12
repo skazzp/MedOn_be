@@ -27,12 +27,19 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Doctor login' })
+
+  async login(@Body() dto: LoginDoctorDto): Promise<object> {
+    const token = await this.authService.login(dto);
+    return token;
+  }
+
   @Post('signup')
   @ApiOperation({ summary: 'New doctor registration' })
   @ApiResponse({
     status: 201,
     description: 'Doctor was created, verification link was sent.',
   })
+
   async signup(@Body() dto: SignupDoctorDto): Promise<IServerResponse> {
     const confirmLink = await this.authService.signup(dto);
     return { statusCode: HttpStatus.OK, message: confirmLink };
@@ -53,10 +60,7 @@ export class AuthController {
     return { statusCode: HttpStatus.OK, message: confirmLink };
   }
 
-  async login(@Body() dto: LoginDoctorDto): Promise<object> {
-    const token = await this.authService.login(dto);
-    return token;
-  }
+
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
@@ -84,7 +88,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   @Post('reset')
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({
@@ -95,6 +99,7 @@ export class AuthController {
     status: 401,
     description: 'Invalid token',
   })
+  
   async resetPassword(
     @Req() req: IResetPasswordRequest,
     @Body() dto: ResetPasswordDoctorDto,
