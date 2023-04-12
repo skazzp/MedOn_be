@@ -1,12 +1,10 @@
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import * as argon from 'argon2';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-
 import { Doctor } from '@entities/Doctor';
-import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
@@ -108,23 +106,6 @@ export class AuthService {
       expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
     });
-  }
-
-  private async generateAccessToken(
-    doctorId: number,
-    email: string,
-  ): Promise<string> {
-    const payload = {
-      sub: doctorId,
-      email,
-    };
-    const secret = this.config.get('JWT_SECRET');
-    const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
-    const accessToken = await this.jwt.signAsync(payload, {
-      secret,
-      expiresIn,
-    });
-    return accessToken;
   }
 
   async forgetPassword(dto: ForgetPasswordDoctorDto): Promise<void> {

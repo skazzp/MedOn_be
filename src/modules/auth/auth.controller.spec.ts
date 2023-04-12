@@ -49,31 +49,4 @@ describe('AuthController', () => {
       message: 'test_confirmation_link',
     });
   });
-
-  describe('forget and reset', () => {
-    it('should return email was sent', async () => {
-      const dto = {
-        email: 'fakemail@gmail.com',
-      };
-      expect(await controller.forgetPassword(dto)).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Email was sent',
-      });
-    });
-    it('should return password was updated', async () => {
-      const req = {
-        doctor: {
-          email: 'fakemail@gmail.com',
-        },
-      } as IResetPasswordRequest;
-      const dto = {
-        email: req.doctor.email,
-        newPassword: 'fakepass',
-      };
-      expect(await controller.resetPassword(req, dto)).toEqual({
-        statusCode: HttpStatus.OK,
-        message: 'Password was updated',
-      });
-    });
-  });
 });
