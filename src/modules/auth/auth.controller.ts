@@ -20,12 +20,13 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 
-
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Post('login')
+  @ApiOperation({ summary: 'Doctor login' })
   @Post('signup')
   @ApiOperation({ summary: 'New doctor registration' })
   @ApiResponse({
@@ -41,20 +42,25 @@ export class AuthController {
   @ApiOperation({ summary: 'Request for new confirmation link' })
   @ApiResponse({
     status: 200,
-    description: 'Doctor was logged in',
+    description: 'New confirmation link was sent',
   })
   @ApiResponse({
     status: 401,
     description: 'Invalid email or password',
   })
-  async login(@Body() dto: LoginDoctorDto) {
+  async reconfirm(@Body() dto: ReconfirmDoctorDto): Promise<IServerResponse> {
+    const confirmLink = await this.authService.reconfirm(dto);
+    return { statusCode: HttpStatus.OK, message: confirmLink };
+  }
+
+  async login(@Body() dto: LoginDoctorDto): Promise<object> {
     const token = await this.authService.login(dto);
     return token;
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
-  getMe(@Req() req: Request & { user: Doctor }) {
+  getMe(@Req() req: Request & { user: Doctor }): Doctor {
     return req.user;
   }
 
@@ -66,7 +72,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Email do not exist',
+    description: 'Email does not exist',
   })
   async forgetPassword(
     @Body() dto: ForgetPasswordDoctorDto,
@@ -78,7 +84,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   @Post('reset')
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({
@@ -94,49 +100,6 @@ export class AuthController {
     @Body() dto: ResetPasswordDoctorDto,
   ): Promise<IServerResponse> {
     await this.authService.resetPassword({
-      email: req.doctor?.email,
-      newPassword: dto.newPassword,
-    });
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Password was updated',
-    };
-  }
-
-  @Post('forget')
-  @ApiOperation({ summary: 'Forgot password' })
-  @ApiResponse({
-    status: 201,
-    description: 'Email was sent',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Email do not exist',
-  })
-  async forgetPassword(
-    @Body() dto: ForgetPasswordDoctorDto,
-  ): Promise<IServerResponse> {
-    await this.authService.forgetPassword({ email: dto.email });
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Email was sent',
-    };
-  }
-
-  @UseGuards(AuthGuard)
-  @Post('reset')
-  @ApiOperation({ summary: 'Reset password' })
-  @ApiResponse({
-    status: 201,
-    description: 'Password was updated',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid token',
-  })
-  async resetPassword(
-    @Request() req: IResetPasswordRequest,
-rvice.resetPassword({
       email: req.doctor?.email,
       newPassword: dto.newPassword,
     });

@@ -10,6 +10,7 @@ import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
+import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 
 @Injectable()
 export class AuthService {
@@ -130,5 +131,22 @@ export class AuthService {
         password: await argon.hash(dto.newPassword),
       },
     );
+  }
+
+  private async generateAccessToken(
+    doctorId: number,
+    email: string,
+  ): Promise<string> {
+    const payload = {
+      sub: doctorId,
+      email,
+    };
+    const secret = this.config.get('JWT_SECRET');
+    const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
+    const accessToken = await this.jwt.signAsync(payload, {
+      secret,
+      expiresIn,
+    });
+    return accessToken;
   }
 }
