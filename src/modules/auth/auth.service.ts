@@ -35,7 +35,7 @@ export class AuthService {
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
-    const accessToken = await this.generateAccessToken(doctor.id, doctor.email);
+    const accessToken = await this.generateAccessToken(doctor.id, doctor.email, doctor.isVerified);
     return {
       access_token: accessToken,
     };
@@ -105,7 +105,7 @@ export class AuthService {
 
   async getToken(payload: { email: string }): Promise<string> {
     return this.jwt.signAsync(payload, {
-      expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
+      expiresIn: this.config.get('JWT_EXPIRATION_TIME'),
       secret: this.config.get('JWT_SECRET'),
     });
   }
@@ -137,9 +137,11 @@ export class AuthService {
   private async generateAccessToken(
     doctorId: number,
     email: string,
+    verify: boolean
   ): Promise<string> {
     const payload = {
       sub: doctorId,
+      verify: verify,
       email,
     };
     const secret = this.config.get('JWT_SECRET');
