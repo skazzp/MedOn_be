@@ -35,9 +35,26 @@ export class AuthService {
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
-    const accessToken = await this.generateAccessToken(doctor.id, doctor.email, doctor.isVerified);
+    const accessToken = await this.generateAccessToken(
+      doctor.id,
+      doctor.email,
+    );
     return {
-      access_token: accessToken,
+      token: accessToken,
+      user: {
+        userId: doctor.id,
+        email: doctor.email,
+        firstName: doctor.firstName,
+        isVerified: doctor.isVerified,
+        lastName: doctor.lastName,
+        city: doctor.city,
+        country: doctor.country,
+        role: doctor.role,
+        specialityId: doctor.specialityId,
+        photo: doctor.photo,
+        dateOfBirth: doctor.dateOfBirth,
+        timeZone: doctor.timeZone,
+      }
     };
   }
 
@@ -137,11 +154,9 @@ export class AuthService {
   private async generateAccessToken(
     doctorId: number,
     email: string,
-    verify: boolean
   ): Promise<string> {
     const payload = {
       sub: doctorId,
-      verify: verify,
       email,
     };
     const secret = this.config.get('JWT_SECRET');
