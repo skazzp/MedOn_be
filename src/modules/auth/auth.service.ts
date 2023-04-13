@@ -23,7 +23,8 @@ export class AuthService {
   async signup(dto: SignupDoctorDto): Promise<string> {
     const hash = await argon.hash(dto.password);
     const token = await this.getToken({ email: dto.email });
-    const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
+    // const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
+    const link = `${this.config.get('BASE_FRONT_URL')}/login?token=${token}`;
     const doctor = this.doctorRepo.create({
       ...dto,
       password: hash,
@@ -58,7 +59,8 @@ export class AuthService {
 
   async reconfirm(dto: ReconfirmDoctorDto): Promise<string> {
     const token = await this.getToken({ email: dto.email });
-    const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
+    // const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
+    const link = `${this.config.get('BASE_FRONT_URL')}/login?token=${token}`;
 
     await this.doctorRepo
       .createQueryBuilder('doctor')
@@ -112,5 +114,4 @@ export class AuthService {
       },
     );
   }
-
 }
