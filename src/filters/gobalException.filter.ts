@@ -19,30 +19,28 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let message: string | string[];
-    let status: HttpStatus;
+    let message: string | string[] =
+      (exception as HttpException).message || 'Unknown server Error!';
+    let status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-    switch (true) {
-      case exception instanceof HttpException:
-        status = (exception as HttpException).getStatus();
-        message = (exception as HttpException)['response']['message'];
-        break;
-      case exception instanceof QueryFailedError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as QueryFailedError).message;
-        break;
-      case exception instanceof EntityNotFoundError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as EntityNotFoundError).message;
-        break;
-      case exception instanceof CannotCreateEntityIdMapError:
-        status = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = (exception as CannotCreateEntityIdMapError).message;
-        break;
-      default:
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
-        message =
-          (exception as HttpException).message || 'Unknown server Error!';
+    if (exception instanceof HttpException) {
+      status = (exception as HttpException).getStatus();
+      message = (exception as HttpException)['response']['message'];
+    }
+
+    if (exception instanceof QueryFailedError) {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = (exception as QueryFailedError).message;
+    }
+
+    if (exception instanceof EntityNotFoundError) {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = (exception as EntityNotFoundError).message;
+    }
+
+    if (exception instanceof CannotCreateEntityIdMapError) {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = (exception as CannotCreateEntityIdMapError).message;
     }
 
     response.status(status).json({
