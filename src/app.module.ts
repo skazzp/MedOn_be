@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
+import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
 import { Speciality } from '@entities/Speciality';
-import { Doctor } from '@entities/Doctor';
-import { SpecialitiesModule } from '@modules/specialities/specialities.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { EmailModule } from '@modules/email/email.module';
 import { UserModule } from '@modules/user/user.module';
@@ -27,7 +27,6 @@ import { UserModule } from '@modules/user/user.module';
       }),
       inject: [ConfigService],
     }),
-    SpecialitiesModule,
     AuthModule,
     EmailModule,
     UserModule,

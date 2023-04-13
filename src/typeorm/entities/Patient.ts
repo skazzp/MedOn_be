@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import { Gender } from '@common/enums/Gender';
 
 @Entity({ name: 'patient' })
