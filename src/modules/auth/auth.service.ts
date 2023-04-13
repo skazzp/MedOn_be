@@ -10,6 +10,10 @@ import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
+import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
+import { DoctorResponse } from '@common/interfaces/DoctorResponse';
+
+
 
 @Injectable()
 export class AuthService {
@@ -19,6 +23,40 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
   ) {}
+
+  async login(dto: LoginDoctorDto): Promise<{token: string, user: DoctorResponse}> {
+    const doctor = await this.doctorRepo.findOne({
+      where: {
+        email: dto.email,
+      },
+    });
+    if (!doctor) {
+      throw new UnauthorizedException('Invalid email');
+    }
+
+    const pwMatches = await argon.verify(doctor.password, dto.password);
+    if (!pwMatches) {
+      throw new UnauthorizedException('Invalid  password');
+    }
+    const accessToken = await this.generateAccessToken(doctor.id, doctor.email);
+    return {
+      token: accessToken,
+      user: {
+        id: doctor.id,
+        email: doctor.email,
+        firstName: doctor.firstName,
+        isVerified: doctor.isVerified,
+        lastName: doctor.lastName,
+        city: doctor.city,
+        country: doctor.country,
+        role: doctor.role,
+        specialityId: doctor.specialityId,
+        photo: doctor.photo,
+        dateOfBirth: doctor.dateOfBirth,
+        timeZone: doctor.timeZone,
+      },
+    };
+  }
 
   async signup(dto: SignupDoctorDto): Promise<string> {
     const hash = await argon.hash(dto.password);
@@ -84,7 +122,7 @@ export class AuthService {
 
   async getToken(payload: { email: string }): Promise<string> {
     return this.jwt.signAsync(payload, {
-      expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
+      expiresIn: this.config.get('JWT_EXPIRATION_TIME'),
       secret: this.config.get('JWT_SECRET'),
     });
   }
@@ -113,4 +151,20 @@ export class AuthService {
     );
   }
 
+  private async generateAccessToken(
+    doctorId: number,
+    email: string,
+  ): Promise<string> {
+    const payload = {
+      sub: doctorId,
+      email,
+    };
+    const secret = this.config.get('JWT_SECRET');
+    const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
+    const accessToken = await this.jwt.signAsync(payload, {
+      secret,
+      expiresIn,
+    });
+    return accessToken;
+  }
 }
