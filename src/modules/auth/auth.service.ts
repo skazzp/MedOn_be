@@ -11,6 +11,9 @@ import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
+import { DoctorResponse } from '@common/interfaces/DoctorResponse';
+
+
 
 @Injectable()
 export class AuthService {
@@ -21,7 +24,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(dto: LoginDoctorDto) {
+  async login(dto: LoginDoctorDto): Promise<{token: string, user: DoctorResponse}> {
     const doctor = await this.doctorRepo.findOne({
       where: {
         email: dto.email,
@@ -35,14 +38,11 @@ export class AuthService {
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
-    const accessToken = await this.generateAccessToken(
-      doctor.id,
-      doctor.email,
-    );
+    const accessToken = await this.generateAccessToken(doctor.id, doctor.email);
     return {
       token: accessToken,
       user: {
-        userId: doctor.id,
+        id: doctor.id,
         email: doctor.email,
         firstName: doctor.firstName,
         isVerified: doctor.isVerified,
@@ -54,7 +54,7 @@ export class AuthService {
         photo: doctor.photo,
         dateOfBirth: doctor.dateOfBirth,
         timeZone: doctor.timeZone,
-      }
+      },
     };
   }
 
