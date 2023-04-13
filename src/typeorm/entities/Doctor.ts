@@ -7,9 +7,8 @@ import {
   UpdateDateColumn,
   JoinColumn,
 } from 'typeorm';
-
-import { Speciality } from '@entities/Speciality';
 import { Role } from '@common/enums/Role';
+import { Speciality } from './Speciality';
 
 @Entity({ name: 'doctor' })
 export class Doctor {

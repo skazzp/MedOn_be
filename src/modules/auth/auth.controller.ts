@@ -3,34 +3,25 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
-  Req,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-
-import { Doctor } from '@entities/Doctor';
-import { AuthService } from '@modules/auth/auth.service';
-import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
+import { AuthService } from '@modules/auth/auth.service';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { AuthGuard } from '@modules/auth/auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
-  @Post('login')
-  @ApiOperation({ summary: 'Doctor login' })
-  async login(@Body() dto: LoginDoctorDto): Promise<object> {
-    const token = await this.authService.login(dto);
-    return token;
-  }
 
   @Post('signup')
   @ApiOperation({ summary: 'New doctor registration' })
@@ -46,22 +37,37 @@ export class AuthController {
   @Post('re-confirm')
   @ApiOperation({ summary: 'Request for new confirmation link' })
   @ApiResponse({
-    status: 200,
-    description: 'New confirmation link was sent',
+    status: 201,
+    description: 'Verification link was sent.',
   })
   @ApiResponse({
     status: 401,
-    description: 'Invalid email or password',
+    description: 'Verification link request was rejected',
   })
-  async reconfirm(@Body() dto: ReconfirmDoctorDto): Promise<IServerResponse> {
+  async reConfirm(@Body() dto: ReconfirmDoctorDto): Promise<IServerResponse> {
     const confirmLink = await this.authService.reconfirm(dto);
-    return { statusCode: HttpStatus.OK, message: confirmLink };
+    return {
+      statusCode: HttpStatus.OK,
+      message: confirmLink,
+    };
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('profile')
-  getMe(@Req() req: Request & { user: Doctor }): Doctor {
-    return req.user;
+  @Get('confirm/:token')
+  @ApiOperation({ summary: "Doctor's account verification" })
+  @ApiResponse({
+    status: 201,
+    description: 'User was confirmed by email',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid confirmation link',
+  })
+  async confirm(@Param() params: { token: string }): Promise<IServerResponse> {
+    await this.authService.confirm(params.token);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Account was successfully confirmed!',
+    };
   }
 
   @Post('forget')
@@ -72,7 +78,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Email does not exist',
+    description: 'Email do not exist',
   })
   async forgetPassword(
     @Body() dto: ForgetPasswordDoctorDto,
@@ -84,7 +90,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard)
   @Post('reset')
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({
@@ -96,7 +102,7 @@ export class AuthController {
     description: 'Invalid token',
   })
   async resetPassword(
-    @Req() req: IResetPasswordRequest,
+    @Request() req: IResetPasswordRequest,
     @Body() dto: ResetPasswordDoctorDto,
   ): Promise<IServerResponse> {
     await this.authService.resetPassword({
