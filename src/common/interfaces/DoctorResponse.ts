@@ -1,4 +1,4 @@
-import { Role } from "@common/enums/Role";
+import { Role } from '@common/enums/Role';
 
 export interface DoctorResponse {
   id: number;
