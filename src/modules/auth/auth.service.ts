@@ -13,8 +13,6 @@ import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.d
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { DoctorResponse } from '@common/interfaces/DoctorResponse';
 
-
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,7 +22,9 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(dto: LoginDoctorDto): Promise<{token: string, user: DoctorResponse}> {
+  async login(
+    dto: LoginDoctorDto,
+  ): Promise<{ token: string; user: DoctorResponse }> {
     const doctor = await this.doctorRepo.findOne({
       where: {
         email: dto.email,
