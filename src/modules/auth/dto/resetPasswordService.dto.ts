@@ -1,13 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  Matches,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ResetPasswordDoctorDto } from './resetPasswordController.dto';
 
-export class ResetPasswordServiceDoctorDto {
+export class ResetPasswordServiceDoctorDto extends ResetPasswordDoctorDto {
   @ApiProperty({
     description: 'Email of the doctor',
     example: 'dr-jenner@gmail.com',
@@ -15,15 +10,4 @@ export class ResetPasswordServiceDoctorDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @ApiProperty({
-    description: "Doctor's password",
-    example: 'TyuiOp123!',
-  })
-  @MinLength(6)
-  @IsString()
-  @Matches(/(?=.*\d)(?=.*\W+)(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'Password too weak!',
-  })
-  newPassword: string;
 }
