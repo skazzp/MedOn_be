@@ -10,6 +10,8 @@ import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { IResetPassword } from '@modules/auth/type/IResetPassword';
+import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
+import { IDoctorResponse } from '@modules/auth/type/IDoctorResponse';
 
 @Injectable()
 export class AuthService {
@@ -111,5 +113,41 @@ export class AuthService {
         password: await argon.hash(newPassword),
       },
     );
+  }
+
+  async login(
+    dto: LoginDoctorDto,
+  ): Promise<{ token: string; user: IDoctorResponse }> {
+    const doctor = await this.doctorRepo.findOne({
+      where: {
+        email: dto.email,
+      },
+    });
+    if (!doctor) {
+      throw new UnauthorizedException('Invalid email');
+    }
+
+    const pwMatches = await argon.verify(doctor.password, dto.password);
+    if (!pwMatches) {
+      throw new UnauthorizedException('Invalid  password');
+    }
+    const accessToken = await this.getToken({ email: doctor.email });
+    return {
+      token: accessToken,
+      user: {
+        id: doctor.id,
+        email: doctor.email,
+        firstName: doctor.firstName,
+        isVerified: doctor.isVerified,
+        lastName: doctor.lastName,
+        city: doctor.city,
+        country: doctor.country,
+        role: doctor.role,
+        specialityId: doctor.specialityId,
+        photo: doctor.photo,
+        dateOfBirth: doctor.dateOfBirth,
+        timeZone: doctor.timeZone,
+      },
+    };
   }
 }

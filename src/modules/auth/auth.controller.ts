@@ -5,6 +5,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -16,7 +17,10 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthService } from '@modules/auth/auth.service';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
-import { AuthGuard } from '@modules/auth/auth.guard';
+import { AuthResetPasswordGuard } from '@modules/auth/auth.guard';
+import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { IDoctorResponse } from '@modules/auth/type/IDoctorResponse';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -90,7 +94,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthResetPasswordGuard)
   @Post('reset')
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({
@@ -113,5 +117,17 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: 'Password was updated',
     };
+  }
+
+  @Post('login')
+  @ApiOperation({ summary: 'Doctor login' })
+  async login(@Body() dto: LoginDoctorDto): Promise<object> {
+    return this.authService.login(dto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('profile')
+  getMe(@Req() req: Request & { user: IDoctorResponse }) {
+    return req.user;
   }
 }

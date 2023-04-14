@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Doctor } from '@entities/Doctor';
 import { Speciality } from '@entities/Speciality';
 import { EmailModule } from '@modules/email/email.module';
+import { JwtStrategy } from '@modules/auth/strategy/jwt.strategy';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 
@@ -14,6 +15,6 @@ import { AuthController } from './auth.controller';
     JwtModule.register({}),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
