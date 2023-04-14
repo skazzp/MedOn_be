@@ -3,22 +3,21 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
-  Req,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
-
-import { Doctor } from '@entities/Doctor';
 import { AuthService } from '@modules/auth/auth.service';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
-import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
+import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPasswordController.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { AuthResetGuard } from './auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -58,10 +57,22 @@ export class AuthController {
     return { statusCode: HttpStatus.OK, message: confirmLink };
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('profile')
-  getMe(@Req() req: Request & { user: Doctor }): Doctor {
-    return req.user;
+  @Get('confirm/:token')
+  @ApiOperation({ summary: "Doctor's account verification" })
+  @ApiResponse({
+    status: 201,
+    description: 'User was confirmed by email',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid confirmation link',
+  })
+  async confirm(@Param() params: { token: string }): Promise<IServerResponse> {
+    await this.authService.confirm(params.token);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Account was successfully confirmed!',
+    };
   }
 
   @Post('forget')
@@ -84,7 +95,7 @@ export class AuthController {
     };
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthResetGuard)
   @Post('reset')
   @ApiOperation({ summary: 'Reset password' })
   @ApiResponse({
@@ -96,7 +107,7 @@ export class AuthController {
     description: 'Invalid token',
   })
   async resetPassword(
-    @Req() req: IResetPasswordRequest,
+    @Request() req: IResetPasswordRequest,
     @Body() dto: ResetPasswordDoctorDto,
   ): Promise<IServerResponse> {
     await this.authService.resetPassword({

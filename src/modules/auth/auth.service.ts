@@ -9,9 +9,9 @@ import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
-import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { DoctorResponse } from '@common/interfaces/DoctorResponse';
+import { ResetPasswordServiceDoctorDto } from './dto/resetPasswordService.dto';
 
 @Injectable()
 export class AuthService {
@@ -61,7 +61,6 @@ export class AuthService {
   async signup(dto: SignupDoctorDto): Promise<string> {
     const hash = await argon.hash(dto.password);
     const token = await this.getToken({ email: dto.email });
-    // const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
     const link = `${this.config.get('BASE_FRONT_URL')}/login?token=${token}`;
     const doctor = this.doctorRepo.create({
       ...dto,
@@ -97,7 +96,6 @@ export class AuthService {
 
   async reconfirm(dto: ReconfirmDoctorDto): Promise<string> {
     const token = await this.getToken({ email: dto.email });
-    // const link = `${this.config.get('BASE_SERVER_URL')}/auth/confirm/${token}`;
     const link = `${this.config.get('BASE_FRONT_URL')}/login?token=${token}`;
 
     await this.doctorRepo
@@ -142,7 +140,7 @@ export class AuthService {
     await this.email.sendForgetPasswordLink(dto.email, link);
   }
 
-  async resetPassword(dto: ResetPasswordDoctorDto): Promise<void> {
+  async resetPassword(dto: ResetPasswordServiceDoctorDto): Promise<void> {
     await this.doctorRepo.update(
       {
         email: dto.email,
