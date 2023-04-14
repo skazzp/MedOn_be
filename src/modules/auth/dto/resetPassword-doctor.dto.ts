@@ -9,14 +9,6 @@ import {
 
 export class ResetPasswordDoctorDto {
   @ApiProperty({
-    description: 'Email of the doctor',
-    example: 'dr-jenner@gmail.com',
-  })
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @ApiProperty({
     description: "Doctor's password",
     example: 'TyuiOp123!',
   })
