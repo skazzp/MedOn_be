@@ -10,8 +10,3 @@ export class ForgetPasswordDoctorDto {
   @IsNotEmpty()
   email: string;
 }
-
-export interface ResetPasswordDoctorDto {
-  email: string;
-  newPassword: string;
-}
