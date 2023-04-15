@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
 import { IProfile } from '@common/interfaces/userProfileResponses';
+import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -31,18 +33,26 @@ export class UserService {
     }
   }
 
-  async updateUser(payload: Partial<Doctor>): Promise<Doctor> {
+  async updateUser(userId: number, payload: UpdateUserDto): Promise<void> {
     try {
       const user = await this.doctorRepo
         .createQueryBuilder('doctor')
-        .where('doctor.email = :email', { email: payload.email })
+        .where('id = :id', { id: userId })
         .getOne();
 
       if (!user) throw new UnauthorizedException('User not found!');
 
-      return user;
+      await this.doctorRepo
+        .createQueryBuilder('doctor')
+        .update(Doctor)
+        .set({
+          ...payload,
+          updatedAt: new Date(),
+        })
+        .where('id = :id', { id: userId })
+        .execute();
     } catch (error) {
-      throw new UnauthorizedException('User not found!');
+      throw new UnauthorizedException(error);
     }
   }
 }
