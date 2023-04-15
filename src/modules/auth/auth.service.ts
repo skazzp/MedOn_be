@@ -68,7 +68,7 @@ export class AuthService {
       token,
     });
     await this.doctorRepo.save(doctor);
-    await this.email.sendConfirmationLink(dto.email, link);
+    this.email.sendConfirmationLink(dto.email, link);
 
     return link;
   }
@@ -115,7 +115,7 @@ export class AuthService {
           );
       });
 
-    await this.email.sendConfirmationLink(dto.email, link);
+    this.email.sendConfirmationLink(dto.email, link);
 
     return link;
   }
@@ -137,7 +137,7 @@ export class AuthService {
       });
     const token = await this.getToken({ email: dto.email });
     const link = `${this.config.get('BASE_FRONT_URL')}/reset-password/${token}`;
-    await this.email.sendForgetPasswordLink(dto.email, link);
+    this.email.sendForgetPasswordLink(dto.email, link);
   }
 
   async resetPassword(dto: ResetPasswordServiceDoctorDto): Promise<void> {
