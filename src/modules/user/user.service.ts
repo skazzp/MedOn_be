@@ -3,7 +3,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
-import { IProfile } from '@common/interfaces/userProfileResponses';
+import { IProfile } from '@modules/user/types/userProfileResponses';
 
 @Injectable()
 export class UserService {

@@ -10,7 +10,6 @@ import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
-import { DoctorResponse } from '@common/interfaces/DoctorResponse';
 import { IResetPassword } from '@modules/auth/types/IResetPassword';
 
 @Injectable()
@@ -22,9 +21,7 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(
-    dto: LoginDoctorDto,
-  ): Promise<{ token: string; user: DoctorResponse }> {
+  async login(dto: LoginDoctorDto): Promise<{ token: string }> {
     const doctor = await this.doctorRepo.findOne({
       where: {
         email: dto.email,
@@ -38,23 +35,9 @@ export class AuthService {
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
-    const accessToken = await this.generateAccessToken(doctor.id, doctor.email);
+    const accessToken = await this.getToken({ email: doctor.email });
     return {
       token: accessToken,
-      user: {
-        id: doctor.id,
-        email: doctor.email,
-        firstName: doctor.firstName,
-        isVerified: doctor.isVerified,
-        lastName: doctor.lastName,
-        city: doctor.city,
-        country: doctor.country,
-        role: doctor.role,
-        specialityId: doctor.specialityId,
-        photo: doctor.photo,
-        dateOfBirth: doctor.dateOfBirth,
-        timeZone: doctor.timeZone,
-      },
     };
   }
 
@@ -122,7 +105,7 @@ export class AuthService {
 
   async getToken(payload: { email: string }): Promise<string> {
     return this.jwt.signAsync(payload, {
-      expiresIn: this.config.get('JWT_EXPIRATION_TIME'),
+      expiresIn: this.config.get('CONFIRMATION_TOKEN_EXPIRED_AT'),
       secret: this.config.get('JWT_SECRET'),
     });
   }
@@ -149,22 +132,5 @@ export class AuthService {
         password: await argon.hash(newPassword),
       },
     );
-  }
-
-  private async generateAccessToken(
-    doctorId: number,
-    email: string,
-  ): Promise<string> {
-    const payload = {
-      sub: doctorId,
-      email,
-    };
-    const secret = this.config.get('JWT_SECRET');
-    const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
-    const accessToken = await this.jwt.signAsync(payload, {
-      secret,
-      expiresIn,
-    });
-    return accessToken;
   }
 }

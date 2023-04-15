@@ -10,7 +10,7 @@ import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import {
   IProfileRequest,
   IProfileResponse,
-} from '@common/interfaces/userProfileResponses';
+} from '@modules/user/types/userProfileResponses';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 

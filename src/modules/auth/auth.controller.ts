@@ -11,7 +11,7 @@ import {
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from '@modules/auth/auth.service';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
-import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
+import { IResetPasswordRequest } from '@modules/auth/types/resetPasswordRequest';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
