@@ -5,3 +5,8 @@ export interface IResetPasswordRequest extends Request {
     email: string;
   };
 }
+
+export interface IResetPassword {
+  email: string;
+  newPassword: string;
+}
