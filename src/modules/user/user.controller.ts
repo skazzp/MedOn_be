@@ -16,10 +16,10 @@ import { UserService } from './user.service';
 
 @ApiTags('user')
 @Controller('user')
+@UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Get('profile')
   @ApiOperation({ summary: 'Request user profile' })
   @ApiResponse({
