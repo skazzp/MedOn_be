@@ -35,7 +35,7 @@ import { EmailModule } from '@modules/email/email.module';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService],
   exports: [JwtModule, AuthService],
 })
 export class AuthModule {}
