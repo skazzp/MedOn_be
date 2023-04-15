@@ -11,7 +11,7 @@ import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { DoctorResponse } from '@common/interfaces/DoctorResponse';
-import { ResetPasswordServiceDoctorDto } from './dto/resetPasswordService.dto';
+import { IResetPassword } from '@common/interfaces/resetPassword';
 
 @Injectable()
 export class AuthService {
@@ -140,7 +140,7 @@ export class AuthService {
     await this.email.sendForgetPasswordLink(dto.email, link);
   }
 
-  async resetPassword(dto: ResetPasswordServiceDoctorDto): Promise<void> {
+  async resetPassword(dto: IResetPassword): Promise<void> {
     await this.doctorRepo.update(
       {
         email: dto.email,

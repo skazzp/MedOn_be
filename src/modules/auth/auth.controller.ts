@@ -11,13 +11,13 @@ import {
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from '@modules/auth/auth.service';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
-import { IResetPasswordRequest } from '@common/interfaces/resetPasswordRequest';
+import { IResetPasswordRequest } from '@common/interfaces/resetPassword';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPasswordController.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
-import { PasswordResetGuard } from './passReset.guard';
+import { PasswordResetGuard } from '@modules/auth/guards/passReset.guard';
 
 @ApiTags('auth')
 @Controller('auth')
