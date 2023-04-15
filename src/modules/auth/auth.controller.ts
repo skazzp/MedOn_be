@@ -17,6 +17,8 @@ import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Doctor } from '@entities/Doctor';
 import { PasswordResetGuard } from './guards/pass-reset.guard';
 
 @ApiTags('auth')
@@ -26,9 +28,8 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({ summary: 'Doctor login' })
-  async login(@Body() dto: LoginDoctorDto): Promise<object> {
-    const token = await this.authService.login(dto);
-    return token;
+  async login(@Body() dto: LoginDoctorDto): Promise<{ token: string }> {
+    return this.authService.login(dto);
   }
 
   @Post('signup')
@@ -118,5 +119,23 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: 'Password was updated',
     };
+  }
+
+  @Get('google/login')
+  @UseGuards(AuthGuard('google'))
+  handleLogin() {
+    return { msg: 'Google Authentication' };
+  }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async handleRedirect(
+    @Request() req: Request & { user: Doctor },
+  ): Promise<{ token: string }> {
+    const accessToken = await this.authService.getToken({
+      email: req.user.email,
+    });
+
+    return { token: accessToken };
   }
 }

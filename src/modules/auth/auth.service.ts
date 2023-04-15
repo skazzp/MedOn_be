@@ -11,6 +11,7 @@ import { EmailService } from '@modules/email/email.service';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { IResetPassword } from '@modules/auth/types/IResetPassword';
+import { GoogleUserDetails } from '@modules/auth/types/GoogleUserDetails';
 
 @Injectable()
 export class AuthService {
@@ -33,7 +34,7 @@ export class AuthService {
 
     const pwMatches = await argon.verify(doctor.password, dto.password);
     if (!pwMatches) {
-      throw new UnauthorizedException('Invalid  password');
+      throw new UnauthorizedException('Invalid password');
     }
     const accessToken = await this.getToken({ email: doctor.email });
     return {
@@ -132,5 +133,24 @@ export class AuthService {
         password: await argon.hash(newPassword),
       },
     );
+  }
+
+  async validateGoogleUser(details: GoogleUserDetails): Promise<Doctor> {
+    const doctor = await this.doctorRepo.findOneBy({
+      email: details.email,
+    });
+
+    if (doctor) return doctor;
+
+    const [firstName, lastName] = details.displayName.split(' ');
+    const googleUserData = {
+      email: details.email,
+      firstName,
+      lastName,
+      isVerified: true,
+    };
+
+    const doctorNew = this.doctorRepo.create(googleUserData);
+    return this.doctorRepo.save(doctorNew);
   }
 }
