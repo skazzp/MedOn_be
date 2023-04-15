@@ -13,7 +13,7 @@ import { AuthService } from '@modules/auth/auth.service';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { IResetPasswordRequest } from '@common/interfaces/resetPassword';
 import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor.dto';
-import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPasswordController.dto';
+import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.dto';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
