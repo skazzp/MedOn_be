@@ -7,6 +7,7 @@ import { Patient } from '@entities/Patient';
 import { Speciality } from '@entities/Speciality';
 import { AuthModule } from '@modules/auth/auth.module';
 import { EmailModule } from '@modules/email/email.module';
+import { SpecialitiesModule } from '@modules/specialities/specialities.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EmailModule } from '@modules/email/email.module';
     }),
     AuthModule,
     EmailModule,
+    SpecialitiesModule,
   ],
 })
 export class AppModule {}
