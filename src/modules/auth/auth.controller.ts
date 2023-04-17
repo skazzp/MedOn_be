@@ -144,7 +144,7 @@ export class AuthController {
     });
 
     return res.redirect(
-      `${this.config.get('BASE_FRONT_URL')}/profile?token=${accessToken}`,
+      `${this.config.get('BASE_FRONT_URL')}/login?gtoken=${accessToken}`,
     );
   }
 }
