@@ -140,13 +140,13 @@ export class AuthService {
     await this.email.sendForgetPasswordLink(dto.email, link);
   }
 
-  async resetPassword(dto: IResetPassword): Promise<void> {
+  async resetPassword(passwordData: IResetPassword): Promise<void> {
     await this.doctorRepo.update(
       {
-        email: dto.email,
+        email: passwordData.email,
       },
       {
-        password: await argon.hash(dto.newPassword),
+        password: await argon.hash(passwordData.newPassword),
       },
     );
   }
