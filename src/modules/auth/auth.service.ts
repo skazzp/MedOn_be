@@ -12,6 +12,7 @@ import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { IResetPassword } from '@modules/auth/types/IResetPassword';
 import { GoogleUserDetails } from '@modules/auth/types/GoogleUserDetails';
+import { DoctorResponse } from './types/DoctorResponse';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,9 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(dto: LoginDoctorDto): Promise<{ token: string }> {
+  async login(
+    dto: LoginDoctorDto,
+  ): Promise<{ token: string; user: DoctorResponse }> {
     const doctor = await this.doctorRepo.findOne({
       where: {
         email: dto.email,
@@ -39,6 +42,20 @@ export class AuthService {
     const accessToken = await this.getToken({ email: doctor.email });
     return {
       token: accessToken,
+      user: {
+        id: doctor.id,
+        email: doctor.email,
+        firstName: doctor.firstName,
+        isVerified: doctor.isVerified,
+        lastName: doctor.lastName,
+        city: doctor.city,
+        country: doctor.country,
+        role: doctor.role,
+        specialityId: doctor.specialityId,
+        photo: doctor.photo,
+        dateOfBirth: doctor.dateOfBirth,
+        timeZone: doctor.timeZone,
+      },
     };
   }
 
