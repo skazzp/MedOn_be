@@ -5,9 +5,11 @@ import {
   HttpStatus,
   Param,
   Post,
-  Request,
+  Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from '@modules/auth/auth.service';
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
@@ -19,12 +21,16 @@ import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Doctor } from '@entities/Doctor';
+import { ConfigService } from '@nestjs/config';
 import { PasswordResetGuard } from './guards/pass-reset.guard';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private config: ConfigService,
+  ) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Doctor login' })
@@ -108,7 +114,7 @@ export class AuthController {
     description: 'Invalid token',
   })
   async resetPassword(
-    @Request() req: IResetPasswordRequest,
+    @Req() req: IResetPasswordRequest,
     @Body() dto: ResetPasswordDoctorDto,
   ): Promise<IServerResponse> {
     await this.authService.resetPassword({
@@ -130,12 +136,15 @@ export class AuthController {
   @Get('google/redirect')
   @UseGuards(AuthGuard('google'))
   async handleRedirect(
-    @Request() req: Request & { user: Doctor },
-  ): Promise<{ token: string }> {
+    @Req() req: Request & { user: Doctor },
+    @Res() res: Response,
+  ): Promise<void> {
     const accessToken = await this.authService.getToken({
       email: req.user.email,
     });
 
-    return { token: accessToken };
+    return res.redirect(
+      `${this.config.get('BASE_FRONT_URL')}/profile?token=${accessToken}`,
+    );
   }
 }
