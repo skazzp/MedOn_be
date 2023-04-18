@@ -12,6 +12,7 @@ import {
   IProfileRequest,
   IProfileResponse,
 } from '@common/interfaces/userProfileResponses';
+import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -58,6 +59,35 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       data: user,
+    };
+  }
+
+  @Patch('update-password')
+  @ApiOperation({ summary: 'Update user password' })
+  @ApiResponse({
+    status: 201,
+    description: 'User password updated successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User password request was rejected',
+  })
+  async updatePassword(
+    @Request() req: IProfileRequest,
+    @Body() dto: UpdateUserDto,
+  ): Promise<IServerResponse> {
+    await this.userService.updatePassword(
+      {
+        email: req.user?.email,
+      },
+      {
+        currentPassword: dto.currentPassword,
+        newPassword: dto.newPassword,
+      },
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Password was updated',
     };
   }
 }
