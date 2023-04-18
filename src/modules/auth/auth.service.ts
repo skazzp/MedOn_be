@@ -12,6 +12,7 @@ import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { DoctorResponse } from '@common/interfaces/DoctorResponse';
 import { IResetPassword } from '@common/interfaces/resetPassword';
+import { GoogleUserDetails } from '@modules/auth/interfaces/GoogleUserDetails';
 
 @Injectable()
 export class AuthService {
@@ -166,5 +167,24 @@ export class AuthService {
       expiresIn,
     });
     return accessToken;
+  }
+
+  async validateGoogleUser(details: GoogleUserDetails): Promise<Doctor> {
+    const doctor = await this.doctorRepo.findOneBy({
+      email: details.email,
+    });
+
+    if (doctor) return doctor;
+
+    const [firstName, lastName] = details.displayName.split(' ');
+    const googleUserData = {
+      email: details.email,
+      firstName,
+      lastName,
+      isVerified: true,
+    };
+
+    const doctorNew = this.doctorRepo.create(googleUserData);
+    return this.doctorRepo.save(doctorNew);
   }
 }
