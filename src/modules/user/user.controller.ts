@@ -56,7 +56,7 @@ export class UserController {
     @Request() req: IProfileRequest,
     @Body() dto: UpdateUserDto,
   ): Promise<IProfileResponse> {
-    const user = await this.userService.updateUser(req.user?.email, dto);
+    const user = await this.userService.updateUser(req.user?.userId, dto);
     return {
       statusCode: HttpStatus.OK,
       data: user,

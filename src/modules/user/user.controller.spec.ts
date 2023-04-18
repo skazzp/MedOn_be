@@ -6,7 +6,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Doctor } from '@entities/Doctor';
 import { UserController } from '@modules/user/user.controller';
 import { UserService } from '@modules/user/user.service';
-import { UpdateUserDto } from '@modules/user/dto/updateUser.dto';
+import { UpdateUserPasswordDto } from '@modules/user/dto/updateUser.dto';
 
 describe('UserController', () => {
   let controller: UserController;
@@ -38,7 +38,7 @@ describe('UserController', () => {
       const email = 'test@example.com';
       const currentPassword = 'old_password';
       const newPassword = 'new_password';
-      const dto: UpdateUserDto = {
+      const dto: UpdateUserPasswordDto = {
         currentPassword,
         newPassword,
       };

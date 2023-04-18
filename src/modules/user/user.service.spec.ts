@@ -5,7 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
 import { Test } from '@nestjs/testing';
-import { UpdateUserDto } from '@modules/user/dto/updateUser.dto';
+import { UpdateUserPasswordDto } from '@modules/user/dto/updateUser.dto';
 import { UserService } from '@modules/user/user.service';
 
 describe('UserService', () => {
@@ -42,7 +42,7 @@ describe('UserService', () => {
       jest.spyOn(userService, 'getUserByEmail').mockResolvedValue(user);
       jest.spyOn(doctorRepo, 'save').mockResolvedValue(user);
 
-      const updateDto = new UpdateUserDto();
+      const updateDto = new UpdateUserPasswordDto();
 
       updateDto.currentPassword = 'oldPassword';
       updateDto.newPassword = 'newPassword';
@@ -62,7 +62,7 @@ describe('UserService', () => {
 
       jest.spyOn(userService, 'getUserByEmail').mockResolvedValue(user);
 
-      const updateDto = new UpdateUserDto();
+      const updateDto = new UpdateUserPasswordDto();
 
       updateDto.currentPassword = 'wrongPassword';
       updateDto.newPassword = 'newPassword';
@@ -77,7 +77,7 @@ describe('UserService', () => {
         .spyOn(userService, 'getUserByEmail')
         .mockRejectedValue(new UnauthorizedException());
 
-      const updateDto = new UpdateUserDto();
+      const updateDto = new UpdateUserPasswordDto();
 
       updateDto.currentPassword = 'oldPassword';
       updateDto.newPassword = 'newPassword';
