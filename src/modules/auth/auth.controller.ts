@@ -5,7 +5,9 @@ import {
   HttpStatus,
   Param,
   Post,
+  Req,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
@@ -17,12 +19,19 @@ import { ResetPasswordDoctorDto } from '@modules/auth/dto/resetPassword-doctor.d
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { SignupDoctorDto } from '@modules/auth/dto/signup-doctor.dto';
 import { ReconfirmDoctorDto } from '@modules/auth/dto/reconfirm-doctor.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Doctor } from '@entities/Doctor';
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { PasswordResetGuard } from './guards/passReset.guard';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private config: ConfigService,
+  ) {}
 
   @Post('login')
   @ApiOperation({ summary: 'Doctor login' })
@@ -118,5 +127,26 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: 'Password was updated',
     };
+  }
+
+  @Get('google/login')
+  @UseGuards(AuthGuard('google'))
+  handleLogin(): { msg: string } {
+    return { msg: 'Google Authentication' };
+  }
+
+  @Get('google/redirect')
+  @UseGuards(AuthGuard('google'))
+  async handleRedirect(
+    @Req() req: Request & { user: Doctor },
+    @Res() res: Response,
+  ): Promise<void> {
+    const accessToken = await this.authService.getToken({
+      email: req.user.email,
+    });
+
+    return res.redirect(
+      `${this.config.get('BASE_FRONT_URL')}/login?gtoken=${accessToken}`,
+    );
   }
 }
