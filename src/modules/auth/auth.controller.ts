@@ -130,12 +130,14 @@ export class AuthController {
   }
 
   @Get('google/login')
+  @ApiOperation({ summary: 'Login with Google OAuth' })
   @UseGuards(AuthGuard('google'))
   handleLogin(): { msg: string } {
     return { msg: 'Google Authentication' };
   }
 
   @Get('google/redirect')
+  @ApiOperation({ summary: 'Google OAuth callback endpoint' })
   @UseGuards(AuthGuard('google'))
   async handleRedirect(
     @Req() req: Request & { user: Doctor },
