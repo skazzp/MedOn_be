@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Matches, MinLength } from 'class-validator';
 
-export class UpdateUserDto {
+export class UpdateUserPasswordDto {
   @ApiProperty({
     description: "Current doctor's password",
     example: 'TyuiOp123!',

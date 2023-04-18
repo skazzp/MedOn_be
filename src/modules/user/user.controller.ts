@@ -16,6 +16,7 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserPasswordDto } from './dto/updateUser.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -55,7 +56,7 @@ export class UserController {
     @Request() req: IProfileRequest,
     @Body() dto: UpdateUserDto,
   ): Promise<IProfileResponse> {
-    const user = await this.userService.updateUser(req.user?.userId, dto);
+    const user = await this.userService.updateUser(req.user?.email, dto);
     return {
       statusCode: HttpStatus.OK,
       data: user,
@@ -74,7 +75,7 @@ export class UserController {
   })
   async updatePassword(
     @Request() req: IProfileRequest,
-    @Body() dto: UpdateUserDto,
+    @Body() dto: UpdateUserPasswordDto,
   ): Promise<IServerResponse> {
     await this.userService.updatePassword(
       {

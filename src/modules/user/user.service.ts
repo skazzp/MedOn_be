@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { IProfile } from '@common/interfaces/userProfileResponses';
 import { Doctor } from '@entities/Doctor';
-import { UpdateUserDto } from '@modules/user/dto/updateUser.dto';
+import { UpdateUserPasswordDto } from '@modules/user/dto/updateUser.dto';
 
 @Injectable()
 export class UserService {
@@ -13,7 +13,7 @@ export class UserService {
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
     private config: ConfigService,
   ) {}
-  
+
   async getUserByEmail(email: string): Promise<Doctor> {
     const user = await this.doctorRepo
       .createQueryBuilder('doctor')
@@ -36,7 +36,7 @@ export class UserService {
 
   async updatePassword(
     payload: Partial<Doctor>,
-    dto: UpdateUserDto,
+    dto: UpdateUserPasswordDto,
   ): Promise<void> {
     const user = await this.getUserByEmail(payload.email);
     const isPasswordCorrect = await argon.verify(
