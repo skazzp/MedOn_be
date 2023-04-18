@@ -24,25 +24,16 @@ export class UserService {
   }
 
   async getUser(payload: { email: string }): Promise<IProfile> {
-    try {
-      const user = await this.getUserByEmail(payload.email);
-      delete user.password;
-      delete user.createdAt;
-      delete user.updatedAt;
-      delete user.token;
-      return user;
-    } catch (error) {
-      throw new UnauthorizedException('User not found!');
-    }
+    const user = await this.getUserByEmail(payload.email);
+    if (!user) throw new UnauthorizedException('User not found!');
+    const { password, createdAt, updatedAt, token, ...result } = user;
+    return result;
   }
 
   async updateUser(payload: Partial<Doctor>): Promise<Doctor> {
-    try {
-      const user = await this.getUserByEmail(payload.email);
-      return user;
-    } catch (error) {
-      throw new UnauthorizedException('User not found!');
-    }
+    const user = await this.getUserByEmail(payload.email);
+    if (!user) throw new UnauthorizedException('User not found!');
+    return user;
   }
 
   async updatePassword(
@@ -50,6 +41,7 @@ export class UserService {
     dto: UpdateUserDto,
   ): Promise<void> {
     const user = await this.getUserByEmail(payload.email);
+    if (!user) throw new UnauthorizedException('User not found!');
     const isPasswordCorrect = await argon.verify(
       user.password,
       dto.currentPassword,
