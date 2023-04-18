@@ -5,7 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { IProfile } from '@common/interfaces/userProfileResponses';
 import { Doctor } from '@entities/Doctor';
-import { UpdateUserDto } from '@modules/user/dto/updateUser.dto';
+import { UpdateUserPasswordDto } from '@modules/user/dto/updateUser.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,7 @@ export class UserService {
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
     private config: ConfigService,
   ) {}
-  
+
   async getUserByEmail(email: string): Promise<Doctor> {
     const user = await this.doctorRepo
       .createQueryBuilder('doctor')
@@ -24,19 +25,47 @@ export class UserService {
   }
 
   async getUser(payload: { email: string }): Promise<IProfile> {
-    const user = await this.getUserByEmail(payload.email);
-    const { password, createdAt, updatedAt, token, ...result } = user;
-    return result;
+    try {
+      const user = await this.getUserByEmail(payload.email);
+      if (!user) throw new UnauthorizedException('User not found!');
+      const { password, createdAt, updatedAt, token, ...userData } = user;
+
+      return userData;
+    } catch (error) {
+      throw new UnauthorizedException('User not found!');
+    }
   }
 
-  async updateUser(payload: Partial<Doctor>): Promise<Doctor> {
-    const user = await this.getUserByEmail(payload.email);
-    return user;
+  async updateUser(userId: number, payload: UpdateUserDto): Promise<IProfile> {
+    try {
+      const user = await this.doctorRepo
+        .createQueryBuilder('doctor')
+        .where('id = :id', { id: userId })
+        .getOne();
+
+      if (!user) throw new UnauthorizedException('User not found!');
+      await this.doctorRepo
+        .createQueryBuilder('doctor')
+        .update(Doctor)
+        .set({
+          ...payload,
+          updatedAt: new Date(),
+        })
+        .where('id = :id', { id: userId })
+        .execute();
+      const updatedUser = { ...user, ...payload };
+      const { password, createdAt, updatedAt, token, ...userData } =
+        updatedUser;
+
+      return userData;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
   }
 
   async updatePassword(
     payload: Partial<Doctor>,
-    dto: UpdateUserDto,
+    dto: UpdateUserPasswordDto,
   ): Promise<void> {
     const user = await this.getUserByEmail(payload.email);
     const isPasswordCorrect = await argon.verify(
