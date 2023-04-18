@@ -19,7 +19,8 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@common/*": ["src/common/*"],
-      "@entities/*": ["src/typeorm/entities/*"]
+      "@entities/*": ["src/typeorm/entities/*"],
+      "@modules/*": ["src/modules/*"]
     }
   }
 }
