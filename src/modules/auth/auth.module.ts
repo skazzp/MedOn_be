@@ -10,6 +10,7 @@ import { Speciality } from '@entities/Speciality';
 import { AuthController } from '@modules/auth/auth.controller';
 import { AuthService } from '@modules/auth/auth.service';
 import { EmailModule } from '@modules/email/email.module';
+import { GoogleStrategy } from '@modules/auth/strategy/google.strategy';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { EmailModule } from '@modules/email/email.module';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, GoogleStrategy],
   exports: [JwtModule, AuthService],
 })
 export class AuthModule {}
