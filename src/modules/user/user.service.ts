@@ -25,14 +25,12 @@ export class UserService {
 
   async getUser(payload: { email: string }): Promise<IProfile> {
     const user = await this.getUserByEmail(payload.email);
-    if (!user) throw new UnauthorizedException('User not found!');
     const { password, createdAt, updatedAt, token, ...result } = user;
     return result;
   }
 
   async updateUser(payload: Partial<Doctor>): Promise<Doctor> {
     const user = await this.getUserByEmail(payload.email);
-    if (!user) throw new UnauthorizedException('User not found!');
     return user;
   }
 
@@ -41,7 +39,6 @@ export class UserService {
     dto: UpdateUserDto,
   ): Promise<void> {
     const user = await this.getUserByEmail(payload.email);
-    if (!user) throw new UnauthorizedException('User not found!');
     const isPasswordCorrect = await argon.verify(
       user.password,
       dto.currentPassword,
