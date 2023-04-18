@@ -27,8 +27,3 @@ export interface IProfile {
   timeZone: string | null;
   specialityId: number | null;
 }
-
-export interface IUpdateProfileResponse {
-  statusCode: HttpStatus;
-  message: string;
-}

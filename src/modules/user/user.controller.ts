@@ -11,7 +11,6 @@ import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import {
   IProfileRequest,
   IProfileResponse,
-  IUpdateProfileResponse,
 } from '@common/interfaces/userProfileResponses';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
@@ -54,11 +53,11 @@ export class UserController {
   async updateUser(
     @Request() req: IProfileRequest,
     @Body() dto: UpdateUserDto,
-  ): Promise<IUpdateProfileResponse> {
-    await this.userService.updateUser(req.user?.userId, dto);
+  ): Promise<IProfileResponse> {
+    const user = await this.userService.updateUser(req.user?.userId, dto);
     return {
       statusCode: HttpStatus.OK,
-      message: 'User was updated',
+      data: user,
     };
   }
 }
