@@ -4,8 +4,8 @@ import {
   Patch,
   HttpStatus,
   Request,
-  UseGuards,
   Body,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import {
@@ -14,12 +14,12 @@ import {
 } from '@common/interfaces/userProfileResponses';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthGuard } from '@nestjs/passport';
-import { UpdateUserDto } from '@modules/user/dto/updateUser.dto';
 import { UserService } from './user.service';
+import { UpdateUserDto } from './dto/update-user.dto';
 
-@UseGuards(AuthGuard('jwt'))
 @ApiTags('user')
 @Controller('user')
+@UseGuards(AuthGuard('jwt'))
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -44,15 +44,18 @@ export class UserController {
   @Patch('update')
   @ApiOperation({ summary: 'Update user profile' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'User information updated successfully',
   })
   @ApiResponse({
     status: 403,
     description: 'User information request was rejected',
   })
-  async updateUser(@Request() req: IProfileRequest): Promise<IProfileResponse> {
-    const user = await this.userService.getUser({ email: req.user?.email });
+  async updateUser(
+    @Request() req: IProfileRequest,
+    @Body() dto: UpdateUserDto,
+  ): Promise<IProfileResponse> {
+    const user = await this.userService.updateUser(req.user?.userId, dto);
     return {
       statusCode: HttpStatus.OK,
       data: user,
@@ -62,7 +65,7 @@ export class UserController {
   @Patch('update-password')
   @ApiOperation({ summary: 'Update user password' })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'User password updated successfully',
   })
   @ApiResponse({

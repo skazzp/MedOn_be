@@ -13,7 +13,7 @@ export class UserService {
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
     private config: ConfigService,
   ) {}
-
+  
   async getUserByEmail(email: string): Promise<Doctor> {
     const user = await this.doctorRepo
       .createQueryBuilder('doctor')
