@@ -25,13 +25,13 @@ export class Doctor {
   @Column({ name: 'email', unique: true })
   email: string;
 
-  @Column({ name: 'city' })
+  @Column({ name: 'city', nullable: true })
   city: string;
 
-  @Column({ name: 'country' })
+  @Column({ name: 'country', nullable: true })
   country: string;
 
-  @Column({ name: 'password' })
+  @Column({ name: 'password', nullable: true })
   password: string;
 
   @Column({ name: 'token', nullable: true })
@@ -40,16 +40,16 @@ export class Doctor {
   @Column({ name: 'photo', nullable: true })
   photo: string;
 
-  @Column({ name: 'date_of_birth', type: 'datetime' })
+  @Column({ name: 'date_of_birth', type: 'datetime', nullable: true })
   dateOfBirth: Date;
 
-  @Column({ name: 'role', type: 'enum', enum: Role })
+  @Column({ name: 'role', type: 'enum', enum: Role, nullable: true })
   role: Role;
 
   @Column({ name: 'is_verified', type: 'boolean', default: false })
   isVerified: boolean;
 
-  @Column({ name: 'time_zone' })
+  @Column({ name: 'time_zone', nullable: true })
   timeZone: string;
 
   @Column({ name: 'speciality_id', nullable: true })
