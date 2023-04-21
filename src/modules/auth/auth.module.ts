@@ -19,19 +19,6 @@ import { GoogleStrategy } from '@modules/auth/strategy/google.strategy';
     TypeOrmModule.forFeature([Doctor, Speciality]),
     PassportModule,
     JwtModule.register({}),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        transport: {
-          host: configService.get('SMTP_SERVER'),
-          auth: {
-            user: configService.get('SMTP_LOGIN'),
-            pass: configService.get('SMTP_PASS'),
-          },
-        },
-      }),
-      inject: [ConfigService],
-    }),
     PassportModule,
   ],
   controllers: [AuthController],

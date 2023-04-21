@@ -4,13 +4,13 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
-  MinLength,
 } from 'class-validator';
 import { Gender } from '@common/enums';
 
-export class CreateUserDto {
+export class CreatePatientDto {
   @ApiProperty({ description: "Patient's first name", example: 'Adam' })
   @IsString()
   @IsNotEmpty()
@@ -38,7 +38,7 @@ export class CreateUserDto {
   @ApiProperty({ description: "Patient's gender", example: 'male' })
   @IsEnum(Gender)
   @IsNotEmpty()
-  role: Gender;
+  gender: Gender;
 
   @ApiProperty({
     description: "Patient's date of birth",
@@ -80,5 +80,6 @@ export class CreateUserDto {
     example: 'Allergy to ambrosia',
   })
   @IsString()
+  @IsOptional()
   overview: string;
 }
