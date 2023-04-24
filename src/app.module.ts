@@ -34,7 +34,6 @@ import { PatientsModule } from '@modules/patients/patients.module';
     EmailModule,
     UserModule,
     SpecialitiesModule,
-    UserModule,
     PatientsModule,
   ],
 })
