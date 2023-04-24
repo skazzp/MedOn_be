@@ -7,6 +7,8 @@ import {
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 import { Gender } from '@common/enums';
 
@@ -14,6 +16,8 @@ export class CreatePatientDto {
   @ApiProperty({ description: "Patient's first name", example: 'Adam' })
   @IsString()
   @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(20)
   @Matches(/^[a-zA-Z]+$/, {
     message: 'Incorrect first name!',
   })
@@ -22,6 +26,8 @@ export class CreatePatientDto {
   @ApiProperty({ description: "Patient's last name", example: 'Smith' })
   @IsString()
   @IsNotEmpty()
+  @MinLength(3)
+  @MaxLength(20)
   @Matches(/^[a-zA-Z]+$/, {
     message: 'Incorrect last name!',
   })
@@ -32,6 +38,7 @@ export class CreatePatientDto {
     example: 'alex@gmail.com',
   })
   @IsEmail()
+  @MaxLength(40)
   @IsNotEmpty()
   email: string;
 
@@ -50,9 +57,10 @@ export class CreatePatientDto {
 
   @ApiProperty({
     description: "Patient's country",
-    example: 'USA',
+    example: 'UA',
   })
   @IsString()
+  @MaxLength(4)
   @IsNotEmpty()
   country: string;
 
@@ -61,6 +69,7 @@ export class CreatePatientDto {
     example: 'Kingston',
   })
   @IsString()
+  @MaxLength(40)
   @IsNotEmpty()
   city: string;
 
@@ -70,7 +79,7 @@ export class CreatePatientDto {
   })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[0-9]{0,14}$/, {
+  @Matches(/^\+[0-9]{10,14}$/, {
     message: 'Incorrect phone number!',
   })
   phoneNumber: string;
@@ -80,6 +89,7 @@ export class CreatePatientDto {
     example: 'Allergy to ambrosia',
   })
   @IsString()
+  @MaxLength(400)
   @IsOptional()
   overview: string;
 }
