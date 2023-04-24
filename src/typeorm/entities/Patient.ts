@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { Gender } from '@common/enums/Gender';
+import { Gender } from '@common/enums';
 
 @Entity({ name: 'patient' })
 export class Patient {
@@ -22,19 +22,22 @@ export class Patient {
   @Column({ name: 'email', unique: true })
   email: string;
 
-  @Column({ name: 'date_of_birth', type: 'datetime' })
-  dateOfBirth: Date;
-
   @Column({ name: 'gender', type: 'enum', enum: Gender })
   gender: Gender;
 
-  @Column({ name: 'address' })
-  address: string;
+  @Column({ name: 'date_of_birth', type: 'datetime' })
+  dateOfBirth: Date;
+
+  @Column({ name: 'country' })
+  country: string;
+
+  @Column({ name: 'city' })
+  city: string;
 
   @Column({ name: 'phone_number' })
   phoneNumber: string;
 
-  @Column({ name: 'overview', type: 'text' })
+  @Column({ name: 'overview', type: 'text', nullable: true })
   overview: string;
 
   @CreateDateColumn({ name: 'created_at' })

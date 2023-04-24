@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 
 import { Doctor } from '@entities/Doctor';
@@ -19,19 +18,6 @@ import { GoogleStrategy } from '@modules/auth/strategy/google.strategy';
     TypeOrmModule.forFeature([Doctor, Speciality]),
     PassportModule,
     JwtModule.register({}),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        transport: {
-          host: configService.get('SMTP_SERVER'),
-          auth: {
-            user: configService.get('SMTP_LOGIN'),
-            pass: configService.get('SMTP_PASS'),
-          },
-        },
-      }),
-      inject: [ConfigService],
-    }),
     PassportModule,
   ],
   controllers: [AuthController],
