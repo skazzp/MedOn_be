@@ -145,8 +145,6 @@ export class AuthController {
   ): Promise<void> {
     const accessToken = await this.authService.getToken({
       email: req.user.email,
-      role: req.user.role,
-      id: req.user.id,
     });
 
     return res.redirect(

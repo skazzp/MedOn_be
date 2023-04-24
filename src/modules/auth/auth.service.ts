@@ -12,7 +12,6 @@ import { ForgetPasswordDoctorDto } from '@modules/auth/dto/forgetPassword-doctor
 import { LoginDoctorDto } from '@modules/auth/dto/login-doctor.dto';
 import { IResetPassword } from '@common/interfaces/resetPassword';
 import { GoogleUserDetails } from '@modules/auth/interfaces/GoogleUserDetails';
-import { Role } from '@common/enums';
 
 @Injectable()
 export class AuthService {
@@ -39,11 +38,7 @@ export class AuthService {
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
-    const accessToken = await this.generateAccessToken(
-      doctor.id,
-      doctor.email,
-      doctor.role,
-    );
+    const accessToken = await this.generateAccessToken(doctor.id, doctor.email);
     return {
       token: accessToken,
       isVerified: doctor.isVerified,
@@ -112,11 +107,7 @@ export class AuthService {
     return link;
   }
 
-  async getToken(payload: {
-    email: string;
-    role?: Role;
-    id?: number;
-  }): Promise<string> {
+  async getToken(payload: { email: string }): Promise<string> {
     return this.jwt.signAsync(payload, {
       expiresIn: this.config.get('JWT_EXPIRATION_TIME'),
       secret: this.config.get('JWT_SECRET'),
@@ -150,12 +141,10 @@ export class AuthService {
   private async generateAccessToken(
     doctorId: number,
     email: string,
-    role: string,
   ): Promise<string> {
     const payload = {
       sub: doctorId,
       email,
-      role,
     };
     const secret = this.config.get('JWT_SECRET');
     const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
