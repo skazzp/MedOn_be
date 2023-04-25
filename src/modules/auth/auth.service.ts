@@ -39,11 +39,11 @@ export class AuthService {
     if (!pwMatches) {
       throw new UnauthorizedException('Invalid  password');
     }
-    const accessToken = await this.generateAccessToken(
-      doctor.id,
-      doctor.email,
-      doctor.role,
-    );
+    const accessToken = await this.getToken({
+      id: doctor.id,
+      email: doctor.email,
+      role: doctor.role,
+    });
     return {
       token: accessToken,
       isVerified: doctor.isVerified,
@@ -145,25 +145,6 @@ export class AuthService {
         password: await argon.hash(passwordData.newPassword),
       },
     );
-  }
-
-  private async generateAccessToken(
-    doctorId: number,
-    email: string,
-    role: string,
-  ): Promise<string> {
-    const payload = {
-      sub: doctorId,
-      email,
-      role,
-    };
-    const secret = this.config.get('JWT_SECRET');
-    const expiresIn = this.config.get('JWT_EXPIRATION_TIME');
-    const accessToken = await this.jwt.signAsync(payload, {
-      secret,
-      expiresIn,
-    });
-    return accessToken;
   }
 
   async validateGoogleUser(details: GoogleUserDetails): Promise<Doctor> {
