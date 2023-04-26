@@ -1,20 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
 import { Doctor } from '@entities/Doctor';
 import { Speciality } from '@entities/Speciality';
 import { EmailModule } from '@modules/email/email.module';
-import { JwtStrategy } from 'src/strategy/jwt.strategy';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 
 @Module({
-  imports: [
-    EmailModule,
-    TypeOrmModule.forFeature([Doctor, Speciality]),
-    JwtModule.register({}),
-  ],
+  imports: [EmailModule, TypeOrmModule.forFeature([Doctor, Speciality])],
   controllers: [UserController],
-  providers: [UserService, JwtStrategy],
+  providers: [UserService],
 })
 export class UserModule {}
