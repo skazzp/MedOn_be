@@ -6,7 +6,7 @@ import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from '@common/enums';
-import { RolesGuard } from '../../guards/roles.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
 import { PatientsService } from './patients.service';
 
 @Controller('patients')
