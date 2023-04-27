@@ -6,7 +6,7 @@ import { PatientsService } from './patients.service';
 
 describe('PatientsService', () => {
   let service: PatientsService;
-  let mockRepository = Repository<Patient>;
+  // let mockRepository = Repository<Patient>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -20,7 +20,7 @@ describe('PatientsService', () => {
     }).compile();
 
     service = module.get<PatientsService>(PatientsService);
-    mockRepository = module.get(getRepositoryToken(Patient));
+    // mockRepository = module.get(getRepositoryToken(Patient));
   });
 
   it('should be defined', () => {
