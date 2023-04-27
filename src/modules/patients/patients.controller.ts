@@ -14,7 +14,7 @@ import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
 import { PatientsService } from './patients.service';
-import { PageOptionsDto } from './dto/pageOptions.dto';
+import { PatientSearchOptionsDto } from './dto/pageOptions.dto';
 import { PatientsRes } from './interfaces/patients-responce';
 
 @ApiTags('patients')
@@ -42,7 +42,9 @@ export class PatientsController {
     status: 201,
     description: 'List of all possible specialities',
   })
-  async getAll(@Query() searchOptions: PageOptionsDto): Promise<PatientsRes> {
+  async getAll(
+    @Query() searchOptions: PatientSearchOptionsDto,
+  ): Promise<PatientsRes> {
     const response = await this.patientsService.getPatients(searchOptions);
     if (!response) throw new NotFoundException('There are no patients!');
     return response;

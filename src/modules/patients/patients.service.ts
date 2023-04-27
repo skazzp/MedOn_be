@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
-import { PageOptionsDto } from './dto/pageOptions.dto';
+import { PatientSearchOptionsDto } from './dto/pageOptions.dto';
 import { PatientsRes } from './interfaces/patients-responce';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class PatientsService {
     return this.repo.save(dto);
   }
 
-  async getPatients(query: PageOptionsDto): Promise<PatientsRes> {
+  async getPatients(query: PatientSearchOptionsDto): Promise<PatientsRes> {
     const queryBuilder = this.repo.createQueryBuilder('patient');
     const { name } = query;
     const limit = query.limit || 5;
