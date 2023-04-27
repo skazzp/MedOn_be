@@ -40,7 +40,7 @@ export class PatientsController {
   @ApiOperation({ summary: 'Get latest patients' })
   @ApiResponse({
     status: 201,
-    description: 'List of all possible specialities',
+    description: 'Get latest patients or search by name',
   })
   async getAll(
     @Query() searchOptions: PatientSearchOptionsDto,
