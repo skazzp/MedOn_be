@@ -5,6 +5,7 @@ import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
 import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
+import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
 
 @Injectable()
 export class PatientsService {
@@ -17,8 +18,8 @@ export class PatientsService {
   async getPatients(query: PatientSearchOptionsDto): Promise<PatientsRes> {
     const queryBuilder = this.repo.createQueryBuilder('patient');
     const { name } = query;
-    const limit = query.limit || 5;
-    const page = query.page || 1;
+    const limit = query.limit || defaultLimit;
+    const page = query.page || defaultPage;
     const skip = (page - 1) * limit;
 
     if (name) {
