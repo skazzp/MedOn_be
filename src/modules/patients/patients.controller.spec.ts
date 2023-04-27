@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PatientsController } from '@modules/patients/patients.controller';
@@ -8,11 +7,10 @@ import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
 
 describe('PatientsController', () => {
   let controller: PatientsController;
-  let service: PatientsService;
 
   const mockAuthService = {
     getPatients: jest.fn((x: PatientSearchOptionsDto) => {
-      return { total: 0, patients: [] };
+      return x;
     }),
     addPatient: jest.fn(() => {}),
   };
@@ -27,7 +25,6 @@ describe('PatientsController', () => {
       .compile();
 
     controller = module.get<PatientsController>(PatientsController);
-    service = module.get<PatientsService>(PatientsService);
   });
 
   it('should return result with or without parameters', async () => {
@@ -37,7 +34,7 @@ describe('PatientsController', () => {
       name: 'Smith',
     };
 
-    expect(await controller.getAll(dto)).toEqual({ total: 0, patients: [] });
-    expect(await controller.getAll({})).toEqual({ total: 0, patients: [] });
+    expect(await controller.getAll(dto)).toEqual(dto);
+    expect(await controller.getAll({})).toEqual({});
   });
 });
