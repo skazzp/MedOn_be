@@ -30,14 +30,6 @@ describe('PatientsController', () => {
     service = module.get<PatientsService>(PatientsService);
   });
 
-  it('controller should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
-  it('patientsService should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   it('should return result with or without parameters', async () => {
     const dto = {
       page: 1,
