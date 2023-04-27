@@ -13,9 +13,9 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
-import { PatientsService } from './patients.service';
-import { PatientSearchOptionsDto } from './dto/pageOptions.dto';
-import { PatientsRes } from './interfaces/patients-responce';
+import { PatientsService } from '@modules/patients/patients.service';
+import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 
 @ApiTags('patients')
 @Controller('patients')

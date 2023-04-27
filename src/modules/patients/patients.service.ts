@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
-import { PatientSearchOptionsDto } from './dto/pageOptions.dto';
-import { PatientsRes } from './interfaces/patients-responce';
+import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 
 @Injectable()
 export class PatientsService {
