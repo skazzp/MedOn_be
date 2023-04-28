@@ -1,13 +1,13 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
+import { PatientNotes } from '@entities/PatientNotes';
+import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
+import { CreatePatientNoteDto } from '@modules/patients/dto/create-patient-note.dto';
 import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
-import { PatientNotes } from '@entities/PatientNotes';
-import { CreatePatientNoteDto } from './dto/create-patient-note.dto';
 
 @Injectable()
 export class PatientsService {
@@ -29,13 +29,7 @@ export class PatientsService {
     const skip = (page - 1) * limit;
 
     if (name) {
-      const total = await queryBuilder
-        .where('last_name like :lastName', { lastName: `%${name}%` })
-        .orWhere('first_name like :firstName', {
-          firstName: `%${name}%`,
-        })
-        .getCount();
-      const patients = await queryBuilder
+      const response = await queryBuilder
         .take(limit)
         .skip(skip)
         .where('last_name like :lastName', { lastName: `%${name}%` })
@@ -43,19 +37,18 @@ export class PatientsService {
           firstName: `%${name}%`,
         })
         .orderBy('patient.updatedAt', 'DESC')
-        .getMany();
+        .getManyAndCount();
 
-      return { total, patients };
+      return { patients: response[0], total: response[1] };
     }
 
-    const total = await queryBuilder.getCount();
-    const patients = await queryBuilder
+    const response = await queryBuilder
       .take(limit)
       .skip(skip)
       .orderBy('patient.updatedAt', 'DESC')
-      .getMany();
+      .getManyAndCount();
 
-    return { total, patients };
+    return { patients: response[0], total: response[1] };
   }
 
   async getPatientById(id: number): Promise<Patient> {

@@ -40,6 +40,7 @@ export class PatientsController {
     @Body() dto: CreatePatientDto,
   ): Promise<IServerResponse<Patient>> {
     const patient = await this.patientsService.addPatient(dto);
+
     return { statusCode: HttpStatus.OK, data: patient };
   }
 
@@ -54,6 +55,7 @@ export class PatientsController {
   ): Promise<PatientsRes> {
     const response = await this.patientsService.getPatients(searchOptions);
     if (!response) throw new NotFoundException('There are no patients!');
+
     return response;
   }
 
@@ -71,6 +73,7 @@ export class PatientsController {
     @Param() params: { id: number },
   ): Promise<IServerResponse<Patient>> {
     const patient = await this.patientsService.getPatientById(params.id);
+
     return {
       statusCode: HttpStatus.OK,
       data: patient,
