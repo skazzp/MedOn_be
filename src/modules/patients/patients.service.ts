@@ -17,19 +17,19 @@ export class PatientsService {
 
   async getPatients(query: PatientSearchOptionsDto): Promise<PatientsRes> {
     const queryBuilder = this.repo.createQueryBuilder('patient');
-    const { name } = query;
+    const { searchPhrase } = query;
     const limit = query.limit || defaultLimit;
     const page = query.page || defaultPage;
     const skip = (page - 1) * limit;
 
-    if (name) {
+    if (searchPhrase) {
       const total = await queryBuilder.getCount();
       const patients = await queryBuilder
         .take(limit)
         .skip(skip)
-        .where('last_name like :lastName', { lastName: `%${name}%` })
+        .where('last_name like :lastName', { lastName: `%${searchPhrase}%` })
         .orWhere('first_name like :firstName', {
-          firstName: `%${name}%`,
+          firstName: `%${searchPhrase}%`,
         })
         .orderBy('patient.updatedAt', 'DESC')
         .getMany();

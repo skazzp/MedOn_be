@@ -24,5 +24,5 @@ export class PatientSearchOptionsDto {
   })
   @IsString()
   @IsOptional()
-  name?: string;
+  searchPhrase?: string;
 }
