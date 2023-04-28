@@ -88,8 +88,8 @@ export class PatientsController {
     @Body()
     dto: CreatePatientNoteDto,
   ): Promise<IServerResponse<PatientNotes>> {
-    const newNote = { ...dto, doctorId: req.user.userId };
-    const note = await this.patientsService.addPatientNote(newNote);
+    const newNoteData = { ...dto, doctorId: req.user.userId };
+    const note = await this.patientsService.addPatientNote(newNoteData);
 
     return { statusCode: HttpStatus.OK, data: note };
   }

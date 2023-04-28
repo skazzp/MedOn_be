@@ -29,7 +29,12 @@ export class PatientsService {
     const skip = (page - 1) * limit;
 
     if (name) {
-      const total = await queryBuilder.getCount();
+      const total = await queryBuilder
+        .where('last_name like :lastName', { lastName: `%${name}%` })
+        .orWhere('first_name like :firstName', {
+          firstName: `%${name}%`,
+        })
+        .getCount();
       const patients = await queryBuilder
         .take(limit)
         .skip(skip)
