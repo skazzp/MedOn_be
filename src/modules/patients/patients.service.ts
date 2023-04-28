@@ -4,10 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
 import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
-import {
-  PatientWithNotes,
-  PatientsRes,
-} from '@modules/patients/interfaces/patients-responce';
+import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
 import { PatientNotes } from '@entities/PatientNotes';
 import { CreatePatientNoteDto } from './dto/create-patient-note.dto';
