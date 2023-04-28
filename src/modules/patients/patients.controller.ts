@@ -4,7 +4,9 @@ import {
   Get,
   HttpStatus,
   NotFoundException,
+  Param,
   Post,
+  Request,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -15,7 +17,13 @@ import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
 import { PatientsService } from '@modules/patients/patients.service';
 import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
-import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
+import {
+  INoteRequest,
+  PatientWithNotes,
+  PatientsRes,
+} from '@modules/patients/interfaces/patients-responce';
+import { PatientNotes } from '@entities/PatientNotes';
+import { CreatePatientNoteDto } from '@modules/patients/dto/create-patient-note.dto';
 
 @ApiTags('patients')
 @Controller('patients')
@@ -48,5 +56,42 @@ export class PatientsController {
     const response = await this.patientsService.getPatients(searchOptions);
     if (!response) throw new NotFoundException('There are no patients!');
     return response;
+  }
+
+  @Get('/:id')
+  @ApiOperation({ summary: "Doctor's account verification" })
+  @ApiResponse({
+    status: 201,
+    description: 'User was confirmed by email',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid confirmation link',
+  })
+  async confirm(
+    @Param() params: { id: number },
+  ): Promise<IServerResponse<Patient>> {
+    const patient = await this.patientsService.getPatientById(params.id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: patient,
+    };
+  }
+
+  @Post('/create-note')
+  @ApiOperation({ summary: 'New patient note' })
+  @ApiResponse({
+    status: 201,
+    description: 'Patient note was created',
+  })
+  async addPatientNote(
+    @Request() req: INoteRequest,
+    @Body()
+    dto: CreatePatientNoteDto,
+  ): Promise<IServerResponse<PatientNotes>> {
+    const newNote = { ...dto, doctorId: req.user.userId };
+    const note = await this.patientsService.addPatientNote(newNote);
+
+    return { statusCode: HttpStatus.OK, data: note };
   }
 }
