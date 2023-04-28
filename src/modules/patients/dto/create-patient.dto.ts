@@ -75,7 +75,7 @@ export class CreatePatientDto {
 
   @ApiProperty({
     description: 'Phone number of the patient',
-    example: '380991201212',
+    example: '+380991201212',
   })
   @IsString()
   @IsNotEmpty()

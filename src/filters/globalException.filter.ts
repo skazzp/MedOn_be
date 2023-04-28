@@ -19,6 +19,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    console.log(exception);
+
     let message: string | string[] =
       (exception as HttpException).message || 'Unknown server Error!';
     let status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
