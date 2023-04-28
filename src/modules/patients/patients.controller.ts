@@ -19,7 +19,6 @@ import { PatientsService } from '@modules/patients/patients.service';
 import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
 import {
   INoteRequest,
-  PatientWithNotes,
   PatientsRes,
 } from '@modules/patients/interfaces/patients-responce';
 import { PatientNotes } from '@entities/PatientNotes';
