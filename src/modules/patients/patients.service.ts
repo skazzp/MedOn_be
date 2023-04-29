@@ -1,11 +1,12 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Patient } from '@entities/Patient';
 import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
-import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { PatientSearchOptionsDto } from '@modules/patients/dto/page-options.dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 
 @Injectable()
 export class PatientsService {
@@ -49,12 +50,33 @@ export class PatientsService {
     const queryBuilder = this.repo.createQueryBuilder('patient');
     const patient = await queryBuilder
       .where('patient.id = :id', { id })
-      .leftJoinAndSelect('patient.notes', 'notes', 'notes.patientId = :id', {
-        id,
-      })
-      .leftJoin('notes.doctor', 'doctor')
-      .addSelect(['doctor.firstName', 'doctor.lastName'])
       .getOne();
     return patient;
+  }
+
+  async updatePatient(id: number, payload: UpdatePatientDto): Promise<Patient> {
+    try {
+      const patient = await this.repo
+        .createQueryBuilder('patient')
+        .where('id = :id', { id })
+        .getOne();
+
+      if (!patient) throw new UnauthorizedException('User not found!');
+
+      await this.repo
+        .createQueryBuilder('patient')
+        .update(Patient)
+        .set({
+          ...payload,
+          updatedAt: new Date(),
+        })
+        .where('id = :id', { id })
+        .execute();
+      const updatedUser = { ...patient, ...payload };
+
+      return updatedUser;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
   }
 }

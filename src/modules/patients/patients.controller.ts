@@ -5,6 +5,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -15,8 +16,9 @@ import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
 import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
 import { PatientsService } from '@modules/patients/patients.service';
-import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { PatientSearchOptionsDto } from '@modules/patients/dto/page-options.dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
+import { UpdatePatientDto } from './dto/update-patient.dto';
 
 @ApiTags('patients')
 @Controller('patients')
@@ -63,7 +65,7 @@ export class PatientsController {
     status: 401,
     description: 'Patient not found',
   })
-  async confirm(
+  async getPatientWithNotes(
     @Param() params: { id: number },
   ): Promise<IServerResponse<Patient>> {
     const patient = await this.patientsService.getPatientById(params.id);
@@ -72,5 +74,24 @@ export class PatientsController {
       statusCode: HttpStatus.OK,
       data: patient,
     };
+  }
+
+  @Patch('update/:id')
+  @ApiOperation({ summary: "Update patient's info" })
+  @ApiResponse({
+    status: 201,
+    description: 'Patient information updated successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Patient not found',
+  })
+  async confirm(
+    @Param() params: { id: number },
+    @Body() dto: UpdatePatientDto,
+  ): Promise<IServerResponse<Patient>> {
+    const patient = await this.patientsService.updatePatient(params.id, dto);
+
+    return { statusCode: HttpStatus.OK, data: patient };
   }
 }
