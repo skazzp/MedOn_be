@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Query,
@@ -30,12 +29,12 @@ export class PatientNotesController {
   constructor(private readonly notesService: PatientNotesService) {}
 
   @Get('/:id')
-  @ApiOperation({ summary: 'Get latest patients or search by name' })
+  @ApiOperation({ summary: 'Get patient notes by patients id' })
   @ApiResponse({
     status: 201,
-    description: 'List of the patients found',
+    description: 'List of the notes found',
   })
-  async getAll(
+  async getNotes(
     @Param() params: { id: number },
     @Query() searchOptions: NotesSearchOptionsDto,
   ): Promise<IServerResponse<NotesRes>> {
