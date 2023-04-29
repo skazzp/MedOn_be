@@ -52,6 +52,8 @@ export class PatientsService {
       .leftJoinAndSelect('patient.notes', 'notes', 'notes.patientId = :id', {
         id,
       })
+      .leftJoin('notes.doctor', 'doctor')
+      .addSelect(['doctor.firstName', 'doctor.lastName'])
       .getOne();
     return patient;
   }
