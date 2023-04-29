@@ -6,13 +6,13 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreatePatientNoteDto } from '@modules/patient-notes/dto/create-patient-note.dto';
-import { IServerResponse } from '@common/interfaces/serverResponses';
 import { PatientNotes } from '@entities/PatientNotes';
+import { CreatePatientNoteDto } from '@modules/patient-notes/dto/create-patient-note.dto';
 import { PatientNotesService } from '@modules/patient-notes/patient-notes.service';
 import { INoteRequest } from '@modules/patient-notes/interfaces/patients-responce';
-import { AuthGuard } from '@nestjs/passport';
+import { IServerResponse } from '@common/interfaces/serverResponses';
 
 @ApiTags('patient-notes')
 @Controller('patient-notes')

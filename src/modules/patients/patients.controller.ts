@@ -39,10 +39,10 @@ export class PatientsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get latest patients' })
+  @ApiOperation({ summary: 'Get latest patients or search by name' })
   @ApiResponse({
     status: 201,
-    description: 'Get latest patients or search by name',
+    description: 'List of the patients found',
   })
   async getAll(
     @Query() searchOptions: PatientSearchOptionsDto,
@@ -54,14 +54,14 @@ export class PatientsController {
   }
 
   @Get('/:id')
-  @ApiOperation({ summary: "Doctor's account verification" })
+  @ApiOperation({ summary: "Get full patient's info" })
   @ApiResponse({
     status: 201,
-    description: 'User was confirmed by email',
+    description: 'Patient information with appointment notes',
   })
   @ApiResponse({
     status: 401,
-    description: 'Invalid confirmation link',
+    description: 'Patient not found',
   })
   async confirm(
     @Param() params: { id: number },
