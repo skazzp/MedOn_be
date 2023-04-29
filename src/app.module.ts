@@ -11,6 +11,7 @@ import { EmailModule } from '@modules/email/email.module';
 import { UserModule } from '@modules/user/user.module';
 import { SpecialitiesModule } from '@modules/specialities/specialities.module';
 import { PatientsModule } from '@modules/patients/patients.module';
+import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PatientsModule } from '@modules/patients/patients.module';
     UserModule,
     SpecialitiesModule,
     PatientsModule,
+    PatientNotesModule,
   ],
 })
 export class AppModule {}

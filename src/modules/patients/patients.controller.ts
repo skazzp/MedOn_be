@@ -6,7 +6,6 @@ import {
   NotFoundException,
   Param,
   Post,
-  Request,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -17,12 +16,7 @@ import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
 import { PatientsService } from '@modules/patients/patients.service';
 import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
-import {
-  INoteRequest,
-  PatientsRes,
-} from '@modules/patients/interfaces/patients-responce';
-import { PatientNotes } from '@entities/PatientNotes';
-import { CreatePatientNoteDto } from '@modules/patients/dto/create-patient-note.dto';
+import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 
 @ApiTags('patients')
 @Controller('patients')
@@ -78,22 +72,5 @@ export class PatientsController {
       statusCode: HttpStatus.OK,
       data: patient,
     };
-  }
-
-  @Post('/create-note')
-  @ApiOperation({ summary: 'New patient note' })
-  @ApiResponse({
-    status: 201,
-    description: 'Patient note was created',
-  })
-  async addPatientNote(
-    @Request() req: INoteRequest,
-    @Body()
-    dto: CreatePatientNoteDto,
-  ): Promise<IServerResponse<PatientNotes>> {
-    const newNoteData = { ...dto, doctorId: req.user.userId };
-    const note = await this.patientsService.addPatientNote(newNoteData);
-
-    return { statusCode: HttpStatus.OK, data: note };
   }
 }
