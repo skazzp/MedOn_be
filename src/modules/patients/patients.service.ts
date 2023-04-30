@@ -1,11 +1,12 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
-import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Patient } from '@entities/Patient';
-import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
+import { PatientSearchOptionsDto } from '@modules/patients/dto/page-options.dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
+import { UpdatePatientDto } from '@modules/patients/dto';
 
 @Injectable()
 export class PatientsService {
@@ -23,8 +24,7 @@ export class PatientsService {
     const skip = (page - 1) * limit;
 
     if (searchPhrase) {
-      const total = await queryBuilder.getCount();
-      const patients = await queryBuilder
+      const response = await queryBuilder
         .take(limit)
         .skip(skip)
         .where('last_name like :lastName', { lastName: `%${searchPhrase}%` })
@@ -32,18 +32,51 @@ export class PatientsService {
           firstName: `%${searchPhrase}%`,
         })
         .orderBy('patient.updatedAt', 'DESC')
-        .getMany();
+        .getManyAndCount();
 
-      return { total, patients };
+      return { patients: response[0], total: response[1] };
     }
 
-    const total = await queryBuilder.getCount();
-    const patients = await queryBuilder
+    const response = await queryBuilder
       .take(limit)
       .skip(skip)
       .orderBy('patient.updatedAt', 'DESC')
-      .getMany();
+      .getManyAndCount();
 
-    return { total, patients };
+    return { patients: response[0], total: response[1] };
+  }
+
+  async getPatientById(id: number): Promise<Patient> {
+    const queryBuilder = this.repo.createQueryBuilder('patient');
+    const patient = await queryBuilder
+      .where('patient.id = :id', { id })
+      .getOne();
+    return patient;
+  }
+
+  async updatePatient(id: number, payload: UpdatePatientDto): Promise<Patient> {
+    try {
+      const patient = await this.repo
+        .createQueryBuilder('patient')
+        .where('id = :id', { id })
+        .getOne();
+
+      if (!patient) throw new UnauthorizedException('User not found!');
+
+      await this.repo
+        .createQueryBuilder('patient')
+        .update(Patient)
+        .set({
+          ...payload,
+          updatedAt: new Date(),
+        })
+        .where('id = :id', { id })
+        .execute();
+      const updatedUser = { ...patient, ...payload };
+
+      return updatedUser;
+    } catch (error) {
+      throw new UnauthorizedException(error);
+    }
   }
 }

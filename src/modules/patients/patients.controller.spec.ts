@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PatientsController } from '@modules/patients/patients.controller';
 import { PatientsService } from '@modules/patients/patients.service';
-import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { PatientSearchOptionsDto } from '@modules/patients/dto/page-options.dto';
 
 describe('PatientsController', () => {
   let controller: PatientsController;

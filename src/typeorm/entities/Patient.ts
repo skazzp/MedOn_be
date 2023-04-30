@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { Gender } from '@common/enums';
+import { PatientNotes } from './PatientNotes';
 
 @Entity({ name: 'patient' })
 export class Patient {
@@ -39,6 +41,9 @@ export class Patient {
 
   @Column({ name: 'overview', type: 'text', nullable: true })
   overview: string;
+
+  @OneToMany(() => PatientNotes, (patientNote) => patientNote.patient)
+  notes: PatientNotes[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

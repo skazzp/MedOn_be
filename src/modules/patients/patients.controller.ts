@@ -4,6 +4,8 @@ import {
   Get,
   HttpStatus,
   NotFoundException,
+  Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -15,6 +17,7 @@ import { Role } from '@common/enums';
 import {
   CreatePatientDto,
   PatientSearchOptionsDto,
+  UpdatePatientDto,
 } from '@modules/patients/dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 import { Patient } from '@entities/Patient';
@@ -44,10 +47,10 @@ export class PatientsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get latest patients' })
+  @ApiOperation({ summary: 'Get latest patients or search by name' })
   @ApiResponse({
     status: 201,
-    description: 'Get latest patients or search by name',
+    description: 'List of the patients found',
   })
   async getAll(
     @Query() searchOptions: PatientSearchOptionsDto,
@@ -55,5 +58,45 @@ export class PatientsController {
     const response = await this.patientsService.getPatients(searchOptions);
     if (!response) throw new NotFoundException('There are no patients!');
     return response;
+  }
+
+  @Get('/:id')
+  @ApiOperation({ summary: "Get full patient's info" })
+  @ApiResponse({
+    status: 201,
+    description: 'Patient information with appointment notes',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Patient not found',
+  })
+  async getPatientWithNotes(
+    @Param() params: { id: number },
+  ): Promise<IServerResponse<Patient>> {
+    const patient = await this.patientsService.getPatientById(params.id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: patient,
+    };
+  }
+
+  @Patch('update/:id')
+  @ApiOperation({ summary: "Update patient's info" })
+  @ApiResponse({
+    status: 201,
+    description: 'Patient information updated successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Patient not found',
+  })
+  async confirm(
+    @Param() params: { id: number },
+    @Body() dto: UpdatePatientDto,
+  ): Promise<IServerResponse<Patient>> {
+    const patient = await this.patientsService.updatePatient(params.id, dto);
+
+    return { statusCode: HttpStatus.OK, data: patient };
   }
 }
