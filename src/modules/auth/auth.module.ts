@@ -16,12 +16,10 @@ import { GoogleStrategy } from '@modules/auth/strategy/google.strategy';
     ConfigModule,
     EmailModule,
     TypeOrmModule.forFeature([Doctor, Speciality]),
-    PassportModule,
     JwtModule.register({}),
     PassportModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, GoogleStrategy],
-  exports: [JwtModule, AuthService],
 })
 export class AuthModule {}

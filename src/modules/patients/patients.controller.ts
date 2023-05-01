@@ -9,13 +9,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { IServerResponse } from '@common/interfaces/serverResponses';
-import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
-import { Patient } from '@entities/Patient';
 import { AuthGuard } from '@nestjs/passport';
-import { PatientsService } from '@modules/patients/patients.service';
-import { PatientSearchOptionsDto } from '@modules/patients/dto/pageOptions.dto';
+import { IServerResponse } from '@common/interfaces/serverResponses';
+import { Role } from '@common/enums';
+import {
+  CreatePatientDto,
+  PatientSearchOptionsDto,
+} from '@modules/patients/dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
+import { Patient } from '@entities/Patient';
+import { Roles } from '@decorators/roles.decorator';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { PatientsService } from './patients.service';
 
 @ApiTags('patients')
 @Controller('patients')
@@ -29,6 +34,8 @@ export class PatientsController {
     status: 201,
     description: 'Patient was created',
   })
+  @Roles(Role.LocalDoctor)
+  @UseGuards(RolesGuard)
   async addPatient(
     @Body() dto: CreatePatientDto,
   ): Promise<IServerResponse<Patient>> {

@@ -20,7 +20,8 @@
     "paths": {
       "@common/*": ["src/common/*"],
       "@entities/*": ["src/typeorm/entities/*"],
-      "@modules/*": ["src/modules/*"]
+      "@modules/*": ["src/modules/*"],
+      "@decorators/*": ["src/decorators/*"]
     }
   }
 }
