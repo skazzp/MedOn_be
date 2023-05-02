@@ -61,7 +61,7 @@ export class PatientsService {
     patientData: UpdatePatientDto,
   ): Promise<UpdatePatientDto> {
     try {
-      const updated = await this.repo
+      const updateResult = await this.repo
         .createQueryBuilder('patient')
         .update(Patient)
         .set({
@@ -71,7 +71,7 @@ export class PatientsService {
         .where('id = :id', { id })
         .execute();
 
-      if (!updated.affected) {
+      if (!updateResult.affected) {
         throw new UnauthorizedException('User not found!');
       }
       const updatedUser = { id, ...patientData };
