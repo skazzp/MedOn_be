@@ -12,6 +12,8 @@ import { UserModule } from '@modules/user/user.module';
 import { SpecialitiesModule } from '@modules/specialities/specialities.module';
 import { PatientsModule } from '@modules/patients/patients.module';
 import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module';
+import { RolesGuard } from './guards/roles.guard';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 @Module({
   imports: [
@@ -38,5 +40,6 @@ import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module'
     PatientsModule,
     PatientNotesModule,
   ],
+  providers: [JwtStrategy, RolesGuard],
 })
 export class AppModule {}
