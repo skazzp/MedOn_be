@@ -2,11 +2,13 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Patient } from '@entities/Patient';
-import { CreatePatientDto } from '@modules/patients/dto/create-patient.dto';
-import { PatientSearchOptionsDto } from '@modules/patients/dto/page-options.dto';
+import {
+  CreatePatientDto,
+  PatientSearchOptionsDto,
+  UpdatePatientDto,
+} from '@modules/patients/dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
 import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
-import { UpdatePatientDto } from './dto/update-patient.dto';
 
 @Injectable()
 export class PatientsService {

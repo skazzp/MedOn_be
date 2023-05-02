@@ -13,14 +13,14 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PatientNotes } from '@entities/PatientNotes';
-import { CreatePatientNoteDto } from '@modules/patient-notes/dto/create-patient-note.dto';
 import { PatientNotesService } from '@modules/patient-notes/patient-notes.service';
+import { CreatePatientNoteDto } from '@modules/patient-notes/dto/create-patient-note.dto';
+import { NotesSearchOptionsDto } from '@modules/patient-notes/dto/query-options.dto';
 import {
   INoteRequest,
   NotesRes,
 } from '@modules/patient-notes/interfaces/patients-responce';
 import { IServerResponse } from '@common/interfaces/serverResponses';
-import { NotesSearchOptionsDto } from './dto/query-options.dto';
 
 @ApiTags('patient-notes')
 @Controller('patient-notes')
