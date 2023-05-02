@@ -54,25 +54,25 @@ export class PatientsService {
     return patient;
   }
 
-  async updatePatient(id: number, payload: UpdatePatientDto): Promise<Patient> {
+  async updatePatient(
+    id: number,
+    patientData: UpdatePatientDto,
+  ): Promise<UpdatePatientDto> {
     try {
-      const patient = await this.repo
-        .createQueryBuilder('patient')
-        .where('id = :id', { id })
-        .getOne();
-
-      if (!patient) throw new UnauthorizedException('User not found!');
-
-      await this.repo
+      const updated = await this.repo
         .createQueryBuilder('patient')
         .update(Patient)
         .set({
-          ...payload,
+          ...patientData,
           updatedAt: new Date(),
         })
         .where('id = :id', { id })
         .execute();
-      const updatedUser = { ...patient, ...payload };
+
+      if (!updated.affected) {
+        throw new UnauthorizedException('User not found!');
+      }
+      const updatedUser = { id, ...patientData };
 
       return updatedUser;
     } catch (error) {

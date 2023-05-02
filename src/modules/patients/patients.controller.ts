@@ -89,8 +89,8 @@ export class PatientsController {
   async confirm(
     @Param() params: { id: number },
     @Body() dto: UpdatePatientDto,
-  ): Promise<IServerResponse<Patient>> {
-    const patient = await this.patientsService.updatePatient(params.id, dto);
+  ): Promise<IServerResponse<UpdatePatientDto>> {
+    const patient = await this.patientsService.updatePatient(+params.id, dto);
 
     return { statusCode: HttpStatus.OK, data: patient };
   }

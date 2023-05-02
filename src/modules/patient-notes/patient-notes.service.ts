@@ -25,11 +25,17 @@ export class PatientNotesService {
     return note;
   }
 
-  async getNotes(id: number, query: NotesSearchOptionsDto): Promise<NotesRes> {
+  async getNotes(
+    id: number,
+    searchOptions: NotesSearchOptionsDto,
+  ): Promise<NotesRes> {
     const queryBuilder = this.notesRepo.createQueryBuilder('notes');
-    const { text, order = 'DESC' } = query;
-    const limit = query.limit || defaultLimit;
-    const page = query.page || defaultPage;
+    const {
+      text,
+      order = 'DESC',
+      limit = defaultLimit,
+      page = defaultPage,
+    } = searchOptions;
     const skip = (page - 1) * limit;
 
     if (text) {
