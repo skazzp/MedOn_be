@@ -19,7 +19,7 @@ import { NotesSearchOptionsDto } from '@modules/patient-notes/dto/query-options.
 import {
   INoteRequest,
   NotesRes,
-} from '@modules/patient-notes/interfaces/patients-responce';
+} from '@modules/patient-notes/interfaces/notes-responce';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 
 @ApiTags('patient-notes')

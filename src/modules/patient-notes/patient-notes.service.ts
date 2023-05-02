@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { PatientNotes } from '@entities/PatientNotes';
 import { CreatePatientNoteDto } from '@modules/patient-notes/dto/create-patient-note.dto';
 import { NotesSearchOptionsDto } from '@modules/patient-notes/dto/query-options.dto';
-import { NotesRes } from '@modules/patient-notes/interfaces/patients-responce';
+import { NotesRes } from '@modules/patient-notes/interfaces/notes-responce';
 import { defaultLimit, defaultPage } from '@common/constants/pagination-params';
 
 interface RemoveNoteData {

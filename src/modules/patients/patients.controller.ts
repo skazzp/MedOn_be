@@ -24,6 +24,7 @@ import { Patient } from '@entities/Patient';
 import { Roles } from '@decorators/roles.decorator';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { PatientsService } from '@modules/patients/patients.service';
+import { GetNotesParam } from './interfaces/patients-params';
 
 @ApiTags('patients')
 @Controller('patients')
@@ -94,10 +95,10 @@ export class PatientsController {
     description: 'Patient not found',
   })
   async confirm(
-    @Param() params: { id: number },
+    @Param() params: GetNotesParam,
     @Body() dto: UpdatePatientDto,
   ): Promise<IServerResponse<UpdatePatientDto>> {
-    const patient = await this.patientsService.updatePatient(+params.id, dto);
+    const patient = await this.patientsService.updatePatient(params.id, dto);
 
     return { statusCode: HttpStatus.OK, data: patient };
   }

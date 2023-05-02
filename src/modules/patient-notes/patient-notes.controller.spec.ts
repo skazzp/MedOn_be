@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { PatientNotesController } from './patient-notes.controller';
 import { PatientNotesService } from './patient-notes.service';
 import { CreatePatientNoteDto } from './dto/create-patient-note.dto';
-import { INoteRequest } from './interfaces/patients-responce';
+import { INoteRequest } from './interfaces/notes-responce';
 
 describe('PatientNotesController', () => {
   let controller: PatientNotesController;
