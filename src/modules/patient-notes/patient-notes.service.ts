@@ -49,6 +49,7 @@ export class PatientNotesService {
       .addSelect(['doctor.firstName', 'doctor.lastName'])
       .orderBy('notes.updatedAt', order)
       .getManyAndCount();
+
     return { notes: response[0], total: response[1] };
   }
 
@@ -58,8 +59,7 @@ export class PatientNotesService {
       .createQueryBuilder('notes')
       .delete()
       .from(PatientNotes)
-      .where('id = :id', { id })
-      .andWhere('doctor_id = :doctorId', { doctorId })
+      .where({ id, doctorId })
       .execute();
 
     if (!response.affected) throw new NotFoundException('Note not found');
