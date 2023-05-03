@@ -31,31 +31,18 @@ export class PatientNotesService {
   ): Promise<NotesRes> {
     const queryBuilder = this.notesRepo.createQueryBuilder('notes');
     const {
-      text,
+      text = '',
       order = 'DESC',
       limit = defaultLimit,
       page = defaultPage,
     } = searchOptions;
     const skip = (page - 1) * limit;
 
-    if (text) {
-      const response = await queryBuilder
-        .take(limit)
-        .skip(skip)
-        .where('notes.patient_id = :id', { id })
-        .andWhere('notes.note like :text', { text: `%${text}%` })
-        .leftJoin('notes.doctor', 'doctor')
-        .addSelect(['doctor.firstName', 'doctor.lastName'])
-        .orderBy('notes.updatedAt', order)
-        .getManyAndCount();
-
-      return { notes: response[0], total: response[1] };
-    }
-
     const response = await queryBuilder
       .take(limit)
       .skip(skip)
       .where('notes.patient_id = :id', { id })
+      .andWhere('notes.note like :text', { text: `%${text}%` })
       .leftJoin('notes.doctor', 'doctor')
       .addSelect(['doctor.firstName', 'doctor.lastName'])
       .orderBy('notes.updatedAt', order)
