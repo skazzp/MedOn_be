@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 
 import { PatientNotes } from '@entities/PatientNotes';
 import { CreatePatientNoteDto } from '@modules/patient-notes/dto/create-patient-note.dto';
@@ -38,29 +38,17 @@ export class PatientNotesService {
     } = searchOptions;
     const skip = (page - 1) * limit;
 
-    if (text) {
-      const response = await queryBuilder
-        .take(limit)
-        .skip(skip)
-        .where('notes.patient_id = :id', { id })
-        .andWhere('notes.note like :text', { text: `%${text}%` })
-        .leftJoin('notes.doctor', 'doctor')
-        .addSelect(['doctor.firstName', 'doctor.lastName'])
-        .orderBy('notes.updatedAt', order)
-        .getManyAndCount();
-
-      return { notes: response[0], total: response[1] };
-    }
-
     const response = await queryBuilder
       .take(limit)
       .skip(skip)
-      .where('notes.patient_id = :id', { id })
+      .where({
+        patientId: id,
+        ...(text && { note: Like(`%${text}%`) }),
+      })
       .leftJoin('notes.doctor', 'doctor')
       .addSelect(['doctor.firstName', 'doctor.lastName'])
       .orderBy('notes.updatedAt', order)
       .getManyAndCount();
-
     return { notes: response[0], total: response[1] };
   }
 
