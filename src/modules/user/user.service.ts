@@ -3,10 +3,10 @@ import * as argon from 'argon2';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { IProfile } from '@common/interfaces/userProfileResponses';
 import { Doctor } from '@entities/Doctor';
 import { UpdateUserPasswordDto } from '@modules/user/dto/updateUser.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto } from '@modules/user/dto/update-user.dto';
+import { IProfile } from '@common/interfaces/userProfileResponses';
 
 @Injectable()
 export class UserService {
