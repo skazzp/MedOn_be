@@ -6,10 +6,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 
 import { Speciality } from '@entities/Speciality';
 import { Role } from '@common/enums/Role';
+import { Availability } from './Availability';
 
 @Entity({ name: 'doctor' })
 export class Doctor {
@@ -58,6 +60,9 @@ export class Doctor {
   @ManyToOne(() => Speciality, (speciality) => speciality.doctors)
   @JoinColumn({ name: 'speciality_id' })
   speciality: Speciality;
+
+  @OneToMany(() => Availability, (availability) => availability.doctor)
+  availability?: Availability[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
