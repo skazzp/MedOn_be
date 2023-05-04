@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
@@ -17,6 +18,8 @@ import {
 } from '@nestjs/swagger';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@common/enums';
+import { AvailabilityReq } from '@common/interfaces/Availability';
+
 import { RolesGuard } from 'src/guards/roles.guard';
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
@@ -33,8 +36,14 @@ export class AvailabilityController {
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Create a new availability' })
   @Post()
-  create(@Body() createAvailabilityDto: CreateAvailabilityDto) {
-    return this.availabilityService.create(createAvailabilityDto);
+  create(
+    @Body() createAvailabilityDto: CreateAvailabilityDto,
+    @Request() req: AvailabilityReq,
+  ) {
+    return this.availabilityService.create(
+      createAvailabilityDto,
+      +req.user.userId,
+    );
   }
 
   @ApiOperation({ summary: 'Get a list of all availabilities' })

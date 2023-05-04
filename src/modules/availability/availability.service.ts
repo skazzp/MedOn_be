@@ -11,8 +11,14 @@ export class AvailabilityService {
     @InjectRepository(Availability) private repo: Repository<Availability>,
   ) {}
 
-  async create(dto: CreateAvailabilityDto): Promise<Availability> {
-    const availability = await this.repo.save(dto);
+  async create(
+    dto: CreateAvailabilityDto,
+    doctorId: number,
+  ): Promise<Availability> {
+    const availability = await this.repo.save({
+      doctorId,
+      ...dto,
+    });
     return availability;
   }
 
