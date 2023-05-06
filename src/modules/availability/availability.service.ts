@@ -3,6 +3,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Availability } from '@entities/Availability';
@@ -16,85 +17,104 @@ export class AvailabilityService {
   ) {}
 
   async createMultiples(
-    dtos: CreateAvailabilityDto[],
+    dto: CreateAvailabilityDto[],
     doctorId: number,
   ): Promise<Availability[]> {
-    if (!Array.isArray(dtos)) {
+    if (!Array.isArray(dto)) {
       throw new BadRequestException('Expected many Availabilities');
     }
 
-    const availabilities = await Promise.all(
-      dtos.map(async (dto) => {
-        const doctorAvailability = await this.repo
+    const savedAvailabilities = await Promise.all(
+      dto.map(async (availability) => {
+        const existingAvailability = await this.repo
           .createQueryBuilder('availability')
-          .leftJoin('availability.doctor', 'doctor')
+          .leftJoinAndSelect('availability.doctor', 'doctor')
           .andWhere('doctor.id = :doctorId', { doctorId })
           .andWhere('availability.startTime <= :endTime', {
-            endTime: dto.endTime,
+            endTime: availability.endTime,
           })
           .andWhere('availability.endTime >= :startTime', {
-            startTime: dto.startTime,
+            startTime: availability.startTime,
           })
           .getMany();
-
-        if (doctorAvailability.length > 0) {
+        if (existingAvailability.length > 0) {
           throw new ConflictException(
             'Doctor is already booked during the requested time slot',
           );
         }
-
-        const availability = this.repo.create({
+        const createdAvailability = this.repo.create({
           doctorId,
-          ...dto,
+          ...availability,
         });
-
-        return availability;
+        return createdAvailability;
       }),
     );
+    const result = await this.repo.save(savedAvailabilities);
 
-    const savedAvailabilities = await this.repo.save(availabilities);
-
-    return savedAvailabilities;
+    return result;
   }
 
-  async findAll(doctorId: number): Promise<Availability[]> {
-    const currentDate = new Date();
-    const threeMonthsAgo = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth() - 3,
-      1,
-    );
+  async findAvailabilities(
+    doctorId: number,
+    timezone: string,
+  ): Promise<Availability[]> {
+    const threeMonthsAgo = moment.tz(timezone).subtract(3, 'months');
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.doctorId = :doctorId', { doctorId })
-      .andWhere('availability.startTime >= :threeMonthsAgo', { threeMonthsAgo })
+      .andWhere('availability.startTime <= :threeMonthsAgo', {
+        threeMonthsAgo: threeMonthsAgo.toDate(),
+      })
       .getMany();
+
     return availabilities;
   }
 
   async getAvailabilityByDay(
     dayString: string,
-    timezone = 'UTC',
+    timezone: string,
   ): Promise<Availability[]> {
+    if (!moment.tz.zone(timezone)) {
+      throw new BadRequestException(`Invalid timezone: ${timezone}`);
+    }
+
     const day = moment.tz(dayString, timezone);
     const startOfDay = day.clone().startOf('day');
     const endOfDay = day.clone().endOf('day');
+    const startOfDayInTimeZone = moment.tz(startOfDay, timezone).format();
+    const endOfDayInTimeZone = moment.tz(endOfDay, timezone).format();
 
     const availabilities = await this.repo
       .createQueryBuilder('availability')
-      .where('availability.startTime >= :startOfDay', { startOfDay })
-      .andWhere('availability.startTime <= :endOfDay', { endOfDay })
+      .where('availability.startTime >= :startOfDay', {
+        startOfDay: startOfDayInTimeZone,
+      })
+      .andWhere('availability.startTime <= :endOfDay', {
+        endOfDay: endOfDayInTimeZone,
+      })
       .getMany();
+
+    if (availabilities.length === 0) {
+      throw new NotFoundException(
+        `No availability found for ${dayString} in ${timezone} timezone`,
+      );
+    }
 
     return availabilities;
   }
 
-  async remove(ids: number[]) {
+  async remove(ids: number[]): Promise<void> {
+    if (!Array.isArray(ids)) {
+      throw new BadRequestException('ids must be an array');
+    }
     // TODO: Implement ONLY IF NOT APPOINTMENT
-    return this.repo
+    const availabilities = await this.repo
       .createQueryBuilder('availability')
       .delete()
       .whereInIds(ids)
       .execute();
+    if (!availabilities.affected) {
+      throw new ConflictException('Availability not found');
+    }
   }
 }

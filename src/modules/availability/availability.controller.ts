@@ -40,19 +40,22 @@ export class AvailabilityController {
 
   @ApiOperation({ summary: 'Get a list of all availabilities' })
   @Get()
-  findAll(@Request() req: AvailabilityReq) {
-    return this.availabilityService.findAll(+req.user.userId);
+  findAll(@Request() req: AvailabilityReq, @Body() dto: { timezone: string }) {
+    return this.availabilityService.findAvailabilities(
+      +req.user.userId,
+      dto.timezone,
+    );
   }
 
   @ApiOperation({ summary: 'Get an availability by Day' })
   @Get('day')
-  getByDay(@Body() dto: { day: string }) {
-    return this.availabilityService.getAvailabilityByDay(dto.day);
+  getByDay(@Body() dto: { day: string; timezone: string }) {
+    return this.availabilityService.getAvailabilityByDay(dto.day, dto.timezone);
   }
 
   @ApiOperation({ summary: "Remove an availability by array of ID's " })
-  @Delete('/delete')
-  remove(@Body() id: number[]) {
-    return this.availabilityService.remove(id);
+  @Delete()
+  remove(@Body() dto: { id: number[] }) {
+    return this.availabilityService.remove(dto.id);
   }
 }
