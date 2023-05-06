@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import * as moment from 'moment-timezone';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Availability } from '@entities/Availability';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
-import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 
 @Injectable()
 export class AvailabilityService {
@@ -11,42 +15,86 @@ export class AvailabilityService {
     @InjectRepository(Availability) private repo: Repository<Availability>,
   ) {}
 
-  async create(
-    dto: CreateAvailabilityDto,
+  async createMultiples(
+    dtos: CreateAvailabilityDto[],
     doctorId: number,
-  ): Promise<Availability> {
-    const availability = await this.repo.save({
-      doctorId,
-      ...dto,
-    });
-    return availability;
+  ): Promise<Availability[]> {
+    if (!Array.isArray(dtos)) {
+      throw new BadRequestException('Expected many Availabilities');
+    }
+
+    const availabilities = await Promise.all(
+      dtos.map(async (dto) => {
+        const doctorAvailability = await this.repo
+          .createQueryBuilder('availability')
+          .leftJoin('availability.doctor', 'doctor')
+          .andWhere('doctor.id = :doctorId', { doctorId })
+          .andWhere('availability.startTime <= :endTime', {
+            endTime: dto.endTime,
+          })
+          .andWhere('availability.endTime >= :startTime', {
+            startTime: dto.startTime,
+          })
+          .getMany();
+
+        if (doctorAvailability.length > 0) {
+          throw new ConflictException(
+            'Doctor is already booked during the requested time slot',
+          );
+        }
+
+        const availability = this.repo.create({
+          doctorId,
+          ...dto,
+        });
+
+        return availability;
+      }),
+    );
+
+    const savedAvailabilities = await this.repo.save(availabilities);
+
+    return savedAvailabilities;
   }
 
-  async findAll() {
-    return this.repo.createQueryBuilder().getMany();
-  }
-
-  async findOne(id: number): Promise<Availability> {
-    return this.repo
+  async findAll(doctorId: number): Promise<Availability[]> {
+    const currentDate = new Date();
+    const threeMonthsAgo = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() - 3,
+      1,
+    );
+    const availabilities = await this.repo
       .createQueryBuilder('availability')
-      .where('availability.id = :id', { id })
-      .getOne();
+      .where('availability.doctorId = :doctorId', { doctorId })
+      .andWhere('availability.startTime >= :threeMonthsAgo', { threeMonthsAgo })
+      .getMany();
+    return availabilities;
   }
 
-  async update(id: number, dto: UpdateAvailabilityDto): Promise<UpdateResult> {
-    return this.repo
+  async getAvailabilityByDay(
+    dayString: string,
+    timezone = 'UTC',
+  ): Promise<Availability[]> {
+    const day = moment.tz(dayString, timezone);
+    const startOfDay = day.clone().startOf('day');
+    const endOfDay = day.clone().endOf('day');
+
+    const availabilities = await this.repo
       .createQueryBuilder('availability')
-      .update(Availability)
-      .set(dto)
-      .where('availability.id = :id', { id })
-      .execute();
+      .where('availability.startTime >= :startOfDay', { startOfDay })
+      .andWhere('availability.startTime <= :endOfDay', { endOfDay })
+      .getMany();
+
+    return availabilities;
   }
 
-  async remove(id: number) {
+  async remove(ids: number[]) {
+    // TODO: Implement ONLY IF NOT APPOINTMENT
     return this.repo
       .createQueryBuilder('availability')
       .delete()
-      .where('availability.id = :id', { id })
+      .whereInIds(ids)
       .execute();
   }
 }

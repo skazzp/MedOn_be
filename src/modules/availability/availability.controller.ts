@@ -3,19 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
   Delete,
   UseGuards,
   Request,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  ApiTags,
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-} from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@common/enums';
 import { AvailabilityReq } from '@common/interfaces/Availability';
@@ -23,7 +16,6 @@ import { AvailabilityReq } from '@common/interfaces/Availability';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
-import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 
 @ApiTags('availability')
 @UseGuards(AuthGuard('jwt'))
@@ -37,10 +29,10 @@ export class AvailabilityController {
   @ApiOperation({ summary: 'Create a new availability' })
   @Post()
   create(
-    @Body() createAvailabilityDto: CreateAvailabilityDto,
+    @Body() createAvailabilityDto: CreateAvailabilityDto[],
     @Request() req: AvailabilityReq,
   ) {
-    return this.availabilityService.create(
+    return this.availabilityService.createMultiples(
       createAvailabilityDto,
       +req.user.userId,
     );
@@ -48,31 +40,19 @@ export class AvailabilityController {
 
   @ApiOperation({ summary: 'Get a list of all availabilities' })
   @Get()
-  findAll() {
-    return this.availabilityService.findAll();
+  findAll(@Request() req: AvailabilityReq) {
+    return this.availabilityService.findAll(+req.user.userId);
   }
 
-  @ApiOperation({ summary: 'Get an availability by ID' })
-  @ApiParam({ name: 'id', description: 'The ID of the availability' })
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.availabilityService.findOne(+id);
+  @ApiOperation({ summary: 'Get an availability by Day' })
+  @Get('day')
+  getByDay(@Body() dto: { day: string }) {
+    return this.availabilityService.getAvailabilityByDay(dto.day);
   }
 
-  @ApiOperation({ summary: 'Update an availability by ID' })
-  @ApiParam({ name: 'id', description: 'The ID of the availability' })
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAvailabilityDto: UpdateAvailabilityDto,
-  ) {
-    return this.availabilityService.update(+id, updateAvailabilityDto);
-  }
-
-  @ApiOperation({ summary: 'Remove an availability by ID' })
-  @ApiParam({ name: 'id', description: 'The ID of the availability' })
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.availabilityService.remove(+id);
+  @ApiOperation({ summary: "Remove an availability by array of ID's " })
+  @Delete('/delete')
+  remove(@Body() id: number[]) {
+    return this.availabilityService.remove(id);
   }
 }
