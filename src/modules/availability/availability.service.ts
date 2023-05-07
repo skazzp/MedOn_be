@@ -54,7 +54,7 @@ export class AvailabilityService {
     return result;
   }
 
-  async findAvailabilities(
+  async findAvailabilitiesForLastThreeMonths(
     doctorId: number,
     timezone: string,
   ): Promise<Availability[]> {
@@ -62,7 +62,7 @@ export class AvailabilityService {
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.doctorId = :doctorId', { doctorId })
-      .andWhere('availability.startTime <= :threeMonthsAgo', {
+      .andWhere('availability.startTime >= :threeMonthsAgo', {
         threeMonthsAgo: threeMonthsAgo.toDate(),
       })
       .getMany();

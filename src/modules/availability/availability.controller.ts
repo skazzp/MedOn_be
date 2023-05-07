@@ -19,7 +19,8 @@ import { Role } from '@common/enums';
 import { AvailabilityReq } from '@common/interfaces/Availability';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 
-import { RolesGuard } from 'src/guards/roles.guard';
+import { RolesGuard } from '@guards/roles.guard';
+
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 
@@ -51,10 +52,11 @@ export class AvailabilityController {
     @Request() req: AvailabilityReq,
     @Body() dto: { timezone: string },
   ): Promise<IServerResponse<Availability[]>> {
-    const availabilities = await this.availabilityService.findAvailabilities(
-      req.user.userId,
-      dto.timezone,
-    );
+    const availabilities =
+      await this.availabilityService.findAvailabilitiesForLastThreeMonths(
+        req.user.userId,
+        dto.timezone,
+      );
     return {
       statusCode: HttpStatus.OK,
       message: 'Availabilities were found',
