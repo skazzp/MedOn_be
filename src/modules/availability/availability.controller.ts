@@ -27,12 +27,12 @@ import { CreateAvailabilityDto } from './dto/create-availability.dto';
 @ApiTags('availability')
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('jwt')
+@Roles(Role.RemoteDoctor)
 @Controller('availability')
 export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 
   @UseGuards(RolesGuard)
-  @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Create a new availability' })
   @Post()
   async create(
@@ -46,6 +46,8 @@ export class AvailabilityController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get a list of all availabilities' })
   @Get()
   async findAll(
@@ -64,6 +66,8 @@ export class AvailabilityController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get an availability by Day' })
   @Get('day')
   async getByDay(
@@ -80,6 +84,8 @@ export class AvailabilityController {
     };
   }
 
+  @UseGuards(RolesGuard)
+  @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: "Remove an availability by array of ID's " })
   @Delete()
   async remove(@Body() dto: { id: number[] }): Promise<IServerResponse<void>> {
