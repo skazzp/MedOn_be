@@ -13,6 +13,7 @@ import { UserModule } from '@modules/user/user.module';
 import { SpecialitiesModule } from '@modules/specialities/specialities.module';
 import { AvailabilityModule } from '@modules/availability/availability.module';
 import { PatientsModule } from '@modules/patients/patients.module';
+import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module';
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategy/jwt.strategy';
 
@@ -40,6 +41,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     SpecialitiesModule,
     PatientsModule,
     AvailabilityModule,
+    PatientNotesModule,
   ],
   providers: [JwtStrategy, RolesGuard],
 })
