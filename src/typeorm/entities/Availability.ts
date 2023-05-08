@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -10,6 +11,7 @@ import {
 import { Doctor } from './Doctor';
 
 @Entity({ name: 'availability' })
+@Index(['doctorId', 'startTime', 'endTime'], { unique: true })
 export class Availability {
   @PrimaryGeneratedColumn()
   id: number;

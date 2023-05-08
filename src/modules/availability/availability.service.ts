@@ -21,37 +21,20 @@ export class AvailabilityService {
     doctorId: number,
   ): Promise<Availability[]> {
     if (!Array.isArray(dto)) {
-      throw new BadRequestException('Expected many Availabilities');
+      throw new BadRequestException('Expected Many Availabilities');
     }
-
-    const savedAvailabilities = await Promise.all(
-      dto.map(async (availability) => {
-        const existingAvailability = await this.repo
-          .createQueryBuilder('availability')
-          .leftJoinAndSelect('availability.doctor', 'doctor')
-          .andWhere('doctor.id = :doctorId', { doctorId })
-          .andWhere('availability.startTime <= :endTime', {
-            endTime: availability.endTime,
-          })
-          .andWhere('availability.endTime >= :startTime', {
-            startTime: availability.startTime,
-          })
-          .getMany();
-        if (existingAvailability.length > 0) {
-          throw new ConflictException(
-            'Doctor is already booked during the requested time slot',
-          );
-        }
-        const createdAvailability = this.repo.create({
+    try {
+      const newAvailabilities = dto.map((availability) => {
+        return this.repo.create({
           doctorId,
           ...availability,
         });
-        return createdAvailability;
-      }),
-    );
-    const result = await this.repo.save(savedAvailabilities);
-
-    return result;
+      });
+      const result = await this.repo.save(newAvailabilities);
+      return result;
+    } catch {
+      throw new ConflictException('This Availability Time Already Exists');
+    }
   }
 
   async findAvailabilitiesForLastThreeMonths(
@@ -66,7 +49,6 @@ export class AvailabilityService {
         threeMonthsAgo: threeMonthsAgo.toDate(),
       })
       .getMany();
-
     return availabilities;
   }
 
