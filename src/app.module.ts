@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import * as moment from 'moment-timezone';
 
 import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
@@ -18,30 +17,22 @@ import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module'
 import { RolesGuard } from './guards/roles.guard';
 import { JwtStrategy } from './strategy/jwt.strategy';
 
-async function getTimezone() {
-  return moment.tz.guess();
-}
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const timezone = await getTimezone();
-        return {
-          type: 'mysql',
-          host: configService.get('DB_HOST'),
-          port: configService.get('DB_PORT'),
-          username: configService.get('DB_USERNAME'),
-          password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_NAME'),
-          entities: [Patient, Speciality, Doctor, Availability],
-          synchronize: true,
-          autoLoadEntities: true,
-          timezone,
-        };
-      },
+      useFactory: async (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        entities: [Patient, Speciality, Doctor, Availability],
+        synchronize: true,
+        autoLoadEntities: true,
+      }),
       inject: [ConfigService],
     }),
     AuthModule,
