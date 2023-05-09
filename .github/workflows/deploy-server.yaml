@@ -1,0 +1,28 @@
+name: Deploy Docker Image
+on:
+  push:
+    branches:
+      - deploy-server
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to AWS via SSH action
+        uses: appleboy/ssh-action@master
+        with:
+          host: ec2-18-232-16-69.compute-1.amazonaws.com
+          username: ubuntu
+          key: MIIEowIBAAKCAQEAvPhpUDJslP7mJ8t8pLsbRhSlhH9IXIBNWSsiyQvejUr2m6ZGauqeYkjw7WuhaLvY7hRjmKYsR4Ub+GONzjtFNDcGyqMAVoXFU8VDKQVnXZM3Eed/6swQHPA248TdVggowBe2i5J3LgLGe0isci7goYfbSLvpZOSrmkL77LOaIBtZoC0jFJRZwAZLmJD5sEbyXUjzG8d8KtFpadLvBDCs3FGp78z8TU4zBxWqMvD1jNlysRFLhbT4l1w8M0jYGGkyJXMG4fQ/R6DTDbk+MOkOK6h9DalxWp4i2BjgA4x+ZCDVEvBT+TZSnAGFj4kBafCUxjhIx27ZZpqkkINVKm5VUQIDAQABAoIBAFU8k3w6EmIui7AdiA5h206EF5ipNQGMWddDrsASm4MN8iiJGrA1PdXFYu8kojy0pofVKIt9QPHNp60lcpw4feGshGK4nXlpg3ViwAVry5EYyzlHO5q0CvySmZ+pd9DLg14KFCvml91oIREQ2b/zRx11Q0MOh5sbzg+Z8Tp2VKnwBK8fY5UMx39AAkgP2sEtOaGJLoGo5tVXB/8jvnb5V137iwW5j+H66LSanDaaT3oXVr65OYvYRuVlOP8XZ7LubkE2/APBvSnHJLSloDCJ0GZsIkEusvAAc/+2m+XUjzWKZQfT8LsZ+F4DLJZO7Oaf269s+BAXvkZjJFtiNBAqBUECgYEA9OZEU79C1UMIhVlmeSpBKym51rozOU/neclY3AR/VhZ6+Wuvr15BWqvBrFWLWemvjStL9PdL+OgVIyRoAE4C8zohLZAJJPj2Lu47f5QDWCi2qr+09RmmPzE9JBJxwyh20zPbli/wYXNkvOlSf662bXJ5V/mJxKWofmKKJ2ZG7HkCgYEAxYkpS5WA725Z9vwlB81SLcgomfQRtNza1rFtRPhDmrm5Vy00qPxLD817dQaAbW62Fkczwpt0J7kUc1G2kPuqVF1WAy0h8F7tcMvx2fW9pmvdgf8+gHlMcjHmI2QdXRsj7WWomS4G5IqEtCEhHVbVS7+2vD7vr7ukb5zBstVgyZkCgYARL4OF+PsAqjaT3QUy5YMzOzdeWSy1DeVph3aj4fDpoqQ4kpT+kne1nC34IPypb5uxJWOsKhp7uhWZpLljpBXS6bZgUyZBIPNtsawdNM7TRfAjpVZWiNlAv/zRZjXzgwhro8z6Ch0tSYK9OwZeDW2h2pGnWcyQLyvWyqV1RFkfyQKBgQC6F1lb52AsL915HFkWXItKrgHx50i3BkjzcPrruqaVoNnGEsRFXkiofoAL4zAh5+aKXlGYyDJJKcbmTNidBTmVeMiK/X23oPY3CSqylxsvKPbofLk49wzZl8CjHrG7ANJ71wVaKU49B3G08HDt3tvaHKXd+bx75V4n95lTDEm+IQKBgGtd3IaoFpPwTCx8XmpOWGy9Ffh0MUJ+oV59biQGXwW71/KgFJqtG+r/Qi9TNy39XPZbqaNlMHJGVicIjVS7d+3M6IaEXWXfex8RNul5LfnZauwfeSqH+K5XBIf5wV3K5d3zgeM7PAA8OeX3zvsqehakIwtAahqakkJcijyGDprs
+          port: 22
+          script: |
+            # Stop all running Docker Containers
+            sudo docker kill $(sudo docker ps -q)
+            # Free up space
+            sudo docker system prune -a -f
+            # Login to Github Container Registry
+            sudo docker login -u medonproject -p t9WWdV_QM=^F
+            # Pull the Docker Image 
+            sudo docker pull medonproject/medon:2tag
+            # Run a new container from a new image
+            sudo docker run -d -p 3000:3000 --add-host=host.docker.internal:host-gateway medonproject/medon:2tag
