@@ -1,3 +1,4 @@
+import * as moment from 'moment-timezone';
 import {
   BadRequestException,
   ConflictException,
@@ -40,50 +41,41 @@ export class AvailabilityService {
 
   async findAvailabilitiesForLastThreeMonths(
     doctorId: number,
+    timezone: string,
   ): Promise<Availability[]> {
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    const threeMonthsAgo = moment.tz(timezone).subtract(3, 'months').toDate();
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.doctorId = :doctorId', { doctorId })
       .andWhere('availability.startTime >= :threeMonthsAgo', {
-        threeMonthsAgo: threeMonthsAgo.toISOString(),
+        threeMonthsAgo: moment(threeMonthsAgo).tz(timezone).toISOString(),
       })
       .getMany();
     return availabilities;
   }
 
-  async getAvailabilityByDay(dayString: string): Promise<Availability[]> {
-    const day = new Date(dayString);
-    const startOfDay = new Date(
-      day.getFullYear(),
-      day.getMonth(),
-      day.getDate(),
-      0,
-      0,
-      0,
-    );
-    const endOfDay = new Date(
-      day.getFullYear(),
-      day.getMonth(),
-      day.getDate(),
-      23,
-      59,
-      59,
-    );
+  async getAvailabilityByDay(
+    dayString: string,
+    timezone: string,
+  ): Promise<Availability[]> {
+    const day = moment.tz(dayString, timezone);
+    const startOfDay = day.clone().startOf('day').toDate();
+    const endOfDay = day.clone().endOf('day').toDate();
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.startTime >= :startOfDay', {
-        startOfDay: startOfDay.toISOString(),
+        startOfDay: moment(startOfDay).toISOString(),
       })
       .andWhere('availability.startTime <= :endOfDay', {
-        endOfDay: endOfDay.toISOString(),
+        endOfDay: moment(endOfDay).toISOString(),
       })
       .getMany();
 
     if (availabilities.length === 0) {
       throw new NotFoundException(
-        `No availability found for ${day.toISOString()} in any timezone`,
+        `No availability found for ${day
+          .tz(timezone)
+          .toISOString()} in ${timezone}`,
       );
     }
 

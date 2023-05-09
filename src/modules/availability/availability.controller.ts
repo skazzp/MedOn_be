@@ -50,13 +50,15 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get a list of all availabilities' })
-  @Get()
+  @Get(':timezone')
   async findAll(
     @Request() req: AvailabilityReq,
+    @Param('timezone') timezone: string,
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities =
       await this.availabilityService.findAvailabilitiesForLastThreeMonths(
         req.user.userId,
+        timezone,
       );
     return {
       statusCode: HttpStatus.OK,
@@ -68,12 +70,14 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get an availability by Day' })
-  @Get(':day')
+  @Get(':day/:timezone')
   async getByDay(
     @Param('day') day: string,
+    @Param('timezone') timezone: string,
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities = await this.availabilityService.getAvailabilityByDay(
       day,
+      timezone,
     );
     return {
       statusCode: HttpStatus.OK,
