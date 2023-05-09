@@ -32,6 +32,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         entities: [Patient, Speciality, Doctor, Availability],
         synchronize: true,
         autoLoadEntities: true,
+        timezone: '+00:00',
       }),
       inject: [ConfigService],
     }),

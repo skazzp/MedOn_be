@@ -28,6 +28,7 @@ export class AvailabilityService {
           doctorId,
           startTime: availability.startTime,
           endTime: availability.endTime,
+          title: availability.title,
         });
       });
       const result = await this.repo.save(newAvailabilities);
@@ -39,11 +40,9 @@ export class AvailabilityService {
 
   async findAvailabilitiesForLastThreeMonths(
     doctorId: number,
-    startDate: Date,
   ): Promise<Availability[]> {
-    const threeMonthsAgo = new Date(
-      startDate.setMonth(startDate.getMonth() - 3),
-    );
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.doctorId = :doctorId', { doctorId })
