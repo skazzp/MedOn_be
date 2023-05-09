@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   HttpStatus,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -49,15 +50,15 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get a list of all availabilities' })
-  @Get()
+  @Post('all')
   async findAll(
     @Request() req: AvailabilityReq,
-    @Body() dto: { timezone: string },
+    @Body() dto: { startTime: Date; endTime: Date },
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities =
       await this.availabilityService.findAvailabilitiesForLastThreeMonths(
         req.user.userId,
-        dto.timezone,
+        dto.startTime,
       );
     return {
       statusCode: HttpStatus.OK,
@@ -69,13 +70,12 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get an availability by Day' })
-  @Get('day')
+  @Get()
   async getByDay(
-    @Body() dto: { day: string; timezone: string },
+    @Param() param: { day: string },
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities = await this.availabilityService.getAvailabilityByDay(
-      dto.day,
-      dto.timezone,
+      param.day,
     );
     return {
       statusCode: HttpStatus.OK,
@@ -88,8 +88,11 @@ export class AvailabilityController {
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: "Remove an availability by array of ID's " })
   @Delete()
-  async remove(@Body() dto: { id: number[] }): Promise<IServerResponse<void>> {
-    await this.availabilityService.remove(dto.id);
+  async remove(
+    @Body() dto: { startTime: Date; endTime: Date }[],
+    @Request() req: AvailabilityReq,
+  ): Promise<IServerResponse<void>> {
+    await this.availabilityService.remove(dto, req.user.userId);
     return {
       statusCode: HttpStatus.NO_CONTENT,
       message: 'Availabilities were removed',

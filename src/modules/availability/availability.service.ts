@@ -1,4 +1,3 @@
-import * as moment from 'moment-timezone';
 import {
   BadRequestException,
   ConflictException,
@@ -27,7 +26,8 @@ export class AvailabilityService {
       const newAvailabilities = dto.map((availability) => {
         return this.repo.create({
           doctorId,
-          ...availability,
+          startTime: availability.startTime,
+          endTime: availability.endTime,
         });
       });
       const result = await this.repo.save(newAvailabilities);
@@ -39,63 +39,75 @@ export class AvailabilityService {
 
   async findAvailabilitiesForLastThreeMonths(
     doctorId: number,
-    timezone: string,
+    startDate: Date,
   ): Promise<Availability[]> {
-    const threeMonthsAgo = moment.tz(timezone).subtract(3, 'months');
+    const threeMonthsAgo = new Date(
+      startDate.setMonth(startDate.getMonth() - 3),
+    );
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.doctorId = :doctorId', { doctorId })
       .andWhere('availability.startTime >= :threeMonthsAgo', {
-        threeMonthsAgo: threeMonthsAgo.toDate(),
+        threeMonthsAgo: threeMonthsAgo.toISOString(),
       })
       .getMany();
     return availabilities;
   }
 
-  async getAvailabilityByDay(
-    dayString: string,
-    timezone: string,
-  ): Promise<Availability[]> {
-    if (!moment.tz.zone(timezone)) {
-      throw new BadRequestException(`Invalid timezone: ${timezone}`);
-    }
-
-    const day = moment.tz(dayString, timezone);
-    const startOfDay = day.clone().startOf('day');
-    const endOfDay = day.clone().endOf('day');
-    const startOfDayInTimeZone = moment.tz(startOfDay, timezone).format();
-    const endOfDayInTimeZone = moment.tz(endOfDay, timezone).format();
-
+  async getAvailabilityByDay(dayString: string): Promise<Availability[]> {
+    const day = new Date(dayString);
+    const startOfDay = new Date(
+      day.getFullYear(),
+      day.getMonth(),
+      day.getDate(),
+      0,
+      0,
+      0,
+    );
+    const endOfDay = new Date(
+      day.getFullYear(),
+      day.getMonth(),
+      day.getDate(),
+      23,
+      59,
+      59,
+    );
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.startTime >= :startOfDay', {
-        startOfDay: startOfDayInTimeZone,
+        startOfDay: startOfDay.toISOString(),
       })
       .andWhere('availability.startTime <= :endOfDay', {
-        endOfDay: endOfDayInTimeZone,
+        endOfDay: endOfDay.toISOString(),
       })
       .getMany();
 
     if (availabilities.length === 0) {
       throw new NotFoundException(
-        `No availability found for ${dayString} in ${timezone} timezone`,
+        `No availability found for ${day.toISOString()} in any timezone`,
       );
     }
 
     return availabilities;
   }
 
-  async remove(ids: number[]): Promise<void> {
-    if (!Array.isArray(ids)) {
-      throw new BadRequestException('ids must be an array');
+  async remove(
+    dto: { startTime: Date; endTime: Date }[],
+    doctorId: number,
+  ): Promise<void> {
+    if (!Array.isArray(dto)) {
+      throw new BadRequestException('Expect many availabilities');
     }
     // TODO: Implement ONLY IF NOT APPOINTMENT
-    const availabilities = await this.repo
-      .createQueryBuilder('availability')
-      .delete()
-      .whereInIds(ids)
-      .execute();
-    if (!availabilities.affected) {
+    const qb = this.repo.createQueryBuilder('availability');
+    dto.forEach(({ startTime, endTime }) => {
+      qb.orWhere(
+        '(startTime = :startTime AND endTime = :endTime AND doctorId = :doctorId)',
+        { startTime, endTime, doctorId },
+      );
+    });
+    const result = await qb.delete().execute();
+    if (!result.affected) {
       throw new ConflictException('Availability not found');
     }
   }
