@@ -23,6 +23,7 @@ import { RolesGuard } from '@guards/roles.guard';
 
 import { AvailabilityService } from './availability.service';
 import { ChangeAvailabilityBody } from './dto/change-availability.dto';
+import { UpdateAvailabilityBody } from './dto/update-availability.dto';
 
 @ApiTags('availability')
 @UseGuards(AuthGuard('jwt'))
@@ -131,11 +132,12 @@ export class AvailabilityController {
   })
   @Patch()
   async updateMultiples(
-    @Body() data: ChangeAvailabilityBody,
+    @Body() data: UpdateAvailabilityBody,
     @Request() req: AvailabilityReq,
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities = await this.availabilityService.updateMultiples(
-      data.dto,
+      data.toDelete,
+      data.toCreate,
       data.timezone,
       req.user.userId,
     );

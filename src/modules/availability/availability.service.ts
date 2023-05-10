@@ -107,44 +107,23 @@ export class AvailabilityService {
   }
 
   async updateMultiples(
-    dto: AvailabilityDto[],
+    toDelete: AvailabilityDto[],
+    toCreate: AvailabilityDto[],
     timezone: string,
     doctorId: number,
   ): Promise<Availability[]> {
-    if (!Array.isArray(dto)) {
-      throw new BadRequestException('Expected Many Availabilities');
+    if (!Array.isArray(toDelete) || !Array.isArray(toCreate)) {
+      throw new BadRequestException('Expected Two Arrays');
     }
 
-    const existingAvailabilities =
-      await this.findAvailabilitiesForLastThreeMonths(doctorId, timezone);
+    await this.remove(toDelete, timezone, doctorId);
 
-    const newAvailabilities: Availability[] = [];
-    dto.forEach((availability) => {
-      const startTime = moment.tz(availability.startTime, timezone).toDate();
-      const endTime = moment.tz(availability.endTime, timezone).toDate();
-      const existingAvailability = existingAvailabilities.find(
-        (a) =>
-          moment(a.startTime).isSame(startTime) &&
-          moment(a.endTime).isSame(endTime),
-      );
+    const newAvailabilities = await this.createMultiples(
+      toCreate,
+      timezone,
+      doctorId,
+    );
 
-      if (!existingAvailability) {
-        newAvailabilities.push(
-          this.repo.create({
-            doctorId,
-            startTime,
-            endTime,
-            title: availability.title,
-          }),
-        );
-      }
-    });
-
-    if (!newAvailabilities.length) {
-      throw new ConflictException('No new availabilities were added');
-    }
-
-    const result = await this.repo.save(newAvailabilities);
-    return result;
+    return newAvailabilities;
   }
 }
