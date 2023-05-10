@@ -6,11 +6,10 @@ import {
   UseGuards,
   Request,
   HttpStatus,
-  Param,
   Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { Roles } from '@decorators/roles.decorator';
 
@@ -27,14 +26,17 @@ import { ChangeAvailabilityBody } from './dto/change-availability.dto';
 
 @ApiTags('availability')
 @UseGuards(AuthGuard('jwt'))
-@ApiBearerAuth('jwt')
-@Roles(Role.RemoteDoctor)
 @Controller('availability')
 export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 
   @UseGuards(RolesGuard)
+  @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Create a new availability' })
+  @ApiResponse({
+    status: 201,
+    description: 'Availability was created',
+  })
   @Post()
   async create(
     @Body() data: ChangeAvailabilityBody,
@@ -54,6 +56,10 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get a list of all availabilities' })
+  @ApiResponse({
+    status: 200,
+    description: 'Availabilities were found',
+  })
   @Post('all')
   async findAll(
     @Request() req: AvailabilityReq,
@@ -74,13 +80,16 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get an availability by Day' })
-  @Post(':day')
+  @ApiResponse({
+    status: 200,
+    description: 'Availabilities were found',
+  })
+  @Post('day')
   async getByDay(
-    @Param('day') day: string,
-    @Body() dto: { timezone: string },
+    @Body() dto: { timezone: string; day: Date },
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities = await this.availabilityService.getAvailabilityByDay(
-      day,
+      dto.day,
       dto.timezone,
     );
     return {
@@ -93,6 +102,10 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: "Remove an availability by array of ID's " })
+  @ApiResponse({
+    status: 204,
+    description: 'Availabilities were removed',
+  })
   @Delete()
   async remove(
     @Body() data: ChangeAvailabilityBody,
@@ -112,6 +125,10 @@ export class AvailabilityController {
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Update an availability by array' })
+  @ApiResponse({
+    status: 200,
+    description: 'Availabilities were updated',
+  })
   @Patch()
   async updateMultiples(
     @Body() data: ChangeAvailabilityBody,

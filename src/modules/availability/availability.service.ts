@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Availability } from '@entities/Availability';
+import { monthsToSeeBeforeToday } from '@common/constants/availability';
 import { Repository } from 'typeorm';
 import { AvailabilityDto } from './dto/availability.dto';
 
@@ -47,7 +48,7 @@ export class AvailabilityService {
     timezone: string,
   ): Promise<Availability[]> {
     const threeMonthsAgo = moment()
-      .subtract(3, 'months')
+      .subtract(monthsToSeeBeforeToday, 'months')
       .startOf('day')
       .utcOffset(timezone)
       .toDate();
@@ -60,7 +61,7 @@ export class AvailabilityService {
   }
 
   async getAvailabilityByDay(
-    dayString: string,
+    dayString: Date,
     timezone: string,
   ): Promise<Availability[]> {
     const startOfDay = moment
@@ -78,7 +79,7 @@ export class AvailabilityService {
   }
 
   async remove(
-    availabilities: { startTime: Date; endTime: Date }[],
+    availabilities: AvailabilityDto[],
     timezone: string,
     doctorId: number,
   ): Promise<void> {
