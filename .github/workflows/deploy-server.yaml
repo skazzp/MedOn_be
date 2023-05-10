@@ -23,6 +23,6 @@ jobs:
             # Login to Github Container Registry
             sudo docker login -u medonproject -p t9WWdV_QM=^F
             # Pull the Docker Image 
-            sudo docker pull medonproject/medon:2tag
+            sudo docker pull medonproject/medon:latest
             # Run a new container from a new image
-            sudo docker run -d -p 3000:3000 --add-host=host.docker.internal:host-gateway medonproject/medon:2tag
+            sudo docker run -d -p 3000:3000 --add-host=host.docker.internal:host-gateway medonproject/medon:latest
