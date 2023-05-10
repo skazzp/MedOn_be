@@ -11,36 +11,9 @@ jobs:
       - name: Deploy to AWS via SSH action
         uses: appleboy/ssh-action@master
         with:
-          host: ec2-18-232-16-69.compute-1.amazonaws.com
-          username: ubuntu
-          key: |
-            -----BEGIN RSA PRIVATE KEY-----
-            MIIEowIBAAKCAQEAvPhpUDJslP7mJ8t8pLsbRhSlhH9IXIBNWSsiyQvejUr2m6ZG
-            auqeYkjw7WuhaLvY7hRjmKYsR4Ub+GONzjtFNDcGyqMAVoXFU8VDKQVnXZM3Eed/
-            6swQHPA248TdVggowBe2i5J3LgLGe0isci7goYfbSLvpZOSrmkL77LOaIBtZoC0j
-            FJRZwAZLmJD5sEbyXUjzG8d8KtFpadLvBDCs3FGp78z8TU4zBxWqMvD1jNlysRFL
-            hbT4l1w8M0jYGGkyJXMG4fQ/R6DTDbk+MOkOK6h9DalxWp4i2BjgA4x+ZCDVEvBT
-            +TZSnAGFj4kBafCUxjhIx27ZZpqkkINVKm5VUQIDAQABAoIBAFU8k3w6EmIui7Ad
-            iA5h206EF5ipNQGMWddDrsASm4MN8iiJGrA1PdXFYu8kojy0pofVKIt9QPHNp60l
-            cpw4feGshGK4nXlpg3ViwAVry5EYyzlHO5q0CvySmZ+pd9DLg14KFCvml91oIREQ
-            2b/zRx11Q0MOh5sbzg+Z8Tp2VKnwBK8fY5UMx39AAkgP2sEtOaGJLoGo5tVXB/8j
-            vnb5V137iwW5j+H66LSanDaaT3oXVr65OYvYRuVlOP8XZ7LubkE2/APBvSnHJLSl
-            oDCJ0GZsIkEusvAAc/+2m+XUjzWKZQfT8LsZ+F4DLJZO7Oaf269s+BAXvkZjJFti
-            NBAqBUECgYEA9OZEU79C1UMIhVlmeSpBKym51rozOU/neclY3AR/VhZ6+Wuvr15B
-            WqvBrFWLWemvjStL9PdL+OgVIyRoAE4C8zohLZAJJPj2Lu47f5QDWCi2qr+09Rmm
-            PzE9JBJxwyh20zPbli/wYXNkvOlSf662bXJ5V/mJxKWofmKKJ2ZG7HkCgYEAxYkp
-            S5WA725Z9vwlB81SLcgomfQRtNza1rFtRPhDmrm5Vy00qPxLD817dQaAbW62Fkcz
-            wpt0J7kUc1G2kPuqVF1WAy0h8F7tcMvx2fW9pmvdgf8+gHlMcjHmI2QdXRsj7WWo
-            mS4G5IqEtCEhHVbVS7+2vD7vr7ukb5zBstVgyZkCgYARL4OF+PsAqjaT3QUy5YMz
-            OzdeWSy1DeVph3aj4fDpoqQ4kpT+kne1nC34IPypb5uxJWOsKhp7uhWZpLljpBXS
-            6bZgUyZBIPNtsawdNM7TRfAjpVZWiNlAv/zRZjXzgwhro8z6Ch0tSYK9OwZeDW2h
-            2pGnWcyQLyvWyqV1RFkfyQKBgQC6F1lb52AsL915HFkWXItKrgHx50i3BkjzcPrr
-            uqaVoNnGEsRFXkiofoAL4zAh5+aKXlGYyDJJKcbmTNidBTmVeMiK/X23oPY3CSqy
-            lxsvKPbofLk49wzZl8CjHrG7ANJ71wVaKU49B3G08HDt3tvaHKXd+bx75V4n95lT
-            DEm+IQKBgGtd3IaoFpPwTCx8XmpOWGy9Ffh0MUJ+oV59biQGXwW71/KgFJqtG+r/
-            Qi9TNy39XPZbqaNlMHJGVicIjVS7d+3M6IaEXWXfex8RNul5LfnZauwfeSqH+K5X
-            BIf5wV3K5d3zgeM7PAA8OeX3zvsqehakIwtAahqakkJcijyGDprs
-            -----END RSA PRIVATE KEY-----
+          host: ${{ vars.AWS_HOST }}
+          username: ${{ secrets.AWS_USERNAME }}
+          key: ${{ secrets.AWS_KEY }}
           port: 22
           script: |
             # Stop all running Docker Containers
@@ -48,7 +21,7 @@ jobs:
             # Free up space
             sudo docker system prune -a -f
             # Login to Github Container Registry
-            sudo docker login -u medonproject -p t9WWdV_QM=^F
+            sudo docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             # Pull the Docker Image 
             sudo docker pull medonproject/medon:latest
             # Run a new container from a new image
