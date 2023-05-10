@@ -35,7 +35,7 @@ jobs:
         with:
           context: .
           push: true
-          file: /Dockerfile
+          file: ./Dockerfile
           build-args: |
             PORT=3333
             DB_HOST=rds-medon.cvmnsx0346ox.us-east-1.rds.amazonaws.com
