@@ -1,0 +1,58 @@
+name: Build and Publish Docker Image
+on:
+  push:
+    tags:
+      - 'sv*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo
+        uses: actions/checkout@v2
+
+      - name: Set Versions
+        uses: actions/github-script@v4
+        id: set_version
+        with:
+          script: |
+            const tag = context.ref.substring(10)
+            const no_v = tag.replace('sv', '')
+            const dash_index = no_v.lastIndexOf('-')
+            const no_dash = (dash_index > -1) ?  no_v.substring(0, dash_index) : no_v
+            core.setOutput('tag', tag)
+            core.setOutput('no-v', no_v)
+            core.setOutput('no-dash', no_dash)
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: medonproject
+          password: t9WWdV_QM=^F
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          file: /Dockerfile
+          build-args: |
+            PORT=3333
+            DB_HOST=rds-medon.cvmnsx0346ox.us-east-1.rds.amazonaws.com
+            DB_PORT=3306
+            DB_USERNAME=admin
+            DB_PASSWORD=QwerTy1234!
+            DB_NAME=medon_db
+            BASE_FRONT_URL=https://medon.fun
+            SMTP_LOGIN=jurchenko.a@gmail.com
+            SMTP_PASS=sfHXGMTUjxZ7PObc
+            SMTP_SERVER=smtp-relay.sendinblue.com
+            EMAIL_SENDER=admin@medon.com
+            JWT_SECRET=my_secret_auth
+            JWT_EXPIRATION_TIME=6h
+            GOOGLE_CLIENT_ID=790559126715-933s8ngov6rqllmsssp6jj6co9sqe9s2.apps.googleusercontent.com
+            GOOGLE_CLIENT_SECRET=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
+            GOOGLE_CALLBACK_URL=https://medon.online/auth/google/redirect
+          tags: |
+            medonproject/medon:${{ steps.set_version.outputs.no-dash }}
+            medonproject/medon:latest
