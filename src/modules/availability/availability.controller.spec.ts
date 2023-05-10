@@ -6,7 +6,7 @@ import { HttpStatus } from '@nestjs/common';
 import { AvailabilityReq } from '@common/interfaces/Availability';
 import { AvailabilityController } from './availability.controller';
 import { AvailabilityService } from './availability.service';
-import { CreateAvailabilityDto } from './dto/create-availability.dto';
+import { AvailabilityDto } from './dto/availability.dto';
 
 describe('AvailabilityController', () => {
   let controller: AvailabilityController;
@@ -30,7 +30,7 @@ describe('AvailabilityController', () => {
 
   describe('create', () => {
     it('should create availabilities and return a success message', async () => {
-      const mockDto: CreateAvailabilityDto[] = [
+      const mockDto: AvailabilityDto[] = [
         {
           startTime: new Date('2022-01-01T04:00:00.000Z'),
           endTime: new Date('2022-01-01T08:00:00.000Z'),

@@ -1,21 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
-export class CreateAvailabilityDto {
+export class AvailabilityDto {
   @ApiProperty({
     description: 'availability start',
-    example: '01/02/2021, 08:40:23',
+    example: '2023-10-01T21:00:00.000Z',
   })
-  @IsDateString()
   @IsNotEmpty()
+  @IsDateString()
   startTime: Date;
 
   @ApiProperty({
     description: 'availability end',
-    example: '01/02/2021, 10:40:23',
+    example: '2023-10-01T23:00:00.000Z',
   })
-  @IsDateString()
   @IsNotEmpty()
+  @IsDateString()
   endTime: Date;
 
   @ApiProperty({
@@ -24,5 +29,6 @@ export class CreateAvailabilityDto {
   })
   @IsNotEmpty()
   @IsString()
-  title: string;
+  @IsOptional()
+  title?: string;
 }
