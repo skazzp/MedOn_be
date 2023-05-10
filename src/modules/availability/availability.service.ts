@@ -8,7 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Availability } from '@entities/Availability';
 import { Repository } from 'typeorm';
-import { CreateAvailabilityDto } from './dto/create-availability.dto';
+import { AvailabilityDto } from './dto/availability.dto';
 
 @Injectable()
 export class AvailabilityService {
@@ -17,7 +17,8 @@ export class AvailabilityService {
   ) {}
 
   async createMultiples(
-    dto: CreateAvailabilityDto[],
+    dto: AvailabilityDto[],
+    timezone: string,
     doctorId: number,
   ): Promise<Availability[]> {
     if (!Array.isArray(dto)) {
@@ -25,17 +26,19 @@ export class AvailabilityService {
     }
     try {
       const newAvailabilities = dto.map((availability) => {
+        const startTime = moment.tz(availability.startTime, timezone).toDate();
+        const endTime = moment.tz(availability.endTime, timezone).toDate();
         return this.repo.create({
           doctorId,
-          startTime: availability.startTime,
-          endTime: availability.endTime,
+          startTime,
+          endTime,
           title: availability.title,
         });
       });
       const result = await this.repo.save(newAvailabilities);
       return result;
-    } catch {
-      throw new ConflictException('This Availability Time Already Exists');
+    } catch (e) {
+      throw new ConflictException('Availability already exists');
     }
   }
 
@@ -43,13 +46,15 @@ export class AvailabilityService {
     doctorId: number,
     timezone: string,
   ): Promise<Availability[]> {
-    const threeMonthsAgo = moment.tz(timezone).subtract(3, 'months').toDate();
+    const threeMonthsAgo = moment()
+      .subtract(3, 'months')
+      .startOf('day')
+      .utcOffset(timezone)
+      .toDate();
     const availabilities = await this.repo
       .createQueryBuilder('availability')
       .where('availability.doctorId = :doctorId', { doctorId })
-      .andWhere('availability.startTime >= :threeMonthsAgo', {
-        threeMonthsAgo: moment(threeMonthsAgo).tz(timezone).toISOString(),
-      })
+      .andWhere('availability.startTime >= :threeMonthsAgo', { threeMonthsAgo })
       .getMany();
     return availabilities;
   }
@@ -58,48 +63,87 @@ export class AvailabilityService {
     dayString: string,
     timezone: string,
   ): Promise<Availability[]> {
-    const day = moment.tz(dayString, timezone);
-    const startOfDay = day.clone().startOf('day').toDate();
-    const endOfDay = day.clone().endOf('day').toDate();
+    const startOfDay = moment
+      .tz(dayString, timezone)
+      .startOf('day')
+      .toISOString();
+    const endOfDay = moment.tz(dayString, timezone).endOf('day').toISOString();
     const availabilities = await this.repo
       .createQueryBuilder('availability')
-      .where('availability.startTime >= :startOfDay', {
-        startOfDay: moment(startOfDay).toISOString(),
-      })
-      .andWhere('availability.startTime <= :endOfDay', {
-        endOfDay: moment(endOfDay).toISOString(),
-      })
+      .where(
+        `availability.startTime >= '${startOfDay}' AND availability.startTime <= '${endOfDay}'`,
+      )
       .getMany();
-
-    if (availabilities.length === 0) {
-      throw new NotFoundException(
-        `No availability found for ${day
-          .tz(timezone)
-          .toISOString()} in ${timezone}`,
-      );
-    }
-
     return availabilities;
   }
 
   async remove(
-    dto: { startTime: Date; endTime: Date }[],
+    availabilities: { startTime: Date; endTime: Date }[],
+    timezone: string,
     doctorId: number,
   ): Promise<void> {
-    if (!Array.isArray(dto)) {
-      throw new BadRequestException('Expect many availabilities');
-    }
-    // TODO: Implement ONLY IF NOT APPOINTMENT
-    const qb = this.repo.createQueryBuilder('availability');
-    dto.forEach(({ startTime, endTime }) => {
-      qb.orWhere(
-        '(startTime = :startTime AND endTime = :endTime AND doctorId = :doctorId)',
-        { startTime, endTime, doctorId },
-      );
-    });
-    const result = await qb.delete().execute();
+    const result = await this.repo
+      .createQueryBuilder()
+      .delete()
+      .from(Availability)
+      .where('doctorId = :doctorId', { doctorId })
+      .andWhere((qb) => {
+        qb.where('startTime IN (:...startTimes)', {
+          startTimes: availabilities.map((a) =>
+            moment(a.startTime).tz(timezone).format('YYYY-MM-DD HH:mm:ss'),
+          ),
+        }).andWhere('endTime IN (:...endTimes)', {
+          endTimes: availabilities.map((a) =>
+            moment(a.endTime).tz(timezone).format('YYYY-MM-DD HH:mm:ss'),
+          ),
+        });
+      })
+      .execute();
+
     if (!result.affected) {
-      throw new ConflictException('Availability not found');
+      throw new NotFoundException('Availability not found');
     }
+  }
+
+  async updateMultiples(
+    dto: AvailabilityDto[],
+    timezone: string,
+    doctorId: number,
+  ): Promise<Availability[]> {
+    if (!Array.isArray(dto)) {
+      throw new BadRequestException('Expected Many Availabilities');
+    }
+
+    const existingAvailabilities =
+      await this.findAvailabilitiesForLastThreeMonths(doctorId, timezone);
+
+    const newAvailabilities: Availability[] = [];
+    dto.forEach((availability) => {
+      const startTime = moment.tz(availability.startTime, timezone).toDate();
+      const endTime = moment.tz(availability.endTime, timezone).toDate();
+      const existingAvailability = existingAvailabilities.find(
+        (a) =>
+          moment(a.startTime).isSame(startTime) &&
+          moment(a.endTime).isSame(endTime),
+      );
+
+      if (!existingAvailability) {
+        newAvailabilities.push(
+          this.repo.create({
+            doctorId,
+            startTime,
+            endTime,
+            title: availability.title,
+          }),
+        );
+      }
+    });
+
+    if (!newAvailabilities.length) {
+      throw new ConflictException('No new availabilities were added');
+    }
+
+    const result = await this.repo.save(newAvailabilities);
+    return result;
   }
 }

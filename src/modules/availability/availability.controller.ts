@@ -7,6 +7,7 @@ import {
   Request,
   HttpStatus,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
@@ -22,7 +23,7 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { RolesGuard } from '@guards/roles.guard';
 
 import { AvailabilityService } from './availability.service';
-import { CreateAvailabilityDto } from './dto/create-availability.dto';
+import { ChangeAvailabilityBody } from './dto/change-availability.dto';
 
 @ApiTags('availability')
 @UseGuards(AuthGuard('jwt'))
@@ -36,10 +37,14 @@ export class AvailabilityController {
   @ApiOperation({ summary: 'Create a new availability' })
   @Post()
   async create(
-    @Body() dto: CreateAvailabilityDto[],
+    @Body() data: ChangeAvailabilityBody,
     @Request() req: AvailabilityReq,
   ): Promise<IServerResponse<Availability[]>> {
-    await this.availabilityService.createMultiples(dto, req.user.userId);
+    await this.availabilityService.createMultiples(
+      data.dto,
+      data.timezone,
+      req.user.userId,
+    );
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Availability was created',
@@ -90,13 +95,37 @@ export class AvailabilityController {
   @ApiOperation({ summary: "Remove an availability by array of ID's " })
   @Delete()
   async remove(
-    @Body() dto: { startTime: Date; endTime: Date }[],
+    @Body() data: ChangeAvailabilityBody,
     @Request() req: AvailabilityReq,
   ): Promise<IServerResponse<void>> {
-    await this.availabilityService.remove(dto, req.user.userId);
+    await this.availabilityService.remove(
+      data.dto,
+      data.timezone,
+      req.user.userId,
+    );
     return {
       statusCode: HttpStatus.NO_CONTENT,
       message: 'Availabilities were removed',
+    };
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.RemoteDoctor)
+  @ApiOperation({ summary: 'Update an availability by array' })
+  @Patch()
+  async updateMultiples(
+    @Body() data: ChangeAvailabilityBody,
+    @Request() req: AvailabilityReq,
+  ): Promise<IServerResponse<Availability[]>> {
+    const availabilities = await this.availabilityService.updateMultiples(
+      data.dto,
+      data.timezone,
+      req.user.userId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Availabilities were updated',
+      data: availabilities,
     };
   }
 }
