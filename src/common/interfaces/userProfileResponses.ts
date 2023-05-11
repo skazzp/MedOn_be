@@ -32,3 +32,8 @@ export interface IUpdateProfileResponse {
   statusCode: HttpStatus;
   message: string;
 }
+
+export interface IUpdateProfile {
+  user: IProfile;
+  token: string;
+}

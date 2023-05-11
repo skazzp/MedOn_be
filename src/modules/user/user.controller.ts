@@ -11,10 +11,12 @@ import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
 import {
   IProfileRequest,
   IProfileResponse,
+  IUpdateProfile,
 } from '@common/interfaces/userProfileResponses';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AuthGuard } from '@nestjs/passport';
-import { UserService } from './user.service';
+import { AuthService } from '@modules/auth/auth.service';
+import { UserService } from '@modules/user/user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserPasswordDto } from './dto/updateUser.dto';
 
@@ -22,7 +24,10 @@ import { UpdateUserPasswordDto } from './dto/updateUser.dto';
 @Controller('user')
 @UseGuards(AuthGuard('jwt'))
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Get('profile')
   @ApiOperation({ summary: 'Request user profile' })
@@ -55,11 +60,11 @@ export class UserController {
   async updateUser(
     @Request() req: IProfileRequest,
     @Body() dto: UpdateUserDto,
-  ): Promise<IProfileResponse> {
-    const user = await this.userService.updateUser(req.user?.userId, dto);
+  ): Promise<IServerResponse<IUpdateProfile>> {
+    const userData = await this.userService.updateUser(req.user?.userId, dto);
     return {
       statusCode: HttpStatus.OK,
-      data: user,
+      data: userData,
     };
   }
 
