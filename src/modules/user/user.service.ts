@@ -6,13 +6,18 @@ import { ConfigService } from '@nestjs/config';
 import { Doctor } from '@entities/Doctor';
 import { UpdateUserPasswordDto } from '@modules/user/dto/updateUser.dto';
 import { UpdateUserDto } from '@modules/user/dto/update-user.dto';
-import { IProfile } from '@common/interfaces/userProfileResponses';
+import {
+  IProfile,
+  IUpdateProfile,
+} from '@common/interfaces/userProfileResponses';
+import { AuthService } from '@modules/auth/auth.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
     private config: ConfigService,
+    private authService: AuthService,
   ) {}
 
   async getUserByEmail(email: string): Promise<Doctor> {
@@ -36,7 +41,10 @@ export class UserService {
     }
   }
 
-  async updateUser(userId: number, payload: UpdateUserDto): Promise<IProfile> {
+  async updateUser(
+    userId: number,
+    payload: UpdateUserDto,
+  ): Promise<IUpdateProfile> {
     try {
       const user = await this.doctorRepo
         .createQueryBuilder('doctor')
@@ -56,8 +64,13 @@ export class UserService {
       const updatedUser = { ...user, ...payload };
       const { password, createdAt, updatedAt, token, ...userData } =
         updatedUser;
+      const accessToken = await this.authService.getToken({
+        id: updatedUser.id,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      });
 
-      return userData;
+      return { user: userData, token: accessToken };
     } catch (error) {
       throw new UnauthorizedException(error);
     }
