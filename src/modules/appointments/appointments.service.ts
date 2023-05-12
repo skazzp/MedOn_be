@@ -11,6 +11,10 @@ export class AppointmentsService {
     private readonly appointmentRepository: Repository<Appointment>,
   ) {}
 
+  async getAllAppointments(): Promise<Appointment[]> {
+    return this.appointmentRepository.find();
+  }
+
   async getAppointmentById(id: number): Promise<Appointment> {
     const options: FindOneOptions<Appointment> = { where: { id } };
     return this.appointmentRepository.findOne(options);

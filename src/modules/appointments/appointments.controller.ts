@@ -1,21 +1,11 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Body,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { Appointment } from '@entities/Appointments';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { AppointmentsService } from './appointments.service';
 
 @ApiTags('appointments')
 @Controller('appointments')
-@UseGuards(AuthGuard('jwt'))
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
@@ -27,20 +17,22 @@ export class AppointmentsController {
     type: Appointment,
     isArray: true,
   })
-  @Get(':id')
+  async getAllAppointments(): Promise<Appointment[]> {
+    return this.appointmentsService.getAllAppointments();
+  }
+
+  @Get('/:id')
   @ApiOperation({ summary: 'Get appointment by ID' })
   @ApiResponse({
     status: 200,
     description: 'Returns the appointment',
     type: Appointment,
   })
-  async getAppointmentById(
-    @Param('id') id: number,
-  ): Promise<Appointment | undefined> {
+  async getAppointmentById(@Param('id') id: number): Promise<Appointment> {
     return this.appointmentsService.getAppointmentById(id);
   }
 
-  @Post()
+  @Post('/create')
   @ApiOperation({ summary: 'Create new appointment' })
   @ApiResponse({
     status: 201,
@@ -53,7 +45,7 @@ export class AppointmentsController {
     return this.appointmentsService.createAppointment(createAppointmentDto);
   }
 
-  @Delete(':id')
+  @Delete('/remove/:id')
   @ApiOperation({ summary: 'Delete appointment by ID' })
   @ApiResponse({ status: 200, description: 'Appointment deleted' })
   async deleteAppointment(@Param('id') id: number): Promise<void> {
