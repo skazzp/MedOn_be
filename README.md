@@ -54,6 +54,9 @@ Push branch and tag to the origin: <br/>
 ```git push --tags```<br/>
 
 #### Deploy latest version of build to AWS
+Remove local branch "deploy-server" if it exists <br/>
+```git branch -D deploy-server``` <br/>
+
 Create and push special branch "deploy-server" to the server: <br/>
 ```git checkout -b deploy-server```<br/>
 ```git push origin deploy-server --force```<br/>
