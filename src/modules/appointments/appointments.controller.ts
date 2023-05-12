@@ -1,11 +1,21 @@
-import { Controller, Get, Post, Delete, Body, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { Appointment } from '@entities/Appointments';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 import { AppointmentsService } from './appointments.service';
 
 @ApiTags('appointments')
 @Controller('appointments')
+@UseGuards(AuthGuard('jwt'))
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
