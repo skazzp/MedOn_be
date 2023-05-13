@@ -23,7 +23,7 @@ export class AppointmentsService {
 
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
-    timezone = 'America/New_York',
+    timezone: string,
   ): Promise<Appointment> {
     const startTime = moment
       .tz(createAppointmentDto.startTime, timezone)

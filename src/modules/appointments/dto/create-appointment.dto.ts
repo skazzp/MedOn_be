@@ -49,4 +49,12 @@ export class CreateAppointmentDto {
   @IsNumber()
   @IsNotEmpty()
   patientId: number;
+
+  @ApiProperty({
+    description: 'Timezone of the appointment',
+    example: 'America/New_York',
+  })
+  @IsString()
+  @IsNotEmpty()
+  timezone: string;
 }
