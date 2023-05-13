@@ -42,7 +42,7 @@ export class AppointmentsController {
     return this.appointmentsService.getAppointmentById(id);
   }
 
-  @Post('/create')
+  @Post()
   @ApiOperation({ summary: 'Create new appointment' })
   @ApiResponse({
     status: 201,
@@ -55,7 +55,7 @@ export class AppointmentsController {
     return this.appointmentsService.createAppointment(createAppointmentDto);
   }
 
-  @Delete('/remove/:id')
+  @Delete('/:id')
   @ApiOperation({ summary: 'Delete appointment by ID' })
   @ApiResponse({ status: 200, description: 'Appointment deleted' })
   async deleteAppointment(@Param('id') id: number): Promise<void> {
