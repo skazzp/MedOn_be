@@ -50,13 +50,13 @@ export class AppointmentsController {
     type: Appointment,
   })
   async createAppointment(
-    @Body()
-    data: {
-      dto: CreateAppointmentDto;
-      timezone: string;
-    },
+    @Body() createAppointmentDto: CreateAppointmentDto,
+    @Body('timezone') timezone: string,
   ): Promise<Appointment> {
-    return this.appointmentsService.createAppointment(data.dto, data.timezone);
+    return this.appointmentsService.createAppointment(
+      createAppointmentDto,
+      timezone,
+    );
   }
 
   @Delete('/:id')
