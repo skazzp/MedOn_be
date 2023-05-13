@@ -1,6 +1,11 @@
 export interface Appointment {
-  id: string;
-  date: Date;
-  time: string;
-  doctorId: number;
+  id: number;
+  link: string;
+  startTime: Date;
+  endTime: Date;
+  localDoctorId: number;
+  remoteDoctorId: number;
+  patientId: number;
+  createdAt: Date;
+  updatedAt?: Date;
 }

