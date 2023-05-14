@@ -29,7 +29,7 @@ import { UpdateAvailabilityBody } from './dto/update-availability.dto';
 @UseGuards(AuthGuard('jwt'))
 @Controller('availability')
 export class AvailabilityController {
-  constructor(private readonly availabilityService: AvailabilityService) {}
+  constructor(private readonly availabilityService: AvailabilityService) { }
 
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
@@ -79,7 +79,7 @@ export class AvailabilityController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(Role.RemoteDoctor)
+  @Roles(Role.LocalDoctor)
   @ApiOperation({ summary: 'Get an availability by Day' })
   @ApiResponse({
     status: 200,
