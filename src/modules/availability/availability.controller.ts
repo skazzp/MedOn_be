@@ -54,8 +54,6 @@ export class AvailabilityController {
     };
   }
 
-  @UseGuards(RolesGuard)
-  @Roles(Role.RemoteDoctor)
   @ApiOperation({ summary: 'Get a list of all availabilities' })
   @ApiResponse({
     status: 200,
@@ -78,8 +76,6 @@ export class AvailabilityController {
     };
   }
 
-  @UseGuards(RolesGuard)
-  @Roles(Role.LocalDoctor)
   @ApiOperation({ summary: 'Get an availability by Day' })
   @ApiResponse({
     status: 200,
