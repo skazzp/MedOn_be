@@ -21,7 +21,8 @@
       "@common/*": ["src/common/*"],
       "@entities/*": ["src/typeorm/entities/*"],
       "@modules/*": ["src/modules/*"],
-      "@decorators/*": ["src/decorators/*"]
+      "@decorators/*": ["src/decorators/*"],
+      "@guards/*": ["src/guards/*"]
     }
   }
 }
