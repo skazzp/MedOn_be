@@ -61,20 +61,37 @@ export class AvailabilityService {
   }
 
   async getAvailabilityByDay(
-    dayString: Date,
+    day: Date,
     timezone: string,
   ): Promise<Availability[]> {
-    const startOfDay = moment
-      .tz(dayString, timezone)
-      .startOf('day')
-      .toISOString();
-    const endOfDay = moment.tz(dayString, timezone).endOf('day').toISOString();
+    const startOfDay = moment.tz(day, timezone).startOf('day').toISOString();
+    const endOfDay = moment.tz(day, timezone).endOf('day').toISOString();
+
     const availabilities = await this.repo
       .createQueryBuilder('availability')
+      .leftJoinAndSelect('availability.doctor', 'doctor')
+      .leftJoinAndSelect('doctor.speciality', 'speciality')
+      .select([
+        'availability.id',
+        'availability.title',
+        'availability.startTime',
+        'availability.endTime',
+        'availability.isAvailable',
+        'doctor.id',
+        'doctor.firstName',
+        'doctor.lastName',
+        'doctor.city',
+        'doctor.country',
+        'doctor.photo',
+        'doctor.role',
+        'doctor.specialityId',
+        'speciality.name',
+      ])
       .where(
         `availability.startTime >= '${startOfDay}' AND availability.startTime <= '${endOfDay}'`,
       )
       .getMany();
+
     return availabilities;
   }
 
