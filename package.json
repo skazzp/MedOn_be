@@ -98,7 +98,8 @@
       "^@common/(.*)$": "<rootDir>/../src/common/$1",
       "^@modules/(.*)$": "<rootDir>/../src/modules/$1",
       "^@entities/(.*)$": "<rootDir>/../src/typeorm/entities/$1",
-      "^@decorators/(.*)$": "<rootDir>/../src/decorators/$1"
+      "^@decorators/(.*)$": "<rootDir>/../src/decorators/$1",
+      "^@guards/(.*)$": "<rootDir>/../src/guards/$1"
     }
   }
 }
