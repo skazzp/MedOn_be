@@ -61,11 +61,14 @@ export class AvailabilityService {
   }
 
   async getAvailabilityByDay(
-    day: Date,
+    dayString: Date,
     timezone: string,
   ): Promise<Availability[]> {
-    const startOfDay = moment.tz(day, timezone).startOf('day').toISOString();
-    const endOfDay = moment.tz(day, timezone).endOf('day').toISOString();
+    const startOfDay = moment
+      .tz(dayString, timezone)
+      .startOf('day')
+      .toISOString();
+    const endOfDay = moment.tz(dayString, timezone).endOf('day').toISOString();
 
     const availabilities = await this.repo
       .createQueryBuilder('availability')
