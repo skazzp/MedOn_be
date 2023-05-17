@@ -96,9 +96,7 @@ export class AvailabilityService {
       .andWhere((qb) => {
         qb.where('startTime IN (:...startTimes)', {
           startTimes: newAvailabilities.map((a) => {
-            const date = moment(a.startTime)
-              .tz(timezone)
-              .format('YYYY-MM-DD HH:mm:ss');
+            const date = moment(a.startTime).format('YYYY-MM-DD HH:mm:ss');
             console.log(date);
             return date;
           }),
