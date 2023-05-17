@@ -95,9 +95,13 @@ export class AvailabilityService {
       .where('doctorId = :doctorId', { doctorId })
       .andWhere((qb) => {
         qb.where('startTime IN (:...startTimes)', {
-          startTimes: newAvailabilities.map((a) =>
-            moment(a.startTime).tz(timezone).format('YYYY-MM-DD HH:mm:ss'),
-          ),
+          startTimes: newAvailabilities.map((a) => {
+            const date = moment(a.startTime)
+              .tz(timezone)
+              .format('YYYY-MM-DD HH:mm:ss');
+            console.log(date);
+            return date;
+          }),
         }).andWhere('endTime IN (:...endTimes)', {
           endTimes: newAvailabilities.map((a) =>
             moment(a.endTime).tz(timezone).format('YYYY-MM-DD HH:mm:ss'),
