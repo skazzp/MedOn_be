@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -9,12 +10,15 @@ import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
 
 @Entity({ name: 'appointments' })
+@Index(['localDoctorId', 'startTime', 'endTime'], { unique: true })
+@Index(['patientId', 'startTime', 'endTime'], { unique: true })
+@Index(['remoteDoctorId', 'startTime', 'endTime'], { unique: true })
 export class Appointment {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ name: 'link' })
-  link: string;
+  link?: string;
 
   @Column({ name: 'start_time' })
   startTime: Date;

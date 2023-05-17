@@ -17,7 +17,7 @@ import { AppointmentsService } from './appointments.service';
 @Controller('appointments')
 @UseGuards(AuthGuard('jwt'))
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(private readonly appointmentsService: AppointmentsService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all appointments' })
@@ -51,12 +51,8 @@ export class AppointmentsController {
   })
   async createAppointment(
     @Body() createAppointmentDto: CreateAppointmentDto,
-    @Body('timezone') timezone: string,
   ): Promise<Appointment> {
-    return this.appointmentsService.createAppointment(
-      createAppointmentDto,
-      timezone,
-    );
+    return this.appointmentsService.createAppointment(createAppointmentDto);
   }
 
   @Delete('/:id')
