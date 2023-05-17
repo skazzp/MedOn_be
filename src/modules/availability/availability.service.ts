@@ -69,12 +69,32 @@ export class AvailabilityService {
       .startOf('day')
       .toISOString();
     const endOfDay = moment.tz(dayString, timezone).endOf('day').toISOString();
+
     const availabilities = await this.repo
       .createQueryBuilder('availability')
+      .leftJoinAndSelect('availability.doctor', 'doctor')
+      .leftJoinAndSelect('doctor.speciality', 'speciality')
+      .select([
+        'availability.id',
+        'availability.title',
+        'availability.startTime',
+        'availability.endTime',
+        'availability.isAvailable',
+        'doctor.id',
+        'doctor.firstName',
+        'doctor.lastName',
+        'doctor.city',
+        'doctor.country',
+        'doctor.photo',
+        'doctor.role',
+        'doctor.specialityId',
+        'speciality.name',
+      ])
       .where(
         `availability.startTime >= '${startOfDay}' AND availability.startTime <= '${endOfDay}'`,
       )
       .getMany();
+
     return availabilities;
   }
 
