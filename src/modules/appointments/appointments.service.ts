@@ -15,7 +15,7 @@ export class AppointmentsService {
     private readonly appointmentRepository: Repository<Appointment>,
     private readonly httpService: HttpService,
     private config: ConfigService,
-  ) { }
+  ) {}
 
   async createZoomMeeting(): Promise<string> {
     const zoomApiUrl = 'https://api.zoom.us/v2/users/me/meetings';

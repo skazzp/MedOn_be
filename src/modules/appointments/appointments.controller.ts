@@ -11,11 +11,14 @@ import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointme
 import { Appointment } from '@entities/Appointments';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '@guards/roles.guard';
+import { Roles } from '@decorators/roles.decorator';
+import { Role } from '@common/enums';
 import { AppointmentsService } from './appointments.service';
 
 @ApiTags('appointments')
 @Controller('appointments')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) { }
 
@@ -49,6 +52,8 @@ export class AppointmentsController {
     description: 'Returns the created appointment',
     type: Appointment,
   })
+  @UseGuards(RolesGuard)
+  @Roles(Role.LocalDoctor)
   async createAppointment(
     @Body() createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
