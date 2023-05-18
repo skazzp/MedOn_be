@@ -103,6 +103,11 @@ export class AvailabilityService {
     timezone: string,
     doctorId: number,
   ): Promise<void> {
+    const newAvailabilities = availabilities.map((availability) => {
+      const startTime = moment.tz(availability.startTime, timezone).toDate();
+      const endTime = moment.tz(availability.endTime, timezone).toDate();
+      return { startTime, endTime };
+    });
     const result = await this.repo
       .createQueryBuilder()
       .delete()
@@ -110,12 +115,12 @@ export class AvailabilityService {
       .where('doctorId = :doctorId', { doctorId })
       .andWhere((qb) => {
         qb.where('startTime IN (:...startTimes)', {
-          startTimes: availabilities.map((a) =>
-            moment(a.startTime).tz(timezone).format('YYYY-MM-DD HH:mm:ss'),
+          startTimes: newAvailabilities.map((a) =>
+            moment(a.startTime).format('YYYY-MM-DD HH:mm:ss'),
           ),
         }).andWhere('endTime IN (:...endTimes)', {
-          endTimes: availabilities.map((a) =>
-            moment(a.endTime).tz(timezone).format('YYYY-MM-DD HH:mm:ss'),
+          endTimes: newAvailabilities.map((a) =>
+            moment(a.endTime).format('YYYY-MM-DD HH:mm:ss'),
           ),
         });
       })
