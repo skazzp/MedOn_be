@@ -1,11 +1,12 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
-import * as moment from 'moment-timezone';
-import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -13,33 +14,18 @@ export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
-    private readonly httpService: HttpService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
-  async createZoomMeeting(): Promise<string> {
-    const zoomApiUrl = 'https://api.zoom.us/v2/users/me/meetings';
-    const token = this.config.get('YOUR_ZOOM_API_JWT');
-
-    const response = await firstValueFrom(
-      this.httpService.post(
-        zoomApiUrl,
-        {},
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      ),
-    );
-
-    const { joinUrl } = response.data;
-    return joinUrl;
-  }
-
-  async getAllAppointments(): Promise<Appointment[]> {
-    return this.appointmentRepository.find();
+  async getAllAppointments(id: number): Promise<Appointment[]> {
+    const appointments = this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('appointment.localDoctorId = :id', { id })
+      .orWhere('appointment.remoteDoctorId = :id', { id })
+      .getMany();
+    if ((await appointments).length === 0)
+      throw new UnauthorizedException('Appointments no found!');
+    return appointments;
   }
 
   async getAppointmentById(id: number): Promise<Appointment> {
@@ -62,21 +48,14 @@ export class AppointmentsService {
     );
     endTime.setUTCSeconds(0);
 
-    const link = await this.createZoomMeeting();
-
     const appointment: DeepPartial<Appointment> = {
+      link: createAppointmentDto.link,
       startTime,
       endTime,
       localDoctorId: createAppointmentDto.localDoctorId,
       remoteDoctorId: createAppointmentDto.remoteDoctorId,
       patientId: createAppointmentDto.patientId,
     };
-
-    if (link) {
-      appointment.link = link;
-    } else {
-      appointment.link = 'https://api.zoom.us/';
-    }
 
     try {
       const savedAppointment = await this.appointmentRepository.save(

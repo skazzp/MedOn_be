@@ -6,6 +6,8 @@ import {
   Body,
   Param,
   UseGuards,
+  Req,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { Appointment } from '@entities/Appointments';
@@ -14,6 +16,11 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '@guards/roles.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@common/enums';
+import {
+  IProfileResponse,
+  IProfileResponseOne,
+  RequestWithUser,
+} from '@common/interfaces/Appointment';
 import { AppointmentsService } from './appointments.service';
 
 @ApiTags('appointments')
@@ -22,16 +29,25 @@ import { AppointmentsService } from './appointments.service';
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) { }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all appointments' })
+  @Get('/all')
+  @ApiOperation({ summary: 'Get all appointments for the current user' })
   @ApiResponse({
     status: 200,
     description: 'Returns an array of appointments',
     type: Appointment,
     isArray: true,
   })
-  async getAllAppointments(): Promise<Appointment[]> {
-    return this.appointmentsService.getAllAppointments();
+  async getAllAppointmentsForCurrentUser(
+    @Req() request: RequestWithUser,
+  ): Promise<IProfileResponse> {
+    const { user } = request;
+    const appointments = await this.appointmentsService.getAllAppointments(
+      user.userId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointments,
+    };
   }
 
   @Get('/:id')
@@ -41,8 +57,14 @@ export class AppointmentsController {
     description: 'Returns the appointment',
     type: Appointment,
   })
-  async getAppointmentById(@Param('id') id: number): Promise<Appointment> {
-    return this.appointmentsService.getAppointmentById(id);
+  async getAppointmentById(
+    @Param('id') id: number,
+  ): Promise<IProfileResponseOne> {
+    const appointmentId = await this.appointmentsService.getAppointmentById(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointmentId,
+    };
   }
 
   @Post()

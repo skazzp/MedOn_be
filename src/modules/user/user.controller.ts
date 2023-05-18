@@ -27,7 +27,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   @Get('profile')
   @ApiOperation({ summary: 'Request user profile' })
