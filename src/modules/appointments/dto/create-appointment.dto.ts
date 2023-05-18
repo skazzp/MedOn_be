@@ -7,7 +7,7 @@ export class CreateAppointmentDto {
     example: 'https://example.com/appointment/123',
   })
   @IsString()
-  link: string;
+  link?: string;
 
   @ApiProperty({
     description: 'Start time of the appointment',
@@ -48,4 +48,12 @@ export class CreateAppointmentDto {
   @IsNumber()
   @IsNotEmpty()
   patientId: number;
+
+  @ApiProperty({
+    description: 'Timezone of the appointment',
+    example: 'America/New_York',
+  })
+  @IsString()
+  @IsNotEmpty()
+  timezone: string;
 }

@@ -8,6 +8,7 @@ import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { ConfigService } from '@nestjs/config';
+import * as moment from 'moment';
 
 @Injectable()
 export class AppointmentsService {
@@ -17,13 +18,13 @@ export class AppointmentsService {
     private config: ConfigService,
   ) { }
 
-  async getAllAppointments(id: number): Promise<Appointment[]> {
-    const appointments = this.appointmentRepository
+  async getAllAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
+    const appointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
       .where('appointment.localDoctorId = :id', { id })
       .orWhere('appointment.remoteDoctorId = :id', { id })
       .getMany();
-    if ((await appointments).length === 0)
+    if (appointments.length === 0)
       throw new UnauthorizedException('Appointments no found!');
     return appointments;
   }
@@ -35,18 +36,12 @@ export class AppointmentsService {
 
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
+    timezone: string,
   ): Promise<Appointment> {
-    const startTime = new Date(createAppointmentDto.startTime);
-    startTime.setUTCMinutes(
-      startTime.getUTCMinutes() + startTime.getTimezoneOffset(),
-    );
-    startTime.setUTCSeconds(0);
-
-    const endTime = new Date(createAppointmentDto.endTime);
-    endTime.setUTCMinutes(
-      endTime.getUTCMinutes() + endTime.getTimezoneOffset(),
-    );
-    endTime.setUTCSeconds(0);
+    const startTime = moment
+      .tz(createAppointmentDto.startTime, timezone)
+      .toDate();
+    const endTime = moment.tz(createAppointmentDto.endTime, timezone).toDate();
 
     const appointment: DeepPartial<Appointment> = {
       link: createAppointmentDto.link,

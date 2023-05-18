@@ -16,11 +16,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '@guards/roles.guard';
 import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@common/enums';
-import {
-  IProfileResponse,
-  IProfileResponseOne,
-  RequestWithUser,
-} from '@common/interfaces/Appointment';
+import { RequestWithUser } from '@common/interfaces/Appointment';
+import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AppointmentsService } from './appointments.service';
 
 @ApiTags('appointments')
@@ -37,13 +34,12 @@ export class AppointmentsController {
     type: Appointment,
     isArray: true,
   })
-  async getAllAppointmentsForCurrentUser(
+  async getAllAppointmentsForCurrentDoctor(
     @Req() request: RequestWithUser,
-  ): Promise<IProfileResponse> {
+  ): Promise<IServerResponse> {
     const { user } = request;
-    const appointments = await this.appointmentsService.getAllAppointments(
-      user.userId,
-    );
+    const appointments =
+      await this.appointmentsService.getAllAppointmentsByDoctorId(user.userId);
     return {
       statusCode: HttpStatus.OK,
       data: appointments,
@@ -57,9 +53,7 @@ export class AppointmentsController {
     description: 'Returns the appointment',
     type: Appointment,
   })
-  async getAppointmentById(
-    @Param('id') id: number,
-  ): Promise<IProfileResponseOne> {
+  async getAppointmentById(@Param('id') id: number): Promise<IServerResponse> {
     const appointmentId = await this.appointmentsService.getAppointmentById(id);
     return {
       statusCode: HttpStatus.OK,
@@ -78,8 +72,12 @@ export class AppointmentsController {
   @Roles(Role.LocalDoctor)
   async createAppointment(
     @Body() createAppointmentDto: CreateAppointmentDto,
+    @Body('timezone') timezone: string,
   ): Promise<Appointment> {
-    return this.appointmentsService.createAppointment(createAppointmentDto);
+    return this.appointmentsService.createAppointment(
+      createAppointmentDto,
+      timezone,
+    );
   }
 
   @Delete('/:id')
