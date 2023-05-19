@@ -4,10 +4,12 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
+import { Chat } from '@entities/Chats';
 
 @Entity({ name: 'appointments' })
 @Index(['localDoctorId', 'startTime', 'endTime'], { unique: true })
@@ -46,6 +48,9 @@ export class Appointment {
   @ManyToOne(() => Patient, (patient) => patient.id)
   @JoinColumn({ name: 'patient_id' })
   patient: Patient;
+
+  @OneToMany(() => Chat, (chat) => chat.appointment)
+  chats: Chat[];
 
   @Column({ name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
