@@ -21,6 +21,7 @@ import { PatientsModule } from '@modules/patients/patients.module';
 import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module';
 import { AppointmentsModule } from '@modules/appointments/appointments.module';
 import { RolesGuard } from '@guards/roles.guard';
+import { ChatModule } from '@modules/chat/chat.module';
 import { JwtStrategy } from './strategy/jwt.strategy';
 
 @Module({
@@ -57,6 +58,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     AvailabilityModule,
     PatientNotesModule,
     AppointmentsModule,
+    ChatModule,
   ],
   providers: [JwtStrategy, RolesGuard],
 })
