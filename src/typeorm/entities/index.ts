@@ -1,6 +1,6 @@
 export * from './Appointments';
 export * from './Availability';
-export * from './Chats';
+export * from './ChatMessage';
 export * from './Doctor';
 export * from './Patient';
 export * from './PatientNotes';

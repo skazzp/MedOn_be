@@ -9,7 +9,7 @@ import {
   PatientNotes,
   Availability,
   Appointment,
-  Chat,
+  ChatMessage,
 } from '@entities/index';
 
 import { AuthModule } from '@modules/auth/auth.module';
@@ -42,7 +42,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
           Doctor,
           Availability,
           Appointment,
-          Chat,
+          ChatMessage,
           PatientNotes,
         ],
         synchronize: true,

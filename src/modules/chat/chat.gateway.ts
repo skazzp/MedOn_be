@@ -2,62 +2,63 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from '@modules/chat/chat.service';
-import { AppointmentsService } from '@modules/appointments/appointments.service';
 import { CreateMessageDto } from '@modules/chat/dto/create-message.dto';
+import { ChatMessage } from '@entities/ChatMessage';
 
 @WebSocketGateway(4000, { cors: true })
-export class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
+  private appointmentId: number | null;
+
+  private room: string | null;
+
   private readonly logger = new Logger(ChatGateway.name);
 
-  constructor(
-    private appointment: AppointmentsService,
-    private chat: ChatService,
-  ) {}
+  constructor(private chat: ChatService) {}
 
-  afterInit() {
-    this.logger.log('WebSocket gateway initialized');
-  }
-
-  handleConnection(client: Socket) {
+  handleConnection(client: Socket): void {
     this.logger.log(`Client connected: ${client.id}`);
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect(client: Socket): void {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  @SubscribeMessage('joinRoom')
-  handleJoinRoom(client: Socket, data: { appointmentId: number }) {
-    const room = `appointment_${data.appointmentId}`;
-    client.join(room);
-    this.logger.log(`Client ${client.id} joined appointment room ${room}`);
+  @SubscribeMessage('joinRoomByAppointmentId')
+  handleJoinRoom(client: Socket, appointmentId: number): void {
+    this.appointmentId = appointmentId;
+    this.room = `app-${this.appointmentId}`;
+    client.join(this.room);
+
+    this.logger.log(`Client ${client.id} joined appointment room ${this.room}`);
   }
 
   @SubscribeMessage('leaveRoom')
-  handleLeaveRoom(client: Socket, data: { appointmentId: number }) {
-    const room = `appointment_${data.appointmentId}`;
-    client.leave(room);
-    this.logger.log(`Client ${client.id} left appointment room ${room}`);
+  handleLeaveRoom(client: Socket): void {
+    client.leave(this.room);
+
+    this.logger.log(`Client ${client.id} left appointment room ${this.room}`);
   }
 
   @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, dto: CreateMessageDto) {
-    const chat = await this.chat.create(dto);
-    const room = `appointment-${dto.appointmentId}`;
-    this.server.to(room).emit('newMessage', chat.message);
+  async handleSendMessage(
+    client: Socket,
+    dto: CreateMessageDto,
+  ): Promise<void> {
+    const message = await this.chat.saveMassage(dto);
+    this.server.to(this.room).emit('message', message);
+  }
 
-    this.logger.log(`Client ${client.id} joined appointment room ${room}`);
+  @SubscribeMessage('getAllMessages')
+  async getAllMessages(): Promise<ChatMessage[]> {
+    return this.chat.getAllMessagesByAppointmentId(this.appointmentId);
   }
 }

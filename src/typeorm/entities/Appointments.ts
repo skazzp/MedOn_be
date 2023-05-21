@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
-import { Chat } from '@entities/Chats';
+import { ChatMessage } from '@entities/ChatMessage';
 
 @Entity({ name: 'appointments' })
 @Index(['localDoctorId', 'startTime', 'endTime'], { unique: true })
@@ -49,8 +49,8 @@ export class Appointment {
   @JoinColumn({ name: 'patient_id' })
   patient: Patient;
 
-  @OneToMany(() => Chat, (chat) => chat.appointment)
-  chats: Chat[];
+  @OneToMany(() => ChatMessage, (msg) => msg.appointment)
+  messages: ChatMessage[];
 
   @Column({ name: 'created_at', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

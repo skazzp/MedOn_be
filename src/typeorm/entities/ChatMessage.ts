@@ -11,14 +11,16 @@ import { Doctor } from '@entities/Doctor';
 import { Appointment } from '@entities/Appointments';
 
 @Entity()
-export class Chat {
+export class ChatMessage {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ name: 'message' })
-  message: string;
+  value: string;
 
-  @ManyToOne(() => Appointment, (appointment) => appointment.chats)
+  @ManyToOne(() => Appointment, (appointment) => appointment.messages, {
+    eager: true,
+  })
   @JoinColumn({ name: 'appointment_id' })
   appointment: Appointment;
 

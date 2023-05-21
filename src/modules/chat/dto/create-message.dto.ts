@@ -3,11 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMessageDto {
   @ApiProperty({
-    description: 'Message in chat',
+    description: 'ChatMessage in chat',
     example: 'Hello',
   })
   @IsNotEmpty()
-  message: string;
+  value: string;
 
   @ApiProperty({
     description: 'Appointment identifier',
