@@ -37,3 +37,7 @@ export interface IUpdateProfile {
   user: IProfile;
   token: string;
 }
+
+export interface IUpdatePhoto {
+  photo: string;
+}

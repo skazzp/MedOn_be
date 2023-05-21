@@ -6,14 +6,28 @@ import {
   Request,
   Body,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  FileTypeValidator,
+  MaxFileSizeValidator,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiTags,
+  ApiResponse,
+  ApiConsumes,
+} from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+
 import {
   IProfileRequest,
   IProfileResponse,
+  IUpdatePhoto,
   IUpdateProfile,
 } from '@common/interfaces/userProfileResponses';
 import { IServerResponse } from '@common/interfaces/serverResponses';
+import { fileType, maxSize } from '@common/constants/file-params';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '@modules/auth/auth.service';
 import { UserService } from '@modules/user/user.service';
@@ -65,6 +79,43 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       data: userData,
+    };
+  }
+
+  @Patch('update-photo')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Update user photo' })
+  @ApiResponse({
+    status: 201,
+    description: 'User information updated successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'User information request was rejected',
+  })
+  async updatePhoto(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize }),
+          new FileTypeValidator({ fileType }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Request()
+    req: IProfileRequest,
+  ): Promise<IServerResponse<IUpdatePhoto>> {
+    const updatedPhoto = await this.userService.updatePhoto(
+      req.user?.userId,
+      file.buffer,
+      file.originalname,
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      data: { photo: updatedPhoto },
     };
   }
 
