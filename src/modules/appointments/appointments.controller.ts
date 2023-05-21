@@ -24,7 +24,7 @@ import { AppointmentsService } from './appointments.service';
 @Controller('appointments')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) { }
+  constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Get('/all')
   @ApiOperation({ summary: 'Get all appointments for the current user' })
