@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatMessage } from '@entities/ChatMessage';
 import { UserModule } from '@modules/user/user.module';
 import { AppointmentsModule } from '@modules/appointments/appointments.module';
+import { ConfigModule } from '@nestjs/config';
 import { ChatService } from './chat.service';
 
 @Module({
@@ -11,6 +12,7 @@ import { ChatService } from './chat.service';
     TypeOrmModule.forFeature([ChatMessage]),
     UserModule,
     AppointmentsModule,
+    ConfigModule,
   ],
   providers: [ChatService, ChatGateway],
 })
