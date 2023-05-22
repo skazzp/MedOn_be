@@ -8,11 +8,13 @@ import { ConfigService } from '@nestjs/config';
 export class FilesService {
   constructor(private readonly configService: ConfigService) {}
 
-  bucketName = this.configService.get('AWS_BUCKET_NAME');
+  bucketName = this.configService.get('AWS_PUBLIC_BUCKET_NAME');
 
   s3 = new S3({
-    accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID'),
-    secretAccessKey: this.configService.get('AWS_SECRET_ACCESS_KEY'),
+    accessKeyId: this.configService.get('AWS_IMAGE_BUCKET_ACCESS_KEY_ID'),
+    secretAccessKey: this.configService.get(
+      'AWS_IMAGE_BUCKET_SECRET_ACCESS_KEY',
+    ),
   });
 
   async uploadPublicFile(
