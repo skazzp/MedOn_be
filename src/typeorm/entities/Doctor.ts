@@ -12,6 +12,7 @@ import {
 import { Speciality } from '@entities/Speciality';
 import { Role } from '@common/enums/Role';
 import { Availability } from './Availability';
+import { Appointment } from './Appointments';
 
 @Entity({ name: 'doctor' })
 export class Doctor {
@@ -63,6 +64,9 @@ export class Doctor {
 
   @OneToMany(() => Availability, (availability) => availability.doctor)
   availability?: Availability[];
+
+  @OneToMany(() => Appointment, (availability) => availability.remoteDoctor)
+  appointments?: Appointment[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

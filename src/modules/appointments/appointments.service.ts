@@ -5,10 +5,11 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import * as moment from 'moment-timezone';
+
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
-import { ConfigService } from '@nestjs/config';
-import * as moment from 'moment';
 
 @Injectable()
 export class AppointmentsService {
@@ -16,7 +17,7 @@ export class AppointmentsService {
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
     private config: ConfigService,
-  ) { }
+  ) {}
 
   async getAllAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
     const appointments = await this.appointmentRepository
@@ -36,12 +37,9 @@ export class AppointmentsService {
 
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
-    timezone: string,
   ): Promise<Appointment> {
-    const startTime = moment
-      .tz(createAppointmentDto.startTime, timezone)
-      .toDate();
-    const endTime = moment.tz(createAppointmentDto.endTime, timezone).toDate();
+    const startTime = moment(createAppointmentDto.startTime).tz('UTC').toDate();
+    const endTime = moment(createAppointmentDto.endTime).tz('UTC').toDate();
 
     const appointment: DeepPartial<Appointment> = {
       link: createAppointmentDto.link,
@@ -66,5 +64,29 @@ export class AppointmentsService {
 
   async deleteAppointment(id: number): Promise<void> {
     await this.appointmentRepository.delete(id);
+  }
+
+  async getFutureAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
+    const now = new Date();
+
+    const futureAppointments = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where(
+        `appointment.startTime > :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        { now, id },
+      )
+      .getMany();
+    return futureAppointments;
+  }
+
+  async getPastAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
+    const pastAppointments = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where(
+        `appointment.startTime < NOW() AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        { id },
+      )
+      .getMany();
+    return pastAppointments;
   }
 }

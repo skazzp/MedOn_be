@@ -24,7 +24,7 @@ import { AppointmentsService } from './appointments.service';
 @Controller('appointments')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) { }
+  constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Get('/all')
   @ApiOperation({ summary: 'Get all appointments for the current user' })
@@ -72,12 +72,8 @@ export class AppointmentsController {
   @Roles(Role.LocalDoctor)
   async createAppointment(
     @Body() createAppointmentDto: CreateAppointmentDto,
-    @Body('timezone') timezone: string,
   ): Promise<Appointment> {
-    return this.appointmentsService.createAppointment(
-      createAppointmentDto,
-      timezone,
-    );
+    return this.appointmentsService.createAppointment(createAppointmentDto);
   }
 
   @Delete('/:id')
@@ -85,5 +81,29 @@ export class AppointmentsController {
   @ApiResponse({ status: 200, description: 'Appointment deleted' })
   async deleteAppointment(@Param('id') id: number): Promise<void> {
     await this.appointmentsService.deleteAppointment(id);
+  }
+
+  @Get('/future')
+  async getFutureAppointmentsForCurrentDoctor(@Req() request: RequestWithUser) {
+    const appointments =
+      await this.appointmentsService.getFutureAppointmentsByDoctorId(
+        request.user.userId,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointments,
+    };
+  }
+
+  @Post('/past')
+  async getPastAppointmentsForCurrentDoctor(@Req() request: RequestWithUser) {
+    const appointments =
+      await this.appointmentsService.getPastAppointmentsByDoctorId(
+        request.user.userId,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointments,
+    };
   }
 }
