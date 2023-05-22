@@ -40,9 +40,9 @@ export class AppointmentsService {
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
-    const startTime = new Date(createAppointmentDto.startTime).toISOString();
+    const startTime = moment(createAppointmentDto.startTime).utc().toDate();
 
-    const endTime = new Date(createAppointmentDto.endTime).toISOString();
+    const endTime = moment(createAppointmentDto.endTime).utc().toDate();
 
     const appointment: DeepPartial<Appointment> = {
       link: createAppointmentDto.link,
@@ -57,7 +57,6 @@ export class AppointmentsService {
       const savedAppointment = await this.appointmentRepository.save(
         appointment,
       );
-      console.log('savedAppointment:', savedAppointment);
 
       return savedAppointment;
     } catch (error) {
@@ -72,7 +71,7 @@ export class AppointmentsService {
   }
 
   async getFutureAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
-    const now = new Date().toISOString();
+    const now = moment().toDate();
 
     const futureAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
@@ -86,7 +85,7 @@ export class AppointmentsService {
   }
 
   async getPastAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
-    const now = new Date().toISOString();
+    const now = moment().toDate();
 
     const pastAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
