@@ -31,10 +31,11 @@ export class ChatGateway
     private readonly config: ConfigService,
   ) {}
 
-  afterInit() {
+  afterInit(): void {
     const port = this.config.get('webSocketPort');
-    this.logger.log(`WebSocket server initialized on port ${port}`);
     this.server.listen(port);
+
+    this.logger.log(`WebSocket server initialized on port ${port}`);
   }
 
   handleConnection(client: Socket): void {
