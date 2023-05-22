@@ -11,6 +11,7 @@ import {
   IUpdateProfile,
 } from '@common/interfaces/userProfileResponses';
 import { AuthService } from '@modules/auth/auth.service';
+import { FilesService } from '@modules/files/files.service';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,7 @@ export class UserService {
     @InjectRepository(Doctor) private doctorRepo: Repository<Doctor>,
     private config: ConfigService,
     private authService: AuthService,
+    private filesService: FilesService,
   ) {}
 
   async getUserById(id: number): Promise<Doctor> {
@@ -78,6 +80,35 @@ export class UserService {
     } catch (error) {
       throw new UnauthorizedException(error);
     }
+  }
+
+  async updatePhoto(
+    id: number,
+    dataBuffer: Buffer,
+    filename: string,
+  ): Promise<string> {
+    const photo = await this.filesService
+      .uploadPublicFile(dataBuffer, filename)
+      .then((res) => {
+        const name: string = res;
+        return name;
+      });
+
+    const updateResult = await this.doctorRepo
+      .createQueryBuilder('doctor')
+      .update(Doctor)
+      .set({
+        photo,
+        updatedAt: new Date(),
+      })
+      .where('id = :id', { id })
+      .execute();
+
+    if (!updateResult.affected) {
+      throw new UnauthorizedException('User not found!');
+    }
+
+    return photo;
   }
 
   async updatePassword(

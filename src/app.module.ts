@@ -20,6 +20,7 @@ import { AvailabilityModule } from '@modules/availability/availability.module';
 import { PatientsModule } from '@modules/patients/patients.module';
 import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module';
 import { AppointmentsModule } from '@modules/appointments/appointments.module';
+import { FilesModule } from '@modules/files/files.module';
 import { RolesGuard } from '@guards/roles.guard';
 import { ChatModule } from '@modules/chat/chat.module';
 import { JwtStrategy } from './strategy/jwt.strategy';
@@ -58,6 +59,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     AvailabilityModule,
     PatientNotesModule,
     AppointmentsModule,
+    FilesModule,
     ChatModule,
   ],
   providers: [JwtStrategy, RolesGuard],
