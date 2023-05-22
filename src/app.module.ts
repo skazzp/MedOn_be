@@ -2,10 +2,15 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Doctor } from '@entities/Doctor';
-import { Patient } from '@entities/Patient';
-import { Speciality } from '@entities/Speciality';
-import { Availability } from '@entities/Availability';
+import {
+  Doctor,
+  Patient,
+  Speciality,
+  PatientNotes,
+  Availability,
+  Appointment,
+  ChatMessage,
+} from '@entities/index';
 
 import { AuthModule } from '@modules/auth/auth.module';
 import { EmailModule } from '@modules/email/email.module';
@@ -16,7 +21,8 @@ import { PatientsModule } from '@modules/patients/patients.module';
 import { PatientNotesModule } from '@modules/patient-notes/patient-notes.module';
 import { AppointmentsModule } from '@modules/appointments/appointments.module';
 import { FilesModule } from '@modules/files/files.module';
-import { RolesGuard } from './guards/roles.guard';
+import { RolesGuard } from '@guards/roles.guard';
+import { ChatModule } from '@modules/chat/chat.module';
 import { JwtStrategy } from './strategy/jwt.strategy';
 
 @Module({
@@ -31,7 +37,15 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [Patient, Speciality, Doctor, Availability],
+        entities: [
+          Patient,
+          Speciality,
+          Doctor,
+          Availability,
+          Appointment,
+          ChatMessage,
+          PatientNotes,
+        ],
         synchronize: true,
         autoLoadEntities: true,
       }),
@@ -46,6 +60,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     PatientNotesModule,
     AppointmentsModule,
     FilesModule,
+    ChatModule,
   ],
   providers: [JwtStrategy, RolesGuard],
 })

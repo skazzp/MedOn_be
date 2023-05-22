@@ -31,6 +31,7 @@ import { fileType, maxSize } from '@common/constants/file-params';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '@modules/auth/auth.service';
 import { UserService } from '@modules/user/user.service';
+import { Doctor } from '@entities/Doctor';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserPasswordDto } from './dto/updateUser.dto';
 
@@ -55,6 +56,14 @@ export class UserController {
   })
   async getUser(@Request() req: IProfileRequest): Promise<IProfileResponse> {
     const user = await this.userService.getUser({ email: req.user?.email });
+    return {
+      statusCode: HttpStatus.OK,
+      data: user,
+    };
+  }
+
+  async getUserById(id: number): Promise<IServerResponse<Doctor>> {
+    const user = await this.userService.getUserById(id);
     return {
       statusCode: HttpStatus.OK,
       data: user,

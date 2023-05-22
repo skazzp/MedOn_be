@@ -22,6 +22,10 @@ export class UserService {
     private filesService: FilesService,
   ) {}
 
+  async getUserById(id: number): Promise<Doctor> {
+    return this.doctorRepo.findOneBy({ id });
+  }
+
   async getUserByEmail(email: string): Promise<Doctor> {
     const user = await this.doctorRepo
       .createQueryBuilder('doctor')
