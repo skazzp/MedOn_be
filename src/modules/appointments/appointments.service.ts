@@ -27,6 +27,8 @@ export class AppointmentsService {
       .getMany();
     if (appointments.length === 0)
       throw new UnauthorizedException('Appointments no found!');
+    console.log('appointments:', appointments);
+
     return appointments;
   }
 
@@ -38,8 +40,9 @@ export class AppointmentsService {
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
-    const startTime = moment(createAppointmentDto.startTime).tz('UTC').toDate();
-    const endTime = moment(createAppointmentDto.endTime).tz('UTC').toDate();
+    const startTime = new Date(createAppointmentDto.startTime).toISOString();
+
+    const endTime = new Date(createAppointmentDto.endTime).toISOString();
 
     const appointment: DeepPartial<Appointment> = {
       link: createAppointmentDto.link,
@@ -54,6 +57,8 @@ export class AppointmentsService {
       const savedAppointment = await this.appointmentRepository.save(
         appointment,
       );
+      console.log('savedAppointment:', savedAppointment);
+
       return savedAppointment;
     } catch (error) {
       throw new ConflictException(
@@ -67,24 +72,27 @@ export class AppointmentsService {
   }
 
   async getFutureAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
-    const now = new Date();
+    const now = new Date().toISOString();
 
     const futureAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
       .where(
-        `appointment.startTime > :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
       .getMany();
+
     return futureAppointments;
   }
 
   async getPastAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
+    const now = new Date().toISOString();
+
     const pastAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
       .where(
-        `appointment.startTime < NOW() AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
-        { id },
+        `appointment.startTime < :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        { now, id },
       )
       .getMany();
     return pastAppointments;

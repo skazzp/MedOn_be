@@ -83,12 +83,20 @@ export class AppointmentsController {
     await this.appointmentsService.deleteAppointment(id);
   }
 
-  @Get('/future')
+  @Post('/future')
+  @ApiOperation({ summary: 'Get future appointments for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
   async getFutureAppointmentsForCurrentDoctor(@Req() request: RequestWithUser) {
     const appointments =
       await this.appointmentsService.getFutureAppointmentsByDoctorId(
         request.user.userId,
       );
+
     return {
       statusCode: HttpStatus.OK,
       data: appointments,
