@@ -6,6 +6,7 @@ import { EmailModule } from '@modules/email/email.module';
 import { AuthService } from '@modules/auth/auth.service';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { FilesService } from '@modules/files/files.service';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 
@@ -17,6 +18,7 @@ import { UserController } from './user.controller';
     JwtModule.register({}),
   ],
   controllers: [UserController],
-  providers: [UserService, AuthService],
+  providers: [UserService, AuthService, FilesService],
+  exports: [UserService],
 })
 export class UserModule {}
