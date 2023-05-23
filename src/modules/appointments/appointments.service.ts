@@ -1,3 +1,4 @@
+import * as moment from 'moment-timezone';
 import {
   ConflictException,
   Injectable,
@@ -6,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import * as moment from 'moment-timezone';
 
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
@@ -27,7 +27,6 @@ export class AppointmentsService {
       .getMany();
     if (appointments.length === 0)
       throw new UnauthorizedException('Appointments no found!');
-    console.log('appointments:', appointments);
 
     return appointments;
   }
@@ -75,10 +74,25 @@ export class AppointmentsService {
 
     const futureAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .where(
         `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
+      .orderBy('appointment.startTime', 'ASC')
+      .select([
+        'appointment.id',
+        'appointment.link',
+        'appointment.startTime',
+        'appointment.endTime',
+        'patient.firstName',
+        'patient.lastName',
+        'patient.dateOfBirth',
+        'patient.gender',
+        'patient.overview',
+        'remoteDoctor.lastName',
+      ])
       .getMany();
 
     return futureAppointments;
@@ -89,10 +103,25 @@ export class AppointmentsService {
 
     const pastAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .where(
-        `appointment.startTime < :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
+      .orderBy('appointment.startTime', 'DESC')
+      .select([
+        'appointment.id',
+        'appointment.link',
+        'appointment.startTime',
+        'appointment.endTime',
+        'patient.firstName',
+        'patient.lastName',
+        'patient.dateOfBirth',
+        'patient.gender',
+        'patient.overview',
+        'remoteDoctor.lastName',
+      ])
       .getMany();
     return pastAppointments;
   }
