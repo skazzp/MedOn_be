@@ -53,6 +53,10 @@ jobs:
             GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
             GOOGLE_CALLBACK_URL=${{ vars.GOOGLE_CALLBACK_URL }}
+            AWS_PUBLIC_BUCKET_NAME=${{ vars.AWS_PUBLIC_BUCKET_NAME }}
+            AWS_IMAGE_BUCKET_ACCESS_KEY_ID=${{ secrets.AWS_IMAGE_BUCKET_ACCESS_KEY_ID }}
+            AWS_IMAGE_BUCKET_SECRET_ACCESS_KEY=${{ secrets.AWS_IMAGE_BUCKET_SECRET_ACCESS_KEY }}
+
           tags: |
             medonproject/medon:${{ steps.set_version.outputs.no-dash }}
             medonproject/medon:latest
