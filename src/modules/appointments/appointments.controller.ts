@@ -88,10 +88,10 @@ export class AppointmentsController {
   }
 
   @Get('/patient/:id')
-  @ApiOperation({ summary: 'Get appointment by ID' })
+  @ApiOperation({ summary: "Get appointments by patient's ID" })
   @ApiResponse({
     status: 200,
-    description: 'Returns the appointment',
+    description: "Returns appointment's array",
     type: Appointment,
   })
   async getAppointmentsByPatientId(
