@@ -17,7 +17,6 @@ export class ChatService {
   async saveMassage(dto: CreateMessageDto): Promise<ChatMessage> {
     const newMessage = new ChatMessage();
     newMessage.sender = await this.doctor.getUserById(dto.senderId);
-    newMessage.recipient = await this.doctor.getUserById(dto.recipientId);
     newMessage.appointment = await this.appointment.getAppointmentById(
       dto.appointmentId,
     );
@@ -31,7 +30,6 @@ export class ChatService {
       .createQueryBuilder('chat')
       .leftJoinAndSelect('chat.appointment', 'appointment')
       .leftJoinAndSelect('chat.sender', 'sender')
-      .leftJoinAndSelect('chat.recipient', 'recipient')
       .where('appointment.id = :id', { id })
       .getMany();
   }

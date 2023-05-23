@@ -28,10 +28,6 @@ export class ChatMessage {
   @JoinColumn({ name: 'sender_id' })
   sender: Doctor;
 
-  @ManyToOne(() => Doctor, { eager: true })
-  @JoinColumn({ name: 'recipient_id' })
-  recipient: Doctor;
-
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
