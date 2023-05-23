@@ -67,4 +67,13 @@ export class AppointmentsService {
   async deleteAppointment(id: number): Promise<void> {
     await this.appointmentRepository.delete(id);
   }
+
+  async getAppointmentsByPatientId(id: number): Promise<Appointment[]> {
+    const appointments = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('appointment.patientId = :id', { id })
+      .getMany();
+
+    return appointments;
+  }
 }

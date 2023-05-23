@@ -86,4 +86,22 @@ export class AppointmentsController {
   async deleteAppointment(@Param('id') id: number): Promise<void> {
     await this.appointmentsService.deleteAppointment(id);
   }
+
+  @Get('/patient/:id')
+  @ApiOperation({ summary: "Get appointments by patient's ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Returns appointment's array",
+    type: Appointment,
+  })
+  async getAppointmentsByPatientId(
+    @Param('id') id: number,
+  ): Promise<IServerResponse> {
+    const appointmentId =
+      await this.appointmentsService.getAppointmentsByPatientId(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointmentId,
+    };
+  }
 }
