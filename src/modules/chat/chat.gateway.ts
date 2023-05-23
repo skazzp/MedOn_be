@@ -53,7 +53,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client: Socket,
     dto: CreateMessageDto,
   ): Promise<void> {
-    console.log(dto);
     const message = await this.chat.saveMassage(dto);
     this.server.to(this.room).emit('message', message);
   }
