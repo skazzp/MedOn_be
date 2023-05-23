@@ -2,7 +2,6 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
@@ -11,12 +10,9 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from '@modules/chat/chat.service';
 import { CreateMessageDto } from '@modules/chat/dto/create-message.dto';
 import { ChatMessage } from '@entities/ChatMessage';
-import { ConfigService } from '@nestjs/config';
 
-@WebSocketGateway({ cors: true })
-export class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+@WebSocketGateway({ cors: true, namespace: 'chat' })
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -26,17 +22,7 @@ export class ChatGateway
 
   private readonly logger = new Logger(ChatGateway.name);
 
-  constructor(
-    private chat: ChatService,
-    private readonly config: ConfigService,
-  ) {}
-
-  afterInit(): void {
-    const port = this.config.get('webSocketPort');
-    this.server.listen(port);
-
-    this.logger.log(`WebSocket server initialized on port ${port}`);
-  }
+  constructor(private chat: ChatService) {}
 
   handleConnection(client: Socket): void {
     this.logger.log(`Client connected: ${client.id}`);
