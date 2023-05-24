@@ -49,6 +49,55 @@ export class AppointmentsController {
     };
   }
 
+  @Get('/future')
+  @ApiOperation({ summary: 'Get future appointments for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
+  async getFutureAppointmentsForCurrentDoctor(
+    @Req() request: RequestWithUser,
+    @Query() pagination: PaginationOptionsDto,
+  ): Promise<IServerResponse> {
+    const appointments =
+      await this.appointmentsService.getFutureAppointmentsByDoctorId(
+        request.user.userId,
+        pagination,
+      );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Future appointments retrieved successfully',
+      data: appointments,
+    };
+  }
+
+  @Get('/past')
+  @ApiOperation({ summary: 'Get future appointments for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
+  async getPastAppointmentsForCurrentDoctor(
+    @Req() request: RequestWithUser,
+    @Query() pagination: PaginationOptionsDto,
+  ): Promise<IServerResponse> {
+    const appointments =
+      await this.appointmentsService.getPastAppointmentsByDoctorId(
+        request.user.userId,
+        pagination,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Past appointments retrieved successfully',
+      data: appointments,
+    };
+  }
+
   @Get('/:id')
   @ApiOperation({ summary: 'Get appointment by ID' })
   @ApiResponse({
@@ -79,62 +128,6 @@ export class AppointmentsController {
     return this.appointmentsService.createAppointment(createAppointmentDto);
   }
 
-  @Delete('/:id')
-  @ApiOperation({ summary: 'Delete appointment by ID' })
-  @ApiResponse({ status: 200, description: 'Appointment deleted' })
-  async deleteAppointment(@Param('id') id: number): Promise<void> {
-    await this.appointmentsService.deleteAppointment(id);
-  }
-
-  @Post('/future')
-  @ApiOperation({ summary: 'Get future appointments for the current user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns an array of appointments',
-    type: Appointment,
-    isArray: true,
-  })
-  async getFutureAppointmentsForCurrentDoctor(
-    @Req() request: RequestWithUser,
-    @Query() pagination: PaginationOptionsDto,
-  ): Promise<IServerResponse> {
-    const appointments =
-      await this.appointmentsService.getFutureAppointmentsByDoctorId(
-        request.user.userId,
-        pagination,
-      );
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Future appointments retrieved successfully',
-      data: appointments,
-    };
-  }
-
-  @Post('/past')
-  @ApiOperation({ summary: 'Get future appointments for the current user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns an array of appointments',
-    type: Appointment,
-    isArray: true,
-  })
-  async getPastAppointmentsForCurrentDoctor(
-    @Req() request: RequestWithUser,
-    @Query() pagination: PaginationOptionsDto,
-  ): Promise<IServerResponse> {
-    const appointments =
-      await this.appointmentsService.getPastAppointmentsByDoctorId(
-        request.user.userId,
-        pagination,
-      );
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Past appointments retrieved successfully',
-      data: appointments,
-    };
-  }
-
   @Patch('/link/:id')
   @Roles(Role.LocalDoctor)
   @ApiOperation({ summary: 'Link appointment by ID' })
@@ -152,5 +145,12 @@ export class AppointmentsController {
       statusCode: HttpStatus.OK,
       message: 'Link to Zoom call added successfully',
     };
+  }
+
+  @Delete('/:id')
+  @ApiOperation({ summary: 'Delete appointment by ID' })
+  @ApiResponse({ status: 200, description: 'Appointment deleted' })
+  async deleteAppointment(@Param('id') id: number): Promise<void> {
+    await this.appointmentsService.deleteAppointment(id);
   }
 }
