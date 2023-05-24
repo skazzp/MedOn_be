@@ -80,6 +80,7 @@ export class AppointmentsService {
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
       .where(
         `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
@@ -96,7 +97,10 @@ export class AppointmentsService {
         'patient.dateOfBirth',
         'patient.gender',
         'patient.overview',
+        'remoteDoctor.firstName',
         'remoteDoctor.lastName',
+        'localDoctor.firstName',
+        'localDoctor.lastName',
       ])
       .skip(pagination.offset)
       .take(pagination.limit)
@@ -115,11 +119,11 @@ export class AppointmentsService {
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
       .where(
         `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
-      .orderBy('appointment.startTime', 'DESC')
       .select([
         'appointment.id',
         'appointment.link',
@@ -131,8 +135,12 @@ export class AppointmentsService {
         'patient.dateOfBirth',
         'patient.gender',
         'patient.overview',
+        'remoteDoctor.firstName',
         'remoteDoctor.lastName',
+        'localDoctor.firstName',
+        'localDoctor.lastName',
       ])
+      .orderBy('appointment.startTime', 'DESC')
       .skip(pagination.offset)
       .take(pagination.limit)
       .getMany();
