@@ -8,6 +8,8 @@ import {
   UseGuards,
   Req,
   HttpStatus,
+  Query,
+  Patch,
 } from '@nestjs/common';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { Appointment } from '@entities/Appointments';
@@ -19,6 +21,7 @@ import { Role } from '@common/enums';
 import { RequestWithUser } from '@common/interfaces/Appointment';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AppointmentsService } from './appointments.service';
+import { PaginationOptionsDto } from './dto/pagination-options.dto';
 
 @ApiTags('appointments')
 @Controller('appointments')
@@ -91,27 +94,63 @@ export class AppointmentsController {
     type: Appointment,
     isArray: true,
   })
-  async getFutureAppointmentsForCurrentDoctor(@Req() request: RequestWithUser) {
+  async getFutureAppointmentsForCurrentDoctor(
+    @Req() request: RequestWithUser,
+    @Query() pagination: PaginationOptionsDto,
+  ): Promise<IServerResponse> {
     const appointments =
       await this.appointmentsService.getFutureAppointmentsByDoctorId(
         request.user.userId,
+        pagination,
       );
 
     return {
       statusCode: HttpStatus.OK,
+      message: 'Future appointments retrieved successfully',
       data: appointments,
     };
   }
 
   @Post('/past')
-  async getPastAppointmentsForCurrentDoctor(@Req() request: RequestWithUser) {
+  @ApiOperation({ summary: 'Get future appointments for the current user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
+  async getPastAppointmentsForCurrentDoctor(
+    @Req() request: RequestWithUser,
+    @Query() pagination: PaginationOptionsDto,
+  ): Promise<IServerResponse> {
     const appointments =
       await this.appointmentsService.getPastAppointmentsByDoctorId(
         request.user.userId,
+        pagination,
       );
     return {
       statusCode: HttpStatus.OK,
+      message: 'Past appointments retrieved successfully',
       data: appointments,
+    };
+  }
+
+  @Patch('/link/:id')
+  @Roles(Role.LocalDoctor)
+  @ApiOperation({ summary: 'Link appointment by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Insert Link to Zoom call to appointment',
+    type: Appointment,
+  })
+  async linkAppointment(
+    @Param('id') id: number,
+    @Body() dto: { link: string },
+  ): Promise<IServerResponse> {
+    await this.appointmentsService.postLinkAppointment(id, dto.link);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Link to Zoom call added successfully',
     };
   }
 }

@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
+import { PaginationOptionsDto } from './dto/pagination-options.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -69,7 +70,10 @@ export class AppointmentsService {
     await this.appointmentRepository.delete(id);
   }
 
-  async getFutureAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
+  async getFutureAppointmentsByDoctorId(
+    id: number,
+    pagination: PaginationOptionsDto,
+  ): Promise<Appointment[]> {
     const now = moment().toDate();
 
     const futureAppointments = await this.appointmentRepository
@@ -94,12 +98,17 @@ export class AppointmentsService {
         'patient.overview',
         'remoteDoctor.lastName',
       ])
+      .skip(pagination.offset)
+      .take(pagination.limit)
       .getMany();
 
     return futureAppointments;
   }
 
-  async getPastAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
+  async getPastAppointmentsByDoctorId(
+    id: number,
+    pagination: PaginationOptionsDto,
+  ): Promise<Appointment[]> {
     const now = moment().toDate();
 
     const pastAppointments = await this.appointmentRepository
@@ -124,7 +133,14 @@ export class AppointmentsService {
         'patient.overview',
         'remoteDoctor.lastName',
       ])
+      .skip(pagination.offset)
+      .take(pagination.limit)
       .getMany();
+
     return pastAppointments;
+  }
+
+  async postLinkAppointment(id: number, link: string): Promise<void> {
+    await this.appointmentRepository.update(id, { link });
   }
 }
