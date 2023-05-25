@@ -83,7 +83,7 @@ export class AppointmentsService {
     id: number,
     pagination: PaginationOptionsDto,
   ): Promise<Appointment[]> {
-    const now = moment().toDate();
+    const now = moment().utc().toDate();
 
     const futureAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
@@ -91,7 +91,7 @@ export class AppointmentsService {
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
       .where(
-        `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        `appointment.endTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
       .orderBy('appointment.startTime', 'ASC')
@@ -122,7 +122,7 @@ export class AppointmentsService {
     id: number,
     pagination: PaginationOptionsDto,
   ): Promise<Appointment[]> {
-    const now = moment().toDate();
+    const now = moment().utc().toDate();
 
     const pastAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
@@ -130,7 +130,7 @@ export class AppointmentsService {
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
       .where(
-        `appointment.startTime >= :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        `appointment.startTime < :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
       .select([
