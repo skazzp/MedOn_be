@@ -24,12 +24,4 @@ export class CreateMessageDto {
   @IsNumber()
   @IsNotEmpty()
   senderId: number;
-
-  @ApiProperty({
-    description: 'Recipient identifier',
-    example: '32',
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  recipientId: number;
 }

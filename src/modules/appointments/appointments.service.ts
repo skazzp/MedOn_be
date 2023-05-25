@@ -70,6 +70,15 @@ export class AppointmentsService {
     await this.appointmentRepository.delete(id);
   }
 
+  async getAppointmentsByPatientId(id: number): Promise<Appointment[]> {
+    const appointments = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('appointment.patientId = :id', { id })
+      .getMany();
+
+    return appointments;
+  }
+
   async getFutureAppointmentsByDoctorId(
     id: number,
     pagination: PaginationOptionsDto,
