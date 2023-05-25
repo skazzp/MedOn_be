@@ -15,7 +15,7 @@ import { AvailabilityDto } from './dto/availability.dto';
 export class AvailabilityService {
   constructor(
     @InjectRepository(Availability) private repo: Repository<Availability>,
-  ) {}
+  ) { }
 
   async createMultiples(
     dto: AvailabilityDto[],
@@ -150,5 +150,26 @@ export class AvailabilityService {
     );
 
     return newAvailabilities;
+  }
+
+  async changeAvailableFlag(
+    startTime: Date,
+    endTime: Date,
+    doctorId: number,
+  ): Promise<void> {
+    const availability = await this.repo.findOne({
+      where: {
+        startTime,
+        endTime,
+        doctorId,
+      },
+    });
+
+    if (!availability) {
+      throw new BadRequestException('Availability not found.');
+    }
+
+    availability.isAvailable = false;
+    await this.repo.save(availability);
   }
 }

@@ -24,12 +24,13 @@ import { RolesGuard } from '@guards/roles.guard';
 import { AvailabilityService } from './availability.service';
 import { ChangeAvailabilityBody } from './dto/change-availability.dto';
 import { UpdateAvailabilityBody } from './dto/update-availability.dto';
+import { ChangeAvailabilityFlagDto } from './dto/change-availability-flag.dto';
 
 @ApiTags('availability')
 @UseGuards(AuthGuard('jwt'))
 @Controller('availability')
 export class AvailabilityController {
-  constructor(private readonly availabilityService: AvailabilityService) {}
+  constructor(private readonly availabilityService: AvailabilityService) { }
 
   @UseGuards(RolesGuard)
   @Roles(Role.RemoteDoctor)
@@ -141,6 +142,30 @@ export class AvailabilityController {
       statusCode: HttpStatus.OK,
       message: 'Availabilities were updated',
       data: availabilities,
+    };
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.LocalDoctor)
+  @ApiOperation({ summary: 'Change the available flag of an availability' })
+  @ApiResponse({
+    status: 200,
+    description: 'Availability flag was changed',
+  })
+  @Post('changeAvailableFlag')
+  async changeAvailableFlag(
+    @Body() changeAvailableFlagDto: ChangeAvailabilityFlagDto,
+  ): Promise<IServerResponse<void>> {
+    const { startTime, endTime, doctorId } = changeAvailableFlagDto;
+
+    await this.availabilityService.changeAvailableFlag(
+      startTime,
+      endTime,
+      doctorId,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Availability flag was changed',
     };
   }
 }
