@@ -138,7 +138,7 @@ export class AppointmentsService {
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
       .where(
-        `appointment.startTime < :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
+        `appointment.endTime < :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
         { now, id },
       )
       .select([
