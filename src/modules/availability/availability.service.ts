@@ -15,7 +15,7 @@ import { AvailabilityDto } from './dto/availability.dto';
 export class AvailabilityService {
   constructor(
     @InjectRepository(Availability) private repo: Repository<Availability>,
-  ) { }
+  ) {}
 
   async createMultiples(
     dto: AvailabilityDto[],
