@@ -41,7 +41,6 @@ export class AppointmentsService {
     createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
     const startTime = moment(createAppointmentDto.startTime).utc().toDate();
-
     const endTime = moment(createAppointmentDto.endTime).utc().toDate();
 
     const appointment: DeepPartial<Appointment> = {
