@@ -15,7 +15,7 @@ import { AvailabilityDto } from './dto/availability.dto';
 export class AvailabilityService {
   constructor(
     @InjectRepository(Availability) private repo: Repository<Availability>,
-  ) {}
+  ) { }
 
   async createMultiples(
     dto: AvailabilityDto[],
@@ -170,6 +170,6 @@ export class AvailabilityService {
     }
 
     availability.isAvailable = false;
-    await this.repo.save(availability);
+    await this.repo.update(availability.id, availability);
   }
 }

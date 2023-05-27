@@ -16,7 +16,7 @@ export class AppointmentsService {
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async getAllAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
     const appointments = await this.appointmentRepository
@@ -36,12 +36,9 @@ export class AppointmentsService {
 
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
-    timezone: string,
   ): Promise<Appointment> {
-    const startTime = moment
-      .tz(createAppointmentDto.startTime, timezone)
-      .toDate();
-    const endTime = moment.tz(createAppointmentDto.endTime, timezone).toDate();
+    const startTime = moment(createAppointmentDto.startTime).utc().toDate();
+    const endTime = moment(createAppointmentDto.endTime).utc().toDate();
 
     const appointment: DeepPartial<Appointment> = {
       link: createAppointmentDto.link,
@@ -56,6 +53,7 @@ export class AppointmentsService {
       const savedAppointment = await this.appointmentRepository.save(
         appointment,
       );
+
       return savedAppointment;
     } catch (error) {
       throw new ConflictException(

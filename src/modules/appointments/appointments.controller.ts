@@ -20,6 +20,7 @@ import { RequestWithUser } from '@common/interfaces/Appointment';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AvailabilityService } from '@modules/availability/availability.service';
 import { AppointmentsService } from '@modules/appointments/appointments.service';
+import moment from 'moment';
 
 @ApiTags('appointments')
 @Controller('appointments')
@@ -28,7 +29,7 @@ export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly availabilityService: AvailabilityService,
-  ) {}
+  ) { }
 
   @Get('/all')
   @ApiOperation({ summary: 'Get all appointments for the current user' })
@@ -76,11 +77,9 @@ export class AppointmentsController {
   @Roles(Role.LocalDoctor)
   async createAppointment(
     @Body() createAppointmentDto: CreateAppointmentDto,
-    @Body('timezone') timezone: string,
   ): Promise<Appointment> {
     const appointment = await this.appointmentsService.createAppointment(
       createAppointmentDto,
-      timezone,
     );
 
     const { startTime, endTime, remoteDoctorId } = createAppointmentDto;
