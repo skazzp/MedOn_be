@@ -79,9 +79,10 @@ export class AppointmentsService {
   }
 
   async getActiveAppointmentByDoctorId(id: number): Promise<Appointment> {
+    const now = moment().utc().toDate();
     return this.appointmentRepository
       .createQueryBuilder('appointment')
-      .where('start_time < NOW() AND end_time > NOW()')
+      .where('start_time < :now AND end_time > :now', { now })
       .andWhere('(remote_doctor_id = :id OR local_doctor_id = :id)', { id })
       .getOne();
   }
