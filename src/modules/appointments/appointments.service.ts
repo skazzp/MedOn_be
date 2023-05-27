@@ -79,6 +79,14 @@ export class AppointmentsService {
     return appointments;
   }
 
+  async getActiveAppointmentByDoctorId(id: number): Promise<Appointment> {
+    return this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('start_time < NOW() AND end_time > NOW()')
+      .andWhere('(remote_doctor_id = :id OR local_doctor_id = :id)', { id })
+      .getOne();
+  }
+
   async getFutureAppointmentsByDoctorId(
     id: number,
     pagination: PaginationOptionsDto,

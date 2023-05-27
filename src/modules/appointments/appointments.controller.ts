@@ -171,4 +171,22 @@ export class AppointmentsController {
       data: appointmentId,
     };
   }
+
+  @Get('/active/:id')
+  @ApiOperation({ summary: "Get active appointments by doctor's ID" })
+  @ApiResponse({
+    status: 200,
+    description: 'Return Appointment',
+    type: Appointment,
+  })
+  async getActiveAppointmentByDoctor(
+    @Param('id') id: number,
+  ): Promise<IServerResponse<Appointment>> {
+    const appointment =
+      await this.appointmentsService.getActiveAppointmentByDoctorId(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointment,
+    };
+  }
 }
