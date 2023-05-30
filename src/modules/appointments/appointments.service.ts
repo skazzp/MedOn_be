@@ -118,13 +118,13 @@ export class AppointmentsService {
     return futureAppointments;
   }
 
-  async getPastAppointmentsByDoctorId(
+  async getAllAppointments(
     id: number,
     pagination: PaginationOptionsDto,
   ): Promise<Appointment[]> {
     const now = moment().utc().toDate();
 
-    const pastAppointments = await this.appointmentRepository
+    const getAllAppointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
@@ -154,7 +154,7 @@ export class AppointmentsService {
       .take(pagination.limit)
       .getMany();
 
-    return pastAppointments;
+    return getAllAppointments;
   }
 
   async postLinkAppointment(id: number, link: string): Promise<void> {
