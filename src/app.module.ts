@@ -37,6 +37,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
+        timezone: '+00:00',
         entities: [
           Patient,
           Speciality,
@@ -64,4 +65,4 @@ import { JwtStrategy } from './strategy/jwt.strategy';
   ],
   providers: [JwtStrategy, RolesGuard],
 })
-export class AppModule {}
+export class AppModule { }

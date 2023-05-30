@@ -11,5 +11,6 @@ import { AvailabilityController } from './availability.controller';
   imports: [TypeOrmModule.forFeature([Availability, Doctor])],
   controllers: [AvailabilityController],
   providers: [AvailabilityService],
+  exports: [AvailabilityService],
 })
 export class AvailabilityModule {}
