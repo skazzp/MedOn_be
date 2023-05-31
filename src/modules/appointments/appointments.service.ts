@@ -7,15 +7,17 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 
-import { Role, Filter } from '@common/enums';
+import { Role, Filter, ShowAll } from '@common/enums';
+
 import { Appointment } from '@entities/Appointments';
 import { Doctor } from '@entities/Doctor';
 
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
-import { PaginationOptionsDto } from '@modules/appointments/dto/pagination-options.dto';
+import { AllPaginationOptionsDto } from '@modules/appointments/dto/allPagination-options.dto';
+import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -96,7 +98,7 @@ export class AppointmentsService {
 
   async getFutureAppointmentsByDoctorId(
     id: number,
-    pagination: PaginationOptionsDto,
+    pagination: FuturePaginationOptionsDto,
   ): Promise<Appointment[]> {
     const now = moment().utc().toDate();
 
@@ -135,11 +137,17 @@ export class AppointmentsService {
 
   async getAllAppointments(
     id: number,
-    pagination: PaginationOptionsDto,
+    pagination: AllPaginationOptionsDto,
   ): Promise<Appointment[]> {
-    let whereClause: string;
-    let nextDay: Date;
-    let prevDay: Date;
+    const { page, filter, showAll } = pagination;
+
+    if (page <= 0) {
+      throw new BadRequestException('Page must be greater than 0');
+    }
+
+    if (filter === Filter.today && page.toString() !== '1') {
+      throw new BadRequestException('Today page cannot be different than 1');
+    }
 
     const doctor = await this.doctorRepository.findOne({ where: { id } });
 
@@ -147,17 +155,41 @@ export class AppointmentsService {
       throw new NotFoundException('Doctor not found');
     }
 
-    const now = moment().utc().toDate();
-    const startOfDay = moment().startOf('day').toDate();
+    let whereClause: string;
+
+    switch (filter) {
+      case Filter.today:
+        whereClause =
+          'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
+        break;
+
+      case Filter.future:
+        whereClause =
+          'appointment.startTime >= :nextDayStart AND appointment.endTime <= :nextDayEnd';
+        break;
+
+      case Filter.past:
+        whereClause =
+          'appointment.endTime >= :pastDayStart AND appointment.endTime < :pastDayEnd';
+        break;
+
+      default:
+        throw new BadRequestException(`Invalid filter: ${filter}`);
+    }
+
     let appointmentQueryBuilder = this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
       .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .where(whereClause, {
-        startOfDay,
+        now: moment().utc().toDate(),
+        startOfDay: moment().startOf('day').toDate(),
         endOfDay: moment().endOf('day').toDate(),
-        now,
+        nextDayStart: moment().add(page, 'day').startOf('day').toDate(),
+        nextDayEnd: moment().add(page, 'day').endOf('day').toDate(),
+        pastDayStart: moment().subtract(page, 'day').startOf('day').toDate(),
+        pastDayEnd: moment().subtract(page, 'day').endOf('day').toDate(),
       })
       .select([
         'appointment.id',
@@ -176,13 +208,11 @@ export class AppointmentsService {
         'remoteDoctor.lastName',
       ]);
 
-    if (doctor.role === Role.LocalDoctor) {
-      if (!pagination.showAll) {
-        appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
-          `appointment.localDoctorId = :id`,
-          { id },
-        );
-      }
+    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.true) {
+      appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
+        `appointment.localDoctorId = :id`,
+        { id },
+      );
     } else if (doctor.role === Role.RemoteDoctor) {
       appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
         `appointment.remoteDoctorId = :id`,
@@ -192,50 +222,10 @@ export class AppointmentsService {
       throw new BadRequestException('Invalid role');
     }
 
-    switch (pagination.filter) {
-      case Filter.today:
-        whereClause =
-          'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
-        appointmentQueryBuilder = appointmentQueryBuilder
-          .orderBy('appointment.startTime', 'ASC')
-          .skip(pagination.offset * pagination.limit)
-          .take(pagination.limit);
-        break;
-      case Filter.future:
-        whereClause =
-          'appointment.startTime >= :startOfDay AND appointment.startTime < :nextDay';
-        nextDay = moment(startOfDay)
-          .add(pagination.offset + 1, 'days')
-          .startOf('day')
-          .toDate();
-        appointmentQueryBuilder = appointmentQueryBuilder
-          .orderBy('appointment.startTime', 'ASC')
-          .andWhere(
-            `appointment.startTime >= :startOfDay AND appointment.startTime < :nextDay`,
-            { startOfDay, nextDay },
-          )
-          .skip(pagination.offset * pagination.limit)
-          .take(pagination.limit);
-        break;
-      case Filter.past:
-        whereClause =
-          'appointment.endTime >= :prevDay AND appointment.endTime < :startOfDay';
-        prevDay = moment(startOfDay)
-          .subtract(pagination.offset + 1, 'days')
-          .endOf('day')
-          .toDate();
-        appointmentQueryBuilder = appointmentQueryBuilder
-          .orderBy('appointment.endTime', 'ASC')
-          .andWhere(
-            `appointment.endTime >= :prevDay AND appointment.endTime < :startOfDay`,
-            { prevDay, startOfDay },
-          )
-          .skip(pagination.offset * pagination.limit)
-          .take(pagination.limit);
-        break;
-      default:
-        throw new BadRequestException(`Invalid filter: ${pagination.filter}`);
-    }
+    appointmentQueryBuilder = appointmentQueryBuilder.orderBy(
+      'appointment.startTime',
+      'ASC',
+    );
 
     const appointments = await appointmentQueryBuilder.getMany();
 
