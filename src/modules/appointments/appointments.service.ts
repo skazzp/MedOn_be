@@ -142,16 +142,16 @@ export class AppointmentsService {
     }
 
     switch (filter) {
-      case 'today':
+      case Filter.today:
         whereClause =
           'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
         orderClause = SortOrder.asc;
         break;
-      case 'future':
+      case Filter.future:
         whereClause = 'appointment.startTime > :endOfDay';
         orderClause = SortOrder.asc;
         break;
-      case 'past':
+      case Filter.past:
         whereClause = 'appointment.endTime < :startOfDay';
         orderClause = SortOrder.desc;
         break;
