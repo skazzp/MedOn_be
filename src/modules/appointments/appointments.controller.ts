@@ -84,13 +84,14 @@ export class AppointmentsController {
   })
   async getPastAppointmentsForCurrentDoctor(
     @Req() request: RequestWithUser,
+    @Body() dto: { filter: 'today' | 'future' | 'past' },
     @Query() pagination: PaginationOptionsDto,
   ): Promise<IServerResponse> {
-    const appointments =
-      await this.appointmentsService.getPastAppointmentsByDoctorId(
-        request.user.userId,
-        pagination,
-      );
+    const appointments = await this.appointmentsService.getAllAppointments(
+      request.user.userId,
+      pagination,
+      dto.filter,
+    );
     return {
       statusCode: HttpStatus.OK,
       message: 'Past appointments retrieved successfully',
