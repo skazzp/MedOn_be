@@ -44,6 +44,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
           Doctor,
           Availability,
           Appointment,
+          PatientNotes,
           ChatMessage,
           PatientNotes,
         ],
@@ -65,4 +66,4 @@ import { JwtStrategy } from './strategy/jwt.strategy';
   ],
   providers: [JwtStrategy, RolesGuard],
 })
-export class AppModule { }
+export class AppModule {}
