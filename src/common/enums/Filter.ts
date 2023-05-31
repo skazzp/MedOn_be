@@ -3,3 +3,8 @@ export enum Filter {
   future = 'future',
   past = 'past',
 }
+
+export enum ShowAll {
+  true = 'true',
+  false = 'false',
+}
