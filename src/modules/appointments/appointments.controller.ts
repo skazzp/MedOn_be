@@ -17,7 +17,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '@guards/roles.guard';
 import { Roles } from '@decorators/roles.decorator';
-import { Role, Filter } from '@common/enums';
+import { Role } from '@common/enums';
 import { RequestWithUser } from '@common/interfaces/Appointment';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AvailabilityService } from '@modules/availability/availability.service';
@@ -78,7 +78,7 @@ export class AppointmentsController {
     };
   }
 
-  @Post('/need')
+  @Get('/app')
   @ApiOperation({ summary: 'Get appointments for the current user' })
   @ApiResponse({
     status: 200,
@@ -88,13 +88,11 @@ export class AppointmentsController {
   })
   async getPastAppointmentsForCurrentDoctor(
     @Req() request: RequestWithUser,
-    @Body() dto: { filter: Filter },
     @Query() pagination: PaginationOptionsDto,
   ): Promise<IServerResponse> {
     const appointments = await this.appointmentsService.getAllAppointments(
       request.user.userId,
       pagination,
-      dto.filter,
     );
     return {
       statusCode: HttpStatus.OK,

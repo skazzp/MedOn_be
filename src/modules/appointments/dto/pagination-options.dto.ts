@@ -1,5 +1,6 @@
+import { Filter } from '@common/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumberString, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumberString, IsOptional } from 'class-validator';
 
 export class PaginationOptionsDto {
   @ApiProperty({
@@ -25,4 +26,13 @@ export class PaginationOptionsDto {
   @IsBoolean()
   @IsOptional()
   showAll?: boolean;
+
+  @ApiProperty({
+    description: 'Filter for appointments',
+    enum: Filter,
+    example: Filter.future,
+  })
+  @IsEnum(Filter)
+  @IsOptional()
+  filter?: Filter;
 }

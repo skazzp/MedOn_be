@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 
-import { Role, SortOrder, Filter } from '@common/enums';
+import { Role, Filter } from '@common/enums';
 import { Appointment } from '@entities/Appointments';
 import { Doctor } from '@entities/Doctor';
 
@@ -136,11 +136,10 @@ export class AppointmentsService {
   async getAllAppointments(
     id: number,
     pagination: PaginationOptionsDto,
-    filter: Filter,
   ): Promise<Appointment[]> {
-    let appointments: Appointment[];
-    let orderClause: SortOrder;
     let whereClause: string;
+    let nextDay: Date;
+    let prevDay: Date;
 
     const doctor = await this.doctorRepository.findOne({ where: { id } });
 
@@ -148,100 +147,97 @@ export class AppointmentsService {
       throw new NotFoundException('Doctor not found');
     }
 
-    switch (filter) {
-      case Filter.today:
-        whereClause =
-          'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
-        orderClause = SortOrder.asc;
-        break;
-      case Filter.future:
-        whereClause = 'appointment.startTime > :endOfDay';
-        orderClause = SortOrder.asc;
-        break;
-      case Filter.past:
-        whereClause = 'appointment.endTime < :startOfDay';
-        orderClause = SortOrder.desc;
-        break;
-      default:
-        throw new BadRequestException(`Invalid filter: ${filter}`);
-    }
-
     const now = moment().utc().toDate();
+    const startOfDay = moment().startOf('day').toDate();
+    let appointmentQueryBuilder = this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .where(whereClause, {
+        startOfDay,
+        endOfDay: moment().endOf('day').toDate(),
+        now,
+      })
+      .select([
+        'appointment.id',
+        'appointment.link',
+        'appointment.startTime',
+        'appointment.endTime',
+        'patient.id',
+        'patient.firstName',
+        'patient.lastName',
+        'patient.dateOfBirth',
+        'patient.gender',
+        'patient.overview',
+        'localDoctor.firstName',
+        'localDoctor.lastName',
+        'remoteDoctor.firstName',
+        'remoteDoctor.lastName',
+      ]);
 
     if (doctor.role === Role.LocalDoctor) {
-      let appointmentQueryBuilder = this.appointmentRepository
-        .createQueryBuilder('appointment')
-        .leftJoinAndSelect('appointment.patient', 'patient')
-        .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
-        .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
-        .where(whereClause, {
-          startOfDay: moment().startOf('day').toDate(),
-          endOfDay: moment().endOf('day').toDate(),
-          now,
-        })
-        .select([
-          'appointment.id',
-          'appointment.link',
-          'appointment.startTime',
-          'appointment.endTime',
-          'patient.id',
-          'patient.firstName',
-          'patient.lastName',
-          'patient.dateOfBirth',
-          'patient.gender',
-          'patient.overview',
-          'localDoctor.firstName',
-          'localDoctor.lastName',
-          'remoteDoctor.firstName',
-          'remoteDoctor.lastName',
-        ])
-        .orderBy('appointment.startTime', orderClause)
-        .skip(pagination.offset)
-        .take(pagination.limit);
-
       if (!pagination.showAll) {
         appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
           `appointment.localDoctorId = :id`,
           { id },
         );
       }
-
-      appointments = await appointmentQueryBuilder.getMany();
     } else if (doctor.role === Role.RemoteDoctor) {
-      appointments = await this.appointmentRepository
-        .createQueryBuilder('appointment')
-        .leftJoinAndSelect('appointment.patient', 'patient')
-        .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
-        .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
-        .where(whereClause, {
-          startOfDay: moment().startOf('day').toDate(),
-          endOfDay: moment().endOf('day').toDate(),
-          now,
-        })
-        .andWhere(`appointment.remoteDoctorId = :id`, { id })
-        .select([
-          'appointment.id',
-          'appointment.link',
-          'appointment.startTime',
-          'appointment.endTime',
-          'patient.id',
-          'patient.firstName',
-          'patient.lastName',
-          'patient.dateOfBirth',
-          'patient.gender',
-          'patient.overview',
-          'localDoctor.firstName',
-          'localDoctor.lastName',
-          'remoteDoctor.firstName',
-          'remoteDoctor.lastName',
-        ])
-        .orderBy('appointment.startTime', orderClause)
-        .skip(pagination.offset)
-        .take(pagination.limit)
-        .getMany();
+      appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
+        `appointment.remoteDoctorId = :id`,
+        { id },
+      );
     } else {
       throw new BadRequestException('Invalid role');
     }
+
+    switch (pagination.filter) {
+      case Filter.today:
+        whereClause =
+          'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
+        appointmentQueryBuilder = appointmentQueryBuilder
+          .orderBy('appointment.startTime', 'ASC')
+          .skip(pagination.offset * pagination.limit)
+          .take(pagination.limit);
+        break;
+      case Filter.future:
+        whereClause =
+          'appointment.startTime >= :startOfDay AND appointment.startTime < :nextDay';
+        nextDay = moment(startOfDay)
+          .add(pagination.offset + 1, 'days')
+          .startOf('day')
+          .toDate();
+        appointmentQueryBuilder = appointmentQueryBuilder
+          .orderBy('appointment.startTime', 'ASC')
+          .andWhere(
+            `appointment.startTime >= :startOfDay AND appointment.startTime < :nextDay`,
+            { startOfDay, nextDay },
+          )
+          .skip(pagination.offset * pagination.limit)
+          .take(pagination.limit);
+        break;
+      case Filter.past:
+        whereClause =
+          'appointment.endTime >= :prevDay AND appointment.endTime < :startOfDay';
+        prevDay = moment(startOfDay)
+          .subtract(pagination.offset + 1, 'days')
+          .endOf('day')
+          .toDate();
+        appointmentQueryBuilder = appointmentQueryBuilder
+          .orderBy('appointment.endTime', 'ASC')
+          .andWhere(
+            `appointment.endTime >= :prevDay AND appointment.endTime < :startOfDay`,
+            { prevDay, startOfDay },
+          )
+          .skip(pagination.offset * pagination.limit)
+          .take(pagination.limit);
+        break;
+      default:
+        throw new BadRequestException(`Invalid filter: ${pagination.filter}`);
+    }
+
+    const appointments = await appointmentQueryBuilder.getMany();
 
     return appointments;
   }
