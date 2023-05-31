@@ -27,8 +27,8 @@ export class AvailabilityService {
     }
     try {
       const newAvailabilities = dto.map((availability) => {
-        const startTime = moment.tz(availability.startTime, timezone).toDate();
-        const endTime = moment.tz(availability.endTime, timezone).toDate();
+        const startTime = moment(availability.startTime).utc().toDate();
+        const endTime = moment(availability.endTime).utc().toDate();
         return this.repo.create({
           doctorId,
           startTime,
@@ -104,8 +104,8 @@ export class AvailabilityService {
     doctorId: number,
   ): Promise<void> {
     const newAvailabilities = availabilities.map((availability) => {
-      const startTime = moment.tz(availability.startTime, timezone).toDate();
-      const endTime = moment.tz(availability.endTime, timezone).toDate();
+      const startTime = moment(availability.startTime).utc().toDate();
+      const endTime = moment(availability.endTime).utc().toDate();
       return { startTime, endTime };
     });
     const result = await this.repo
@@ -116,12 +116,10 @@ export class AvailabilityService {
       .andWhere((qb) => {
         qb.where('startTime IN (:...startTimes)', {
           startTimes: newAvailabilities.map((a) =>
-            moment(a.startTime).format('YYYY-MM-DD HH:mm:ss'),
+            moment(a.startTime).toDate(),
           ),
         }).andWhere('endTime IN (:...endTimes)', {
-          endTimes: newAvailabilities.map((a) =>
-            moment(a.endTime).format('YYYY-MM-DD HH:mm:ss'),
-          ),
+          endTimes: newAvailabilities.map((a) => moment(a.endTime).toDate()),
         });
       })
       .execute();
@@ -150,5 +148,26 @@ export class AvailabilityService {
     );
 
     return newAvailabilities;
+  }
+
+  async updateAvailableStatus(
+    startTime: Date,
+    endTime: Date,
+    doctorId: number,
+  ): Promise<void> {
+    const availability = await this.repo.findOne({
+      where: {
+        startTime,
+        endTime,
+        doctorId,
+      },
+    });
+
+    if (!availability) {
+      throw new BadRequestException('Availability not found.');
+    }
+
+    availability.isAvailable = false;
+    await this.repo.update(availability.id, availability);
   }
 }

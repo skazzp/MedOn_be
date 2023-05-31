@@ -16,10 +16,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
-  private appointmentId: number | null;
-
-  private room: string | null;
-
   private readonly logger = new Logger(ChatGateway.name);
 
   constructor(private chat: ChatService) {}
@@ -34,18 +30,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('joinRoomByAppointmentId')
   handleJoinRoom(client: Socket, appointmentId: number): void {
-    this.appointmentId = appointmentId;
-    this.room = `app-${this.appointmentId}`;
-    client.join(this.room);
+    client.join(`app-${appointmentId}`);
 
-    this.logger.log(`Client ${client.id} joined appointment room ${this.room}`);
-  }
-
-  @SubscribeMessage('leaveRoom')
-  handleLeaveRoom(client: Socket): void {
-    client.leave(this.room);
-
-    this.logger.log(`Client ${client.id} left appointment room ${this.room}`);
+    this.logger.log(
+      `Client ${client.id} joined appointment room app-${appointmentId}`,
+    );
   }
 
   @SubscribeMessage('sendMessage')
@@ -54,11 +43,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     dto: CreateMessageDto,
   ): Promise<void> {
     const message = await this.chat.saveMassage(dto);
-    this.server.to(this.room).emit('message', message);
+    this.server
+      .to(Array.from(client.rooms)[1])
+      .except(client.id)
+      .emit('message', message);
   }
 
-  @SubscribeMessage('getAllMessages')
-  async getAllMessages(): Promise<ChatMessage[]> {
-    return this.chat.getAllMessagesByAppointmentId(this.appointmentId);
+  @SubscribeMessage('getMessagesByAppointmentId')
+  async getAllMessages(
+    client: Socket,
+    appointmentId: number,
+  ): Promise<ChatMessage[]> {
+    return this.chat.getAllMessagesByAppointmentId(appointmentId);
   }
 }
