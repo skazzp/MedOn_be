@@ -9,14 +9,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
+
+import { Role, SortOrder, Filter } from '@common/enums';
 
 import { Appointment } from '@entities/Appointments';
 import { Doctor } from '@entities/Doctor';
 
-import { Role } from '@common/enums';
-
-import { PaginationOptionsDto } from './dto/pagination-options.dto';
+import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
+import { PaginationOptionsDto } from '@modules/appointments/dto/pagination-options.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -129,12 +129,11 @@ export class AppointmentsService {
   async getAllAppointments(
     id: number,
     pagination: PaginationOptionsDto,
-    filter: 'today' | 'future' | 'past',
-    showAll: boolean,
+    filter: Filter,
   ): Promise<Appointment[]> {
-    let appointments;
-    let whereClause;
-    let orderClause: 'ASC' | 'DESC';
+    let appointments: Appointment[];
+    let orderClause: SortOrder;
+    let whereClause: string;
 
     const doctor = await this.doctorRepository.findOne({ where: { id } });
 
@@ -146,15 +145,15 @@ export class AppointmentsService {
       case 'today':
         whereClause =
           'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
-        orderClause = 'ASC';
+        orderClause = SortOrder.asc;
         break;
       case 'future':
         whereClause = 'appointment.startTime > :endOfDay';
-        orderClause = 'ASC';
+        orderClause = SortOrder.asc;
         break;
       case 'past':
         whereClause = 'appointment.endTime < :startOfDay';
-        orderClause = 'DESC';
+        orderClause = SortOrder.desc;
         break;
       default:
         throw new BadRequestException(`Invalid filter: ${filter}`);
@@ -193,7 +192,7 @@ export class AppointmentsService {
         .skip(pagination.offset)
         .take(pagination.limit);
 
-      if (!showAll) {
+      if (!pagination.showAll) {
         appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
           `appointment.localDoctorId = :id`,
           { id },
@@ -212,6 +211,7 @@ export class AppointmentsService {
           endOfDay: moment().endOf('day').toDate(),
           now,
         })
+        .andWhere(`appointment.remoteDoctorId = :id`, { id })
         .select([
           'appointment.id',
           'appointment.link',
