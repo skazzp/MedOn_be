@@ -13,6 +13,7 @@ import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointme
 
 import { Appointment } from '@entities/Appointments';
 import { Doctor } from '@entities/Doctor';
+
 import { Role } from '@common/enums';
 
 import { PaginationOptionsDto } from './dto/pagination-options.dto';
@@ -22,6 +23,7 @@ export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
+    @InjectRepository(Doctor)
     private readonly doctorRepository: Repository<Doctor>,
     private config: ConfigService,
   ) {}
@@ -128,9 +130,11 @@ export class AppointmentsService {
     id: number,
     pagination: PaginationOptionsDto,
     filter: 'today' | 'future' | 'past',
+    showAll: boolean,
   ): Promise<Appointment[]> {
     let appointments;
     let whereClause;
+    let orderClause: 'ASC' | 'DESC';
 
     const doctor = await this.doctorRepository.findOne({ where: { id } });
 
@@ -142,12 +146,15 @@ export class AppointmentsService {
       case 'today':
         whereClause =
           'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
+        orderClause = 'ASC';
         break;
       case 'future':
         whereClause = 'appointment.startTime > :endOfDay';
+        orderClause = 'ASC';
         break;
       case 'past':
         whereClause = 'appointment.endTime < :startOfDay';
+        orderClause = 'DESC';
         break;
       default:
         throw new BadRequestException(`Invalid filter: ${filter}`);
@@ -156,7 +163,7 @@ export class AppointmentsService {
     const now = moment().utc().toDate();
 
     if (doctor.role === Role.LocalDoctor) {
-      appointments = await this.appointmentRepository
+      let appointmentQueryBuilder = this.appointmentRepository
         .createQueryBuilder('appointment')
         .leftJoinAndSelect('appointment.patient', 'patient')
         .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
@@ -182,10 +189,18 @@ export class AppointmentsService {
           'remoteDoctor.firstName',
           'remoteDoctor.lastName',
         ])
-        .orderBy('appointment.startTime', 'DESC')
+        .orderBy('appointment.startTime', orderClause)
         .skip(pagination.offset)
-        .take(pagination.limit)
-        .getMany();
+        .take(pagination.limit);
+
+      if (!showAll) {
+        appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
+          `appointment.localDoctorId = :id`,
+          { id },
+        );
+      }
+
+      appointments = await appointmentQueryBuilder.getMany();
     } else if (doctor.role === Role.RemoteDoctor) {
       appointments = await this.appointmentRepository
         .createQueryBuilder('appointment')
@@ -213,7 +228,7 @@ export class AppointmentsService {
           'remoteDoctor.firstName',
           'remoteDoctor.lastName',
         ])
-        .orderBy('appointment.startTime', 'DESC')
+        .orderBy('appointment.startTime', orderClause)
         .skip(pagination.offset)
         .take(pagination.limit)
         .getMany();

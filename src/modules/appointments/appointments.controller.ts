@@ -74,8 +74,8 @@ export class AppointmentsController {
     };
   }
 
-  @Get('/past')
-  @ApiOperation({ summary: 'Get future appointments for the current user' })
+  @Post('/need')
+  @ApiOperation({ summary: 'Get appointments for the current user' })
   @ApiResponse({
     status: 200,
     description: 'Returns an array of appointments',
@@ -84,17 +84,18 @@ export class AppointmentsController {
   })
   async getPastAppointmentsForCurrentDoctor(
     @Req() request: RequestWithUser,
-    @Body() dto: { filter: 'today' | 'future' | 'past' },
+    @Body() dto: { filter: 'today' | 'future' | 'past'; showAll: boolean },
     @Query() pagination: PaginationOptionsDto,
   ): Promise<IServerResponse> {
     const appointments = await this.appointmentsService.getAllAppointments(
       request.user.userId,
       pagination,
       dto.filter,
+      dto.showAll,
     );
     return {
       statusCode: HttpStatus.OK,
-      message: 'Past appointments retrieved successfully',
+      message: 'Appointments retrieved successfully',
       data: appointments,
     };
   }
