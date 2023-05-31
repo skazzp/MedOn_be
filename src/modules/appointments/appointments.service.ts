@@ -16,7 +16,7 @@ export class AppointmentsService {
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
     private config: ConfigService,
-  ) { }
+  ) {}
 
   async getAllAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
     const appointments = await this.appointmentRepository
