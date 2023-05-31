@@ -66,4 +66,4 @@ import { JwtStrategy } from './strategy/jwt.strategy';
   ],
   providers: [JwtStrategy, RolesGuard],
 })
-export class AppModule {}
+export class AppModule { }

@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { PaginationOptionsDto } from './dto/pagination-options.dto';
@@ -41,7 +40,6 @@ export class AppointmentsService {
     createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
     const startTime = moment(createAppointmentDto.startTime).utc().toDate();
-
     const endTime = moment(createAppointmentDto.endTime).utc().toDate();
 
     const appointment: DeepPartial<Appointment> = {
@@ -77,6 +75,15 @@ export class AppointmentsService {
       .getMany();
 
     return appointments;
+  }
+
+  async getActiveAppointmentByDoctorId(id: number): Promise<Appointment> {
+    const now = moment().utc().toDate();
+    return this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .where('start_time < :now AND end_time > :now', { now })
+      .andWhere('(remote_doctor_id = :id OR local_doctor_id = :id)', { id })
+      .getOne();
   }
 
   async getFutureAppointmentsByDoctorId(

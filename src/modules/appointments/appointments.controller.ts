@@ -20,14 +20,18 @@ import { Roles } from '@decorators/roles.decorator';
 import { Role } from '@common/enums';
 import { RequestWithUser } from '@common/interfaces/Appointment';
 import { IServerResponse } from '@common/interfaces/serverResponses';
-import { AppointmentsService } from './appointments.service';
+import { AvailabilityService } from '@modules/availability/availability.service';
+import { AppointmentsService } from '@modules/appointments/appointments.service';
 import { PaginationOptionsDto } from './dto/pagination-options.dto';
 
 @ApiTags('appointments')
 @Controller('appointments')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AppointmentsController {
-  constructor(private readonly appointmentsService: AppointmentsService) {}
+  constructor(
+    private readonly appointmentsService: AppointmentsService,
+    private readonly availabilityService: AvailabilityService,
+  ) {}
 
   @Get('/all')
   @ApiOperation({ summary: 'Get all appointments for the current user' })
@@ -125,26 +129,18 @@ export class AppointmentsController {
   async createAppointment(
     @Body() createAppointmentDto: CreateAppointmentDto,
   ): Promise<Appointment> {
-    return this.appointmentsService.createAppointment(createAppointmentDto);
-  }
+    const appointment = await this.appointmentsService.createAppointment(
+      createAppointmentDto,
+    );
 
-  @Patch('/link/:id')
-  @Roles(Role.LocalDoctor)
-  @ApiOperation({ summary: 'Link appointment by ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Insert Link to Zoom call to appointment',
-    type: Appointment,
-  })
-  async linkAppointment(
-    @Param('id') id: number,
-    @Body() dto: { link: string },
-  ): Promise<IServerResponse> {
-    await this.appointmentsService.postLinkAppointment(id, dto.link);
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Link to Zoom call added successfully',
-    };
+    const { startTime, endTime, remoteDoctorId } = createAppointmentDto;
+    await this.availabilityService.updateAvailableStatus(
+      startTime,
+      endTime,
+      remoteDoctorId,
+    );
+
+    return appointment;
   }
 
   @Delete('/:id')
@@ -169,6 +165,43 @@ export class AppointmentsController {
     return {
       statusCode: HttpStatus.OK,
       data: appointmentId,
+    };
+  }
+
+  @Get('/active/:id')
+  @ApiOperation({ summary: "Get active appointments by doctor's ID" })
+  @ApiResponse({
+    status: 200,
+    description: 'Return Appointment',
+    type: Appointment,
+  })
+  async getActiveAppointmentByDoctor(
+    @Param('id') id: number,
+  ): Promise<IServerResponse<Appointment>> {
+    const appointment =
+      await this.appointmentsService.getActiveAppointmentByDoctorId(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointment,
+    };
+  }
+
+  @Patch('/link/:id')
+  @Roles(Role.LocalDoctor)
+  @ApiOperation({ summary: 'Link appointment by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Insert Link to Zoom call to appointment',
+    type: Appointment,
+  })
+  async linkAppointment(
+    @Param('id') id: number,
+    @Body() dto: { link: string },
+  ): Promise<IServerResponse> {
+    await this.appointmentsService.postLinkAppointment(id, dto.link);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Link to Zoom call added successfully',
     };
   }
 }
