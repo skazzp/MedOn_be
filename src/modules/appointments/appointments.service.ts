@@ -9,6 +9,7 @@ import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Appointment } from '@entities/Appointments';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
+import { AppointmentsGateway } from '@modules/appointments/appointments.gateway';
 import { PaginationOptionsDto } from './dto/pagination-options.dto';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class AppointmentsService {
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
     private config: ConfigService,
+    private readonly appointmentsGateway: AppointmentsGateway,
   ) {}
 
   async getAllAppointmentsByDoctorId(id: number): Promise<Appointment[]> {
@@ -166,5 +168,10 @@ export class AppointmentsService {
 
   async postLinkAppointment(id: number, link: string): Promise<void> {
     await this.appointmentRepository.update(id, { link });
+  }
+
+  async sendAppointmentsByDoctorId(id: number): Promise<void> {
+    const appointments = await this.getAllAppointmentsByDoctorId(id);
+    await this.appointmentsGateway.sendAppointments(id, appointments);
   }
 }

@@ -133,6 +133,13 @@ export class AppointmentsController {
       createAppointmentDto,
     );
 
+    await this.appointmentsService.sendAppointmentsByDoctorId(
+      createAppointmentDto.remoteDoctorId,
+    );
+    await this.appointmentsService.sendAppointmentsByDoctorId(
+      createAppointmentDto.localDoctorId,
+    );
+
     const { startTime, endTime, remoteDoctorId } = createAppointmentDto;
     await this.availabilityService.updateAvailableStatus(
       startTime,
