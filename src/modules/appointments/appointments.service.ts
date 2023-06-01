@@ -160,10 +160,12 @@ export class AppointmentsService {
   }
 
   async getActiveAppointmentsByUserId(id: number): Promise<Appointment[]> {
+    // console.log(moment().utc().toDate());
+    // console.log(id);
     return this.appointmentRepository
       .createQueryBuilder()
-      .where('(localDoctorId = :id OR remoteDoctorId = :id)', { id })
-      .andWhere('(endTime > :now)', {
+      .where('(local_doctor_id = :id OR remote_doctor_id = :id)', { id })
+      .andWhere('(end_time > :now)', {
         now: moment().utc().toDate(),
       })
       .getMany();

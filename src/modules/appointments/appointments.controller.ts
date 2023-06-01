@@ -201,10 +201,10 @@ export class AppointmentsController {
     summary: "Get all appointments for Doctor that haven't  finished yet",
   })
   async getActiveAppointments(
-    @Req() req: Request & { userId: number },
+    @Param('id') id: number,
   ): Promise<IServerResponse<Appointment[]>> {
     const appointments =
-      await this.appointmentsService.getActiveAppointmentsByUserId(req.userId);
+      await this.appointmentsService.getActiveAppointmentsByUserId(id);
     return {
       statusCode: HttpStatus.OK,
       data: appointments,
