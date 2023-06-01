@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 
 import { Role, Filter, ShowAll } from '@common/enums';
+import { oneAsString } from '@common/constants/appointments';
 
 import { Appointment } from '@entities/Appointments';
 import { Doctor } from '@entities/Doctor';
@@ -146,7 +147,7 @@ export class AppointmentsService {
       throw new BadRequestException('Page must be greater than 0');
     }
 
-    if (filter === Filter.today && page.toString() !== '1') {
+    if (filter === Filter.today && page.toString() !== oneAsString) {
       throw new BadRequestException('Today page cannot be different than 1');
     }
 
