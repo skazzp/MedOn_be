@@ -209,9 +209,10 @@ export class AppointmentsService {
         'remoteDoctor.lastName',
       ]);
 
-    if (!Object.values(ShowAll).includes(showAll)) {
+    if (!(showAll in ShowAll)) {
       throw new BadRequestException('Invalid showAll value');
     }
+
     if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
       appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
         `appointment.localDoctorId = :id`,
@@ -237,10 +238,10 @@ export class AppointmentsService {
   async getAllCalendarAppointments(
     id: number,
     pagination: AllPaginationCalendarOptionsDto,
-  ) {
+  ): Promise<Appointment[]> {
     const { showAll } = pagination;
 
-    let appointments = this.appointmentRepository
+    let appointmentsQueryBuilder = this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
       .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
@@ -255,17 +256,27 @@ export class AppointmentsService {
 
     const doctor = await this.doctorRepository.findOne({ where: { id } });
 
-    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
-      appointments = appointments.andWhere(`appointment.localDoctorId = :id`, {
-        id,
-      });
-    } else if (doctor.role === Role.RemoteDoctor) {
-      appointments = appointments.andWhere(`appointment.remoteDoctorId = :id`, {
-        id,
-      });
-    } else {
-      throw new BadRequestException('Invalid role');
+    if (!(showAll in ShowAll)) {
+      throw new BadRequestException('Invalid showAll value');
     }
+
+    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
+      appointmentsQueryBuilder = appointmentsQueryBuilder.andWhere(
+        'appointment.localDoctorId = :id',
+        {
+          id,
+        },
+      );
+    } else if (doctor.role === Role.RemoteDoctor) {
+      appointmentsQueryBuilder = appointmentsQueryBuilder.andWhere(
+        'appointment.remoteDoctorId = :id',
+        {
+          id,
+        },
+      );
+    }
+
+    const appointments = await appointmentsQueryBuilder.getMany();
 
     return appointments;
   }
