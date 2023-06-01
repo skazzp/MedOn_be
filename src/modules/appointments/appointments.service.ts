@@ -208,7 +208,7 @@ export class AppointmentsService {
         'remoteDoctor.lastName',
       ]);
 
-    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.true) {
+    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
       appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
         `appointment.localDoctorId = :id`,
         { id },
