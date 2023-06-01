@@ -16,7 +16,8 @@ import { Appointment } from '@entities/Appointments';
 import { Doctor } from '@entities/Doctor';
 
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
-import { AllPaginationOptionsDto } from '@modules/appointments/dto/allPagination-options.dto';
+import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
+import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
 
 @Injectable()
@@ -137,7 +138,7 @@ export class AppointmentsService {
 
   async getAllAppointments(
     id: number,
-    pagination: AllPaginationOptionsDto,
+    pagination: AllPaginationListOptionsDto,
   ): Promise<Appointment[]> {
     const { page, filter, showAll } = pagination;
 
@@ -228,6 +229,42 @@ export class AppointmentsService {
     );
 
     const appointments = await appointmentQueryBuilder.getMany();
+
+    return appointments;
+  }
+
+  async getAllCalendarAppointments(
+    id: number,
+    pagination: AllPaginationCalendarOptionsDto,
+  ) {
+    const { showAll } = pagination;
+
+    let appointments = this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .where(
+        'appointment.startTime >= :sixMonthsAgo AND appointment.startTime <= :sixMonthsAhead',
+        {
+          sixMonthsAgo: moment().subtract(6, 'months').startOf('day').toDate(),
+          sixMonthsAhead: moment().add(6, 'months').endOf('day').toDate(),
+        },
+      );
+
+    const doctor = await this.doctorRepository.findOne({ where: { id } });
+
+    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
+      appointments = appointments.andWhere(`appointment.localDoctorId = :id`, {
+        id,
+      });
+    } else if (doctor.role === Role.RemoteDoctor) {
+      appointments = appointments.andWhere(`appointment.remoteDoctorId = :id`, {
+        id,
+      });
+    } else {
+      throw new BadRequestException('Invalid role');
+    }
 
     return appointments;
   }

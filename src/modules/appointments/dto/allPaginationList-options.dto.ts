@@ -2,10 +2,10 @@ import { Filter, ShowAll } from '@common/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumberString, IsOptional } from 'class-validator';
 
-export class AllPaginationOptionsDto {
+export class AllPaginationListOptionsDto {
   @ApiProperty({
     description: 'page of the pagination',
-    example: '1',
+    example: 1,
   })
   @IsNumberString()
   page: number;
@@ -13,7 +13,7 @@ export class AllPaginationOptionsDto {
   @ApiProperty({
     description: 'Show all appointments',
     enum: ShowAll,
-    example: true,
+    example: 'true',
   })
   @IsEnum(ShowAll)
   @IsOptional()
