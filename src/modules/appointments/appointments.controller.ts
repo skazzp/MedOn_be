@@ -22,6 +22,7 @@ import { RequestWithUser } from '@common/interfaces/Appointment';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { AvailabilityService } from '@modules/availability/availability.service';
 import { AppointmentsService } from '@modules/appointments/appointments.service';
+import { AppointmentsGateway } from '@modules/appointments/appointments.gateway';
 import { PaginationOptionsDto } from './dto/pagination-options.dto';
 
 @ApiTags('appointments')
@@ -31,6 +32,7 @@ export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly availabilityService: AvailabilityService,
+    private readonly appointmentsGateway: AppointmentsGateway,
   ) {}
 
   @Get('/all')
@@ -133,10 +135,10 @@ export class AppointmentsController {
       createAppointmentDto,
     );
 
-    await this.appointmentsService.sendAppointmentsByDoctorId(
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(
       createAppointmentDto.remoteDoctorId,
     );
-    await this.appointmentsService.sendAppointmentsByDoctorId(
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(
       createAppointmentDto.localDoctorId,
     );
 
@@ -175,24 +177,6 @@ export class AppointmentsController {
     };
   }
 
-  @Get('/active/:id')
-  @ApiOperation({ summary: "Get active appointments by doctor's ID" })
-  @ApiResponse({
-    status: 200,
-    description: 'Return Appointment',
-    type: Appointment,
-  })
-  async getActiveAppointmentByDoctor(
-    @Param('id') id: number,
-  ): Promise<IServerResponse<Appointment>> {
-    const appointment =
-      await this.appointmentsService.getActiveAppointmentByDoctorId(id);
-    return {
-      statusCode: HttpStatus.OK,
-      data: appointment,
-    };
-  }
-
   @Patch('/link/:id')
   @Roles(Role.LocalDoctor)
   @ApiOperation({ summary: 'Link appointment by ID' })
@@ -209,6 +193,21 @@ export class AppointmentsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Link to Zoom call added successfully',
+    };
+  }
+
+  @Get('/active/:id')
+  @ApiOperation({
+    summary: "Get all appointments for Doctor that haven't  finished yet",
+  })
+  async getActiveAppointments(
+    @Req() req: Request & { userId: number },
+  ): Promise<IServerResponse<Appointment[]>> {
+    const appointments =
+      await this.appointmentsService.getActiveAppointmentsByUserId(req.userId);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointments,
     };
   }
 }

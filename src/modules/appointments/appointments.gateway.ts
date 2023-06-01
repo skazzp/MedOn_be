@@ -7,7 +7,6 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { Appointment } from '@entities/Appointments';
 
 interface IClient {
   id: string;
@@ -42,16 +41,13 @@ export class AppointmentsGateway
     );
   }
 
-  async sendAppointments(
-    userId: number,
-    appointments: Appointment[],
-  ): Promise<void> {
+  async sendAppointmentsHaveChanged(userId: number): Promise<void> {
     const clientsByUserId = this.clients.filter(
       (client: IClient) => client.userId === userId,
     );
 
     clientsByUserId.forEach((client) =>
-      this.server.to(client.id).emit('appointments', appointments),
+      this.server.to(client.id).emit('appointmentsHaveChanged'),
     );
   }
 }
