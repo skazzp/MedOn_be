@@ -26,7 +26,8 @@ import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointme
 import { AvailabilityService } from '@modules/availability/availability.service';
 import { AppointmentsService } from '@modules/appointments/appointments.service';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
-import { AllPaginationOptionsDto } from '@modules/appointments/dto/allPagination-options.dto';
+import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
+import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
 
 @ApiTags('appointments')
 @Controller('appointments')
@@ -37,22 +38,46 @@ export class AppointmentsController {
     private readonly availabilityService: AvailabilityService,
   ) {}
 
-  @Get('/app')
-  @ApiOperation({ summary: 'Get appointments for the current user' })
+  @Get('/list')
+  @ApiOperation({ summary: 'Get appointments for the list' })
   @ApiResponse({
     status: 200,
     description: 'Returns an array of appointments',
     type: Appointment,
     isArray: true,
   })
-  async getPastAppointmentsForCurrentDoctor(
+  async getAllAppointmentsList(
     @Req() request: RequestWithUser,
-    @Query() pagination: AllPaginationOptionsDto,
+    @Query() pagination: AllPaginationListOptionsDto,
   ): Promise<IServerResponse> {
-    const appointments = await this.appointmentsService.getAllAppointments(
+    const appointments = await this.appointmentsService.getAllListAppointments(
       request.user.userId,
       pagination,
     );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Appointments retrieved successfully',
+      data: appointments,
+    };
+  }
+
+  @Get('/calendar')
+  @ApiOperation({ summary: 'Get appointments for the calendar' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
+  async getAllAppointmentsCalendar(
+    @Req() request: RequestWithUser,
+    @Query() pagination: AllPaginationCalendarOptionsDto,
+  ): Promise<IServerResponse> {
+    const appointments =
+      await this.appointmentsService.getAllCalendarAppointments(
+        request.user.userId,
+        pagination,
+      );
     return {
       statusCode: HttpStatus.OK,
       message: 'Appointments retrieved successfully',

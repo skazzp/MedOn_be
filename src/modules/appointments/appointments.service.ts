@@ -136,7 +136,7 @@ export class AppointmentsService {
     return futureAppointments;
   }
 
-  async getAllAppointments(
+  async getAllListAppointments(
     id: number,
     pagination: AllPaginationListOptionsDto,
   ): Promise<Appointment[]> {
