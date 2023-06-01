@@ -171,7 +171,7 @@ export class AppointmentsService {
 
       case Filter.past:
         whereClause =
-          'appointment.endTime >= :pastDayStart AND appointment.endTime < :pastDayEnd';
+          'appointment.startTime >= :pastDayStart AND appointment.endTime < :pastDayEnd';
         break;
 
       default:
