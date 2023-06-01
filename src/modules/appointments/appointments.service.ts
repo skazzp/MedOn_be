@@ -252,7 +252,25 @@ export class AppointmentsService {
           sixMonthsAgo: moment().subtract(6, 'months').startOf('day').toDate(),
           sixMonthsAhead: moment().add(6, 'months').endOf('day').toDate(),
         },
-      );
+      )
+      .select([
+        'appointment.id',
+        'appointment.link',
+        'appointment.startTime',
+        'appointment.endTime',
+        'patient.id',
+        'patient.firstName',
+        'patient.lastName',
+        'patient.dateOfBirth',
+        'patient.gender',
+        'patient.overview',
+        'localDoctor.id',
+        'localDoctor.firstName',
+        'localDoctor.lastName',
+        'remoteDoctor.id',
+        'remoteDoctor.firstName',
+        'remoteDoctor.lastName',
+      ]);
 
     const doctor = await this.doctorRepository.findOne({ where: { id } });
 
