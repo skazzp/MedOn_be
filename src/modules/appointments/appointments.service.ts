@@ -209,6 +209,9 @@ export class AppointmentsService {
         'remoteDoctor.lastName',
       ]);
 
+    if (!Object.values(ShowAll).includes(showAll)) {
+      throw new BadRequestException('Invalid showAll value');
+    }
     if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
       appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
         `appointment.localDoctorId = :id`,
@@ -219,8 +222,6 @@ export class AppointmentsService {
         `appointment.remoteDoctorId = :id`,
         { id },
       );
-    } else {
-      throw new BadRequestException('Invalid role');
     }
 
     appointmentQueryBuilder = appointmentQueryBuilder.orderBy(
