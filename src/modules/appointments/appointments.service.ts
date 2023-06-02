@@ -172,6 +172,7 @@ export class AppointmentsService {
       .andWhere('(appointments.endTime > :now)', {
         now: moment().utc().toDate(),
       })
+      .orderBy('appointments.startTime')
       .getMany();
   }
 }
