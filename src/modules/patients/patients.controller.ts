@@ -13,20 +13,25 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { Role } from '@common/enums';
 import { RequestWithUser } from '@common/interfaces/Appointment';
+
+import { Roles } from '@decorators/roles.decorator';
+
+import { Patient } from '@entities/Patient';
+
+import { RolesGuard } from '@guards/roles.guard';
+
 import {
   CreatePatientDto,
   PatientSearchOptionsDto,
   UpdatePatientDto,
 } from '@modules/patients/dto';
 import { PatientsRes } from '@modules/patients/interfaces/patients-responce';
-import { Patient } from '@entities/Patient';
-import { Roles } from '@decorators/roles.decorator';
-import { RolesGuard } from 'src/guards/roles.guard';
 import { PatientsService } from '@modules/patients/patients.service';
-import { GetNotesParam } from './interfaces/patients-params';
+import { GetNotesParam } from '@modules/patients/interfaces/patients-params';
 
 @ApiTags('patients')
 @Controller('patients')
