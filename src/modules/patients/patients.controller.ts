@@ -8,12 +8,14 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 import { Role } from '@common/enums';
+import { RequestWithUser } from '@common/interfaces/Appointment';
 import {
   CreatePatientDto,
   PatientSearchOptionsDto,
@@ -55,9 +57,13 @@ export class PatientsController {
     description: 'List of the patients found',
   })
   async getAll(
+    @Request() req: RequestWithUser,
     @Query() searchOptions: PatientSearchOptionsDto,
   ): Promise<PatientsRes> {
-    const response = await this.patientsService.getPatients(searchOptions);
+    const response = await this.patientsService.getPatients(
+      req.user.userId,
+      searchOptions,
+    );
     if (!response) throw new NotFoundException('There are no patients!');
 
     return response;
