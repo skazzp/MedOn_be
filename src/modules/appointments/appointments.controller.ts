@@ -25,6 +25,7 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { AvailabilityService } from '@modules/availability/availability.service';
 import { AppointmentsService } from '@modules/appointments/appointments.service';
+import { AppointmentsGateway } from '@modules/appointments/appointments.gateway';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
 import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
 import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
@@ -36,6 +37,7 @@ export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly availabilityService: AvailabilityService,
+    private readonly appointmentsGateway: AppointmentsGateway,
   ) {}
 
   @Get('/list')
@@ -161,6 +163,13 @@ export class AppointmentsController {
       createAppointmentDto,
     );
 
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(
+      createAppointmentDto.remoteDoctorId,
+    );
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(
+      createAppointmentDto.localDoctorId,
+    );
+
     const { startTime, endTime, remoteDoctorId } = createAppointmentDto;
     await this.availabilityService.updateAvailableStatus(
       startTime,
@@ -196,24 +205,6 @@ export class AppointmentsController {
     };
   }
 
-  @Get('/active/:id')
-  @ApiOperation({ summary: "Get active appointments by doctor's ID" })
-  @ApiResponse({
-    status: 200,
-    description: 'Return Appointment',
-    type: Appointment,
-  })
-  async getActiveAppointmentByDoctor(
-    @Param('id') id: number,
-  ): Promise<IServerResponse<Appointment>> {
-    const appointment =
-      await this.appointmentsService.getActiveAppointmentByDoctorId(id);
-    return {
-      statusCode: HttpStatus.OK,
-      data: appointment,
-    };
-  }
-
   @Patch('/link/:id')
   @Roles(Role.LocalDoctor)
   @ApiOperation({ summary: 'Link appointment by ID' })
@@ -230,6 +221,21 @@ export class AppointmentsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Link to Zoom call added successfully',
+    };
+  }
+
+  @Get('/active/:id')
+  @ApiOperation({
+    summary: "Get all appointments for Doctor that haven't  finished yet",
+  })
+  async getActiveAppointments(
+    @Param('id') id: number,
+  ): Promise<IServerResponse<Appointment[]>> {
+    const appointments =
+      await this.appointmentsService.getActiveAppointmentsByUserId(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointments,
     };
   }
 }
