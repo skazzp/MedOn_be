@@ -1,17 +1,25 @@
 import * as moment from 'moment-timezone';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
+
+import { Role, Filter, ShowAll } from '@common/enums';
+import { oneAsString } from '@common/constants/appointments';
+
 import { Appointment } from '@entities/Appointments';
-import { Role } from '@common/enums';
 import { Doctor } from '@entities/Doctor';
+
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
-import { PaginationOptionsDto } from './dto/pagination-options.dto';
+import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
+import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
+import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -104,18 +112,9 @@ export class AppointmentsService {
     return appointments;
   }
 
-  async getActiveAppointmentByDoctorId(id: number): Promise<Appointment> {
-    const now = moment().utc().toDate();
-    return this.appointmentRepository
-      .createQueryBuilder('appointment')
-      .where('start_time < :now AND end_time > :now', { now })
-      .andWhere('(remote_doctor_id = :id OR local_doctor_id = :id)', { id })
-      .getOne();
-  }
-
   async getFutureAppointmentsByDoctorId(
     id: number,
-    pagination: PaginationOptionsDto,
+    pagination: FuturePaginationOptionsDto,
   ): Promise<Appointment[]> {
     const now = moment().utc().toDate();
 
@@ -152,20 +151,122 @@ export class AppointmentsService {
     return futureAppointments;
   }
 
-  async getPastAppointmentsByDoctorId(
+  async getAllListAppointments(
     id: number,
-    pagination: PaginationOptionsDto,
+    pagination: AllPaginationListOptionsDto,
   ): Promise<Appointment[]> {
-    const now = moment().utc().toDate();
+    const { page, filter, showAll } = pagination;
 
-    const pastAppointments = await this.appointmentRepository
+    if (page <= 0) {
+      throw new BadRequestException('Page must be greater than 0');
+    }
+
+    if (filter === Filter.today && page.toString() !== oneAsString) {
+      throw new BadRequestException('Today page cannot be different than 1');
+    }
+
+    const doctor = await this.doctorRepository.findOne({ where: { id } });
+
+    if (!doctor) {
+      throw new NotFoundException('Doctor not found');
+    }
+
+    let whereClause: string;
+
+    switch (filter) {
+      case Filter.today:
+        whereClause =
+          'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
+        break;
+
+      case Filter.future:
+        whereClause =
+          'appointment.startTime >= :nextDayStart AND appointment.endTime <= :nextDayEnd';
+        break;
+
+      case Filter.past:
+        whereClause =
+          'appointment.startTime >= :pastDayStart AND appointment.endTime < :pastDayEnd';
+        break;
+
+      default:
+        throw new BadRequestException(`Invalid filter: ${filter}`);
+    }
+
+    let appointmentQueryBuilder = this.appointmentRepository
       .createQueryBuilder('appointment')
       .leftJoinAndSelect('appointment.patient', 'patient')
-      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .where(whereClause, {
+        now: moment().utc().toDate(),
+        startOfDay: moment().startOf('day').toDate(),
+        endOfDay: moment().endOf('day').toDate(),
+        nextDayStart: moment().add(page, 'day').startOf('day').toDate(),
+        nextDayEnd: moment().add(page, 'day').endOf('day').toDate(),
+        pastDayStart: moment().subtract(page, 'day').startOf('day').toDate(),
+        pastDayEnd: moment().subtract(page, 'day').endOf('day').toDate(),
+      })
+      .select([
+        'appointment.id',
+        'appointment.link',
+        'appointment.startTime',
+        'appointment.endTime',
+        'patient.id',
+        'patient.firstName',
+        'patient.lastName',
+        'patient.dateOfBirth',
+        'patient.gender',
+        'patient.overview',
+        'localDoctor.firstName',
+        'localDoctor.lastName',
+        'remoteDoctor.firstName',
+        'remoteDoctor.lastName',
+      ]);
+
+    if (!(showAll in ShowAll)) {
+      throw new BadRequestException('Invalid showAll value');
+    }
+
+    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
+      appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
+        `appointment.localDoctorId = :id`,
+        { id },
+      );
+    } else if (doctor.role === Role.RemoteDoctor) {
+      appointmentQueryBuilder = appointmentQueryBuilder.andWhere(
+        `appointment.remoteDoctorId = :id`,
+        { id },
+      );
+    }
+
+    appointmentQueryBuilder = appointmentQueryBuilder.orderBy(
+      'appointment.startTime',
+      'ASC',
+    );
+
+    const appointments = await appointmentQueryBuilder.getMany();
+
+    return appointments;
+  }
+
+  async getAllCalendarAppointments(
+    id: number,
+    pagination: AllPaginationCalendarOptionsDto,
+  ): Promise<Appointment[]> {
+    const { showAll } = pagination;
+
+    let appointmentsQueryBuilder = this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.patient', 'patient')
+      .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
       .where(
-        `appointment.endTime < :now AND (appointment.localDoctorId = :id OR appointment.remoteDoctorId = :id)`,
-        { now, id },
+        'appointment.startTime >= :sixMonthsAgo AND appointment.startTime <= :sixMonthsAhead',
+        {
+          sixMonthsAgo: moment().subtract(6, 'months').startOf('day').toDate(),
+          sixMonthsAhead: moment().add(6, 'months').endOf('day').toDate(),
+        },
       )
       .select([
         'appointment.id',
@@ -178,20 +279,59 @@ export class AppointmentsService {
         'patient.dateOfBirth',
         'patient.gender',
         'patient.overview',
-        'remoteDoctor.firstName',
-        'remoteDoctor.lastName',
+        'localDoctor.id',
         'localDoctor.firstName',
         'localDoctor.lastName',
-      ])
-      .orderBy('appointment.startTime', 'DESC')
-      .skip(pagination.offset)
-      .take(pagination.limit)
-      .getMany();
+        'remoteDoctor.id',
+        'remoteDoctor.firstName',
+        'remoteDoctor.lastName',
+      ]);
 
-    return pastAppointments;
+    const doctor = await this.doctorRepository.findOne({ where: { id } });
+
+    if (!(showAll in ShowAll)) {
+      throw new BadRequestException('Invalid showAll value');
+    }
+
+    if (doctor.role === Role.LocalDoctor && showAll === ShowAll.false) {
+      appointmentsQueryBuilder = appointmentsQueryBuilder.andWhere(
+        'appointment.localDoctorId = :id',
+        {
+          id,
+        },
+      );
+    } else if (doctor.role === Role.RemoteDoctor) {
+      appointmentsQueryBuilder = appointmentsQueryBuilder.andWhere(
+        'appointment.remoteDoctorId = :id',
+        {
+          id,
+        },
+      );
+    }
+
+    const appointments = await appointmentsQueryBuilder.getMany();
+
+    return appointments;
   }
 
   async postLinkAppointment(id: number, link: string): Promise<void> {
     await this.appointmentRepository.update(id, { link });
+  }
+
+  async getActiveAppointmentsByUserId(id: number): Promise<Appointment[]> {
+    return this.appointmentRepository
+      .createQueryBuilder('appointments')
+      .leftJoinAndSelect('appointments.patient', 'patient')
+      .leftJoinAndSelect('appointments.remoteDoctor', 'remoteDoctor')
+      .leftJoinAndSelect('appointments.localDoctor', 'localDoctor')
+      .where(
+        '(appointments.localDoctorId = :id OR appointments.remoteDoctorId = :id)',
+        { id },
+      )
+      .andWhere('(appointments.endTime > :now)', {
+        now: moment().utc().toDate(),
+      })
+      .orderBy('appointments.startTime')
+      .getMany();
   }
 }

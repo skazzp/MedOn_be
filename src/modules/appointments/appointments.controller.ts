@@ -11,18 +11,24 @@ import {
   Query,
   Patch,
 } from '@nestjs/common';
-import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
-import { Appointment } from '@entities/Appointments';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { RolesGuard } from '@guards/roles.guard';
+
 import { Roles } from '@decorators/roles.decorator';
+import { Appointment } from '@entities/Appointments';
+import { RolesGuard } from '@guards/roles.guard';
+
 import { Role } from '@common/enums';
 import { RequestWithUser } from '@common/interfaces/Appointment';
 import { IServerResponse } from '@common/interfaces/serverResponses';
+
+import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { AvailabilityService } from '@modules/availability/availability.service';
 import { AppointmentsService } from '@modules/appointments/appointments.service';
-import { PaginationOptionsDto } from './dto/pagination-options.dto';
+import { AppointmentsGateway } from '@modules/appointments/appointments.gateway';
+import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
+import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
+import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
 
 @ApiTags('appointments')
 @Controller('appointments')
@@ -31,7 +37,55 @@ export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
     private readonly availabilityService: AvailabilityService,
+    private readonly appointmentsGateway: AppointmentsGateway,
   ) {}
+
+  @Get('/list')
+  @ApiOperation({ summary: 'Get appointments for the list' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
+  async getAllAppointmentsList(
+    @Req() request: RequestWithUser,
+    @Query() pagination: AllPaginationListOptionsDto,
+  ): Promise<IServerResponse> {
+    const appointments = await this.appointmentsService.getAllListAppointments(
+      request.user.userId,
+      pagination,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Appointments retrieved successfully',
+      data: appointments,
+    };
+  }
+
+  @Get('/calendar')
+  @ApiOperation({ summary: 'Get appointments for the calendar' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns an array of appointments',
+    type: Appointment,
+    isArray: true,
+  })
+  async getAllAppointmentsCalendar(
+    @Req() request: RequestWithUser,
+    @Query() pagination: AllPaginationCalendarOptionsDto,
+  ): Promise<IServerResponse> {
+    const appointments =
+      await this.appointmentsService.getAllCalendarAppointments(
+        request.user.userId,
+        pagination,
+      );
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Appointments retrieved successfully',
+      data: appointments,
+    };
+  }
 
   @Get('/all')
   @ApiOperation({ summary: 'Get all appointments for the current user' })
@@ -63,7 +117,7 @@ export class AppointmentsController {
   })
   async getFutureAppointmentsForCurrentDoctor(
     @Req() request: RequestWithUser,
-    @Query() pagination: PaginationOptionsDto,
+    @Query() pagination: FuturePaginationOptionsDto,
   ): Promise<IServerResponse> {
     const appointments =
       await this.appointmentsService.getFutureAppointmentsByDoctorId(
@@ -74,30 +128,6 @@ export class AppointmentsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Future appointments retrieved successfully',
-      data: appointments,
-    };
-  }
-
-  @Get('/past')
-  @ApiOperation({ summary: 'Get future appointments for the current user' })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns an array of appointments',
-    type: Appointment,
-    isArray: true,
-  })
-  async getPastAppointmentsForCurrentDoctor(
-    @Req() request: RequestWithUser,
-    @Query() pagination: PaginationOptionsDto,
-  ): Promise<IServerResponse> {
-    const appointments =
-      await this.appointmentsService.getPastAppointmentsByDoctorId(
-        request.user.userId,
-        pagination,
-      );
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Past appointments retrieved successfully',
       data: appointments,
     };
   }
@@ -131,6 +161,13 @@ export class AppointmentsController {
   ): Promise<Appointment> {
     const appointment = await this.appointmentsService.createAppointment(
       createAppointmentDto,
+    );
+
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(
+      createAppointmentDto.remoteDoctorId,
+    );
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(
+      createAppointmentDto.localDoctorId,
     );
 
     const { startTime, endTime, remoteDoctorId } = createAppointmentDto;
@@ -168,24 +205,6 @@ export class AppointmentsController {
     };
   }
 
-  @Get('/active/:id')
-  @ApiOperation({ summary: "Get active appointments by doctor's ID" })
-  @ApiResponse({
-    status: 200,
-    description: 'Return Appointment',
-    type: Appointment,
-  })
-  async getActiveAppointmentByDoctor(
-    @Param('id') id: number,
-  ): Promise<IServerResponse<Appointment>> {
-    const appointment =
-      await this.appointmentsService.getActiveAppointmentByDoctorId(id);
-    return {
-      statusCode: HttpStatus.OK,
-      data: appointment,
-    };
-  }
-
   @Patch('/link/:id')
   @Roles(Role.LocalDoctor)
   @ApiOperation({ summary: 'Link appointment by ID' })
@@ -202,6 +221,21 @@ export class AppointmentsController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Link to Zoom call added successfully',
+    };
+  }
+
+  @Get('/active/:id')
+  @ApiOperation({
+    summary: "Get all appointments for Doctor that haven't  finished yet",
+  })
+  async getActiveAppointments(
+    @Param('id') id: number,
+  ): Promise<IServerResponse<Appointment[]>> {
+    const appointments =
+      await this.appointmentsService.getActiveAppointmentsByUserId(id);
+    return {
+      statusCode: HttpStatus.OK,
+      data: appointments,
     };
   }
 }
