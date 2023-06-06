@@ -77,15 +77,6 @@ export class AppointmentsService {
     return appointments;
   }
 
-  async getActiveAppointmentByDoctorId(id: number): Promise<Appointment> {
-    const now = moment().utc().toDate();
-    return this.appointmentRepository
-      .createQueryBuilder('appointment')
-      .where('start_time < :now AND end_time > :now', { now })
-      .andWhere('(remote_doctor_id = :id OR local_doctor_id = :id)', { id })
-      .getOne();
-  }
-
   async getFutureAppointmentsByDoctorId(
     id: number,
     pagination: PaginationOptionsDto,
@@ -166,5 +157,22 @@ export class AppointmentsService {
 
   async postLinkAppointment(id: number, link: string): Promise<void> {
     await this.appointmentRepository.update(id, { link });
+  }
+
+  async getActiveAppointmentsByUserId(id: number): Promise<Appointment[]> {
+    return this.appointmentRepository
+      .createQueryBuilder('appointments')
+      .leftJoinAndSelect('appointments.patient', 'patient')
+      .leftJoinAndSelect('appointments.remoteDoctor', 'remoteDoctor')
+      .leftJoinAndSelect('appointments.localDoctor', 'localDoctor')
+      .where(
+        '(appointments.localDoctorId = :id OR appointments.remoteDoctorId = :id)',
+        { id },
+      )
+      .andWhere('(appointments.endTime > :now)', {
+        now: moment().utc().toDate(),
+      })
+      .orderBy('appointments.startTime')
+      .getMany();
   }
 }
