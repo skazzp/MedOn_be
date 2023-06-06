@@ -1,3 +1,4 @@
+import * as moment from 'moment-timezone';
 import {
   Column,
   CreateDateColumn,
@@ -28,9 +29,29 @@ export class ChatMessage {
   @JoinColumn({ name: 'sender_id' })
   sender: Doctor;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({
+    name: 'created_at',
+    transformer: {
+      to(value: Date): Date {
+        return moment(value).utc().toDate();
+      },
+      from(value: Date): Date {
+        return moment(value).toDate();
+      },
+    },
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    transformer: {
+      to(value: Date): Date {
+        return moment(value).utc().toDate();
+      },
+      from(value: Date): Date {
+        return moment(value).toDate();
+      },
+    },
+  })
   updatedAt: Date;
 }
