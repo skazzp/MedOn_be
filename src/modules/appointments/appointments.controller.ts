@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Query,
   Patch,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -183,8 +184,18 @@ export class AppointmentsController {
   @Delete('/:id')
   @ApiOperation({ summary: 'Delete appointment by ID' })
   @ApiResponse({ status: 200, description: 'Appointment deleted' })
-  async deleteAppointment(@Param('id') id: number): Promise<void> {
+  async deleteAppointment(
+    @Request() request: RequestWithUser,
+    @Param('id') id: number,
+  ): Promise<void> {
+    const { remoteDoctorId, localDoctorId } =
+      await this.appointmentsService.getAppointmentById(id);
+
     await this.appointmentsService.deleteAppointment(id);
+
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(remoteDoctorId);
+
+    await this.appointmentsGateway.sendAppointmentsHaveChanged(localDoctorId);
   }
 
   @Get('/patient/:id')

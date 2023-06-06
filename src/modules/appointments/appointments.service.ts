@@ -20,6 +20,8 @@ import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointme
 import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
 import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
+import { AvailabilityService } from '@modules/availability/availability.service';
+import { Availability } from '@entities/Availability';
 
 @Injectable()
 export class AppointmentsService {
@@ -28,6 +30,7 @@ export class AppointmentsService {
     private readonly appointmentRepository: Repository<Appointment>,
     @InjectRepository(Doctor)
     private readonly doctorRepository: Repository<Doctor>,
+    private readonly availabilityService: AvailabilityService,
     private config: ConfigService,
   ) {}
 
@@ -76,30 +79,26 @@ export class AppointmentsService {
     }
   }
 
-  async deleteAppointment(id: number, doctorId: number): Promise<void> {
-    let doctorQuery = this.doctorRepository.createQueryBuilder('doctor');
-
-    const doctor = await this.doctorRepository.findOne({
-      where: { id: doctorId },
-    });
-
-    if (doctor.role === Role.LocalDoctor) {
-      doctorQuery = doctorQuery.where('doctor.id = :id', { id: doctorId });
-    } else if (doctor.role === Role.RemoteDoctor) {
-      doctorQuery = doctorQuery.where('doctor.id = :id', {
-        id: doctorId,
-      });
-    }
+  async deleteAppointment(id: number): Promise<void> {
+    const { remoteDoctorId } = await this.getAppointmentById(id);
 
     const now = moment().utc().toDate();
 
     const appointmentQuery = await this.appointmentRepository
       .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .leftJoinAndSelect('remoteDoctor.availability', 'availability')
+      .update(Availability)
+      .set({ isAvailable: true })
+      .where('remoteDoctor.id = :remoteDoctorId', { remoteDoctorId })
+      .andWhere(
+        'appointment.startTime = availability.startTime AND appointment.endTime = availability.endTime',
+      )
       .delete()
       .where('appointment.id = :id AND endTime > :now', { now, id })
       .execute();
 
-    if (appointmentQuery.affected === 0)
+    if (!appointmentQuery.affected)
       throw new UnauthorizedException('Appointments no found!');
   }
 
