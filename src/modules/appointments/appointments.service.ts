@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Appointment } from '@entities/Appointments';
+import { Role } from '@common/enums';
+import { Doctor } from '@entities/Doctor';
 import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointment.dto';
 import { PaginationOptionsDto } from './dto/pagination-options.dto';
 
@@ -16,6 +18,8 @@ export class AppointmentsService {
   constructor(
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
+    @InjectRepository(Doctor)
+    private readonly doctorRepository: Repository<Doctor>,
     private config: ConfigService,
   ) {}
 
@@ -64,8 +68,31 @@ export class AppointmentsService {
     }
   }
 
-  async deleteAppointment(id: number): Promise<void> {
-    await this.appointmentRepository.delete(id);
+  async deleteAppointment(id: number, doctorId: number): Promise<void> {
+    let doctorQuery = this.doctorRepository.createQueryBuilder('doctor');
+
+    const doctor = await this.doctorRepository.findOne({
+      where: { id: doctorId },
+    });
+
+    if (doctor.role === Role.LocalDoctor) {
+      doctorQuery = doctorQuery.where('doctor.id = :id', { id: doctorId });
+    } else if (doctor.role === Role.RemoteDoctor) {
+      doctorQuery = doctorQuery.where('doctor.id = :id', {
+        id: doctorId,
+      });
+    }
+
+    const now = moment().utc().toDate();
+
+    const appointmentQuery = await this.appointmentRepository
+      .createQueryBuilder('appointment')
+      .delete()
+      .where('appointment.id = :id AND endTime > :now', { now, id })
+      .execute();
+
+    if (appointmentQuery.affected === 0)
+      throw new UnauthorizedException('Appointments no found!');
   }
 
   async getAppointmentsByPatientId(id: number): Promise<Appointment[]> {
