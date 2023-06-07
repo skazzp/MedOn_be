@@ -20,6 +20,7 @@ import { CreateAppointmentDto } from '@modules/appointments/dto/create-appointme
 import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPaginationCalendar-options.dto';
 import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
+import { AvailabilityService } from '@modules/availability/availability.service';
 
 @Injectable()
 export class AppointmentsService {
@@ -28,6 +29,7 @@ export class AppointmentsService {
     private readonly appointmentRepository: Repository<Appointment>,
     @InjectRepository(Doctor)
     private readonly doctorRepository: Repository<Doctor>,
+    private readonly availabilityService: AvailabilityService,
     private config: ConfigService,
   ) {}
 
@@ -77,7 +79,36 @@ export class AppointmentsService {
   }
 
   async deleteAppointment(id: number): Promise<void> {
-    await this.appointmentRepository.delete(id);
+    const appointment = await this.getAppointmentById(id);
+    const { remoteDoctorId, startTime, endTime } = appointment;
+
+    const now = moment().utc().toDate();
+    const end = moment(endTime).utc().toDate();
+
+    if (end > now) {
+      const availability =
+        await this.availabilityService.getAvailabilityByDoctorId(
+          remoteDoctorId,
+          startTime,
+          endTime,
+        );
+      availability.isAvailable = true;
+      await this.availabilityService.updateAvailability(availability);
+
+      const appointmentQuery = await this.appointmentRepository
+        .createQueryBuilder('appointment')
+        .delete()
+        .where({
+          id,
+        })
+        .execute();
+
+      if (appointmentQuery.affected === 0) {
+        throw new UnauthorizedException('No Appointments was found to delete');
+      }
+    } else {
+      throw new BadRequestException('Only future appointments can be deleted');
+    }
   }
 
   async getAppointmentsByPatientId(id: number): Promise<Appointment[]> {

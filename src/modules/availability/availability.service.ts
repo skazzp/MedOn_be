@@ -170,4 +170,18 @@ export class AvailabilityService {
     availability.isAvailable = false;
     await this.repo.update(availability.id, availability);
   }
+
+  async getAvailabilityByDoctorId(
+    doctorId: number,
+    startTime: Date,
+    endTime: Date,
+  ): Promise<Availability> {
+    return this.repo.findOne({
+      where: { doctorId, startTime, endTime },
+    });
+  }
+
+  async updateAvailability(availability: Availability): Promise<Availability> {
+    return this.repo.save(availability);
+  }
 }
