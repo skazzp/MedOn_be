@@ -21,7 +21,6 @@ import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPa
 import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
 import { AvailabilityService } from '@modules/availability/availability.service';
-import { defaultLimit } from '@common/constants/pagination-params';
 
 @Injectable()
 export class AppointmentsService {
@@ -251,8 +250,7 @@ export class AppointmentsService {
 
     appointmentQueryBuilder = appointmentQueryBuilder
       .orderBy('appointment.startTime', orderClause)
-      .skip((page - 1) * limit)
-      .limit(defaultLimit);
+      .take(limit * page);
 
     const appointments = await appointmentQueryBuilder.getMany();
 
