@@ -9,6 +9,7 @@ import {
 
 import { Gender } from '@common/enums';
 import { PatientNotes } from './PatientNotes';
+import { Appointment } from './Appointments';
 
 @Entity({ name: 'patient' })
 export class Patient {
@@ -41,6 +42,9 @@ export class Patient {
 
   @Column({ name: 'overview', type: 'text' })
   overview: string;
+
+  @OneToMany(() => Appointment, (appointment) => appointment.patient)
+  appointments: Appointment[];
 
   @OneToMany(() => PatientNotes, (patientNote) => patientNote.patient)
   notes: PatientNotes[];

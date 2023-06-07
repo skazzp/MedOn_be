@@ -16,7 +16,7 @@ import { Roles } from '@decorators/roles.decorator';
 import { Availability } from '@entities/Availability';
 
 import { Role } from '@common/enums';
-import { AvailabilityReq } from '@common/interfaces/Availability';
+import { RequestJwt } from '@common/interfaces/RequestJwt';
 import { IServerResponse } from '@common/interfaces/serverResponses';
 
 import { RolesGuard } from '@guards/roles.guard';
@@ -41,7 +41,7 @@ export class AvailabilityController {
   @Post()
   async create(
     @Body() data: ChangeAvailabilityBody,
-    @Request() req: AvailabilityReq,
+    @Request() req: RequestJwt,
   ): Promise<IServerResponse<Availability[]>> {
     await this.availabilityService.createMultiples(
       data.dto,
@@ -61,7 +61,7 @@ export class AvailabilityController {
   })
   @Post('all')
   async findAll(
-    @Request() req: AvailabilityReq,
+    @Request() req: RequestJwt,
     @Body() dto: { timezone: string },
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities =
@@ -106,7 +106,7 @@ export class AvailabilityController {
   @Delete()
   async remove(
     @Body() data: ChangeAvailabilityBody,
-    @Request() req: AvailabilityReq,
+    @Request() req: RequestJwt,
   ): Promise<IServerResponse<void>> {
     await this.availabilityService.remove(
       data.dto,
@@ -129,7 +129,7 @@ export class AvailabilityController {
   @Patch()
   async updateMultiples(
     @Body() data: UpdateAvailabilityBody,
-    @Request() req: AvailabilityReq,
+    @Request() req: RequestJwt,
   ): Promise<IServerResponse<Availability[]>> {
     const availabilities = await this.availabilityService.updateMultiples(
       data.toDelete,
