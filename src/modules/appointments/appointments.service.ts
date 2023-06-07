@@ -21,7 +21,6 @@ import { AllPaginationCalendarOptionsDto } from '@modules/appointments/dto/allPa
 import { AllPaginationListOptionsDto } from '@modules/appointments/dto/allPaginationList-options.dto';
 import { FuturePaginationOptionsDto } from '@modules/appointments/dto/futurePagination-options.dto';
 import { AvailabilityService } from '@modules/availability/availability.service';
-import { Availability } from '@entities/Availability';
 
 @Injectable()
 export class AppointmentsService {
@@ -80,26 +79,36 @@ export class AppointmentsService {
   }
 
   async deleteAppointment(id: number): Promise<void> {
-    const { remoteDoctorId } = await this.getAppointmentById(id);
+    const appointment = await this.getAppointmentById(id);
+    const { remoteDoctorId, startTime, endTime } = appointment;
 
     const now = moment().utc().toDate();
+    const end = moment(endTime).utc().toDate();
 
-    const appointmentQuery = await this.appointmentRepository
-      .createQueryBuilder('appointment')
-      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
-      .leftJoinAndSelect('remoteDoctor.availability', 'availability')
-      .update(Availability)
-      .set({ isAvailable: true })
-      .where('remoteDoctor.id = :remoteDoctorId', { remoteDoctorId })
-      .andWhere(
-        'appointment.startTime = availability.startTime AND appointment.endTime = availability.endTime',
-      )
-      .delete()
-      .where('appointment.id = :id AND endTime > :now', { now, id })
-      .execute();
+    if (end > now) {
+      const availability =
+        await this.availabilityService.getAvailabilityByDoctorId(
+          remoteDoctorId,
+          startTime,
+          endTime,
+        );
+      availability.isAvailable = true;
+      await this.availabilityService.updateAvailability(availability);
 
-    if (!appointmentQuery.affected)
-      throw new UnauthorizedException('Appointments no found!');
+      const appointmentQuery = await this.appointmentRepository
+        .createQueryBuilder('appointment')
+        .delete()
+        .where({
+          id,
+        })
+        .execute();
+
+      if (appointmentQuery.affected === 0) {
+        throw new UnauthorizedException('No Appointments was found to delete');
+      }
+    } else {
+      throw new BadRequestException('Only future appointments can be deleted');
+    }
   }
 
   async getAppointmentsByPatientId(id: number): Promise<Appointment[]> {

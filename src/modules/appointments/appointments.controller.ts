@@ -187,15 +187,19 @@ export class AppointmentsController {
   async deleteAppointment(
     @Request() request: RequestWithUser,
     @Param('id') id: number,
-  ): Promise<void> {
+  ): Promise<IServerResponse<void>> {
     const { remoteDoctorId, localDoctorId } =
       await this.appointmentsService.getAppointmentById(id);
 
     await this.appointmentsService.deleteAppointment(id);
 
     await this.appointmentsGateway.sendAppointmentsHaveChanged(remoteDoctorId);
-
     await this.appointmentsGateway.sendAppointmentsHaveChanged(localDoctorId);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Appointment deleted successfully',
+    };
   }
 
   @Get('/patient/:id')
