@@ -1,20 +1,18 @@
 
 ## Description
 
-MedOn - Distributed system for patients treatment
+MedOn - Medical system for doctors that manage their schedule and book appointments to treat patients
 
-## Installation
-- Install mySQL server locally
+## Setup project
+- Install mySQL server
 
-- Create file .env (use template .env.defaults)
+- Create file .env (use template .env.example)
 
 - Run command
 
 ```bash
 $ npm install
 ```
-
-
 
 ## Running the app
 
@@ -42,21 +40,14 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 ## Deploy
-#### New API version deploy to Docker Hub
-Go to the branch that was chosen as branch for new version build: <br/>
-```git checkout branch-for-build```<br/>
 
-Tag this branch with new server version: <br/>
-```git tag sv0.0.5```<br/>
+```bash
+# Build the Docker Image:
+$ docker build -t app-name-backend
 
-Push branch and tag to the origin: <br/>
-```git push origin branch-for-build``` <br/>
-```git push --tags```<br/>
+# Run the Docker Container:
+$ docker run -d -p 3333:3333 --env-file .env app-name-backend
 
-#### Deploy latest version of build to AWS
-Remove local branch "deploy-server" if it exists <br/>
-```git branch -D deploy-server``` <br/>
-
-Create and push special branch "deploy-server" to the server: <br/>
-```git checkout -b deploy-server```<br/>
-```git push origin deploy-server --force```<br/>
+# Verify the Deployment:
+$ docker logs <container_id>
+```
