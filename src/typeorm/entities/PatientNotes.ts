@@ -9,6 +9,8 @@ import {
 } from 'typeorm';
 import * as moment from 'moment-timezone';
 
+import { maxTextareaLength } from '@common/constants/validation';
+
 import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
 
@@ -17,7 +19,7 @@ export class PatientNotes {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'note', length: 1200 })
+  @Column({ name: 'note', length: maxTextareaLength })
   note: string;
 
   @Column({ name: 'doctor_id' })

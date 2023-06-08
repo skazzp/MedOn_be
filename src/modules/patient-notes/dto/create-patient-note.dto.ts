@@ -6,13 +6,15 @@ import {
   MaxLength,
 } from 'class-validator';
 
+import { maxTextareaLength } from '@common/constants/validation';
+
 export class CreatePatientNoteDto {
   @ApiProperty({
     description: "Patient's note",
     example: 'Patient broke his leg',
   })
   @IsString()
-  @MaxLength(1200)
+  @MaxLength(maxTextareaLength)
   @IsNotEmpty()
   note: string;
 
