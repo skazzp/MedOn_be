@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import * as moment from 'moment-timezone';
 
 import { Doctor } from '@entities/Doctor';
 import { Patient } from '@entities/Patient';
@@ -33,9 +34,29 @@ export class PatientNotes {
   @JoinColumn({ name: 'patient_id' })
   patient: Patient;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({
+    name: 'created_at',
+    transformer: {
+      to(value: Date): Date {
+        return moment(value).utc().toDate();
+      },
+      from(value: Date): Date {
+        return moment(value).toDate();
+      },
+    },
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    transformer: {
+      to(value: Date): Date {
+        return moment(value).utc().toDate();
+      },
+      from(value: Date): Date {
+        return moment(value).toDate();
+      },
+    },
+  })
   updatedAt: Date;
 }
