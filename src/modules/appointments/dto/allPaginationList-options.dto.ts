@@ -26,4 +26,11 @@ export class AllPaginationListOptionsDto {
   })
   @IsEnum(Filter)
   filter: Filter;
+
+  @ApiProperty({
+    description: 'limit of the pagination',
+    example: 15,
+  })
+  @IsNumberString()
+  limit: number;
 }

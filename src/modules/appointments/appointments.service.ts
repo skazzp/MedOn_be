@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { DeepPartial, FindOneOptions, Repository } from 'typeorm';
 
-import { Role, Filter, ShowAll } from '@common/enums';
+import { Role, Filter, ShowAll, Order } from '@common/enums';
 import { oneAsString } from '@common/constants/appointments';
 
 import { Appointment } from '@entities/Appointments';
@@ -163,7 +163,7 @@ export class AppointmentsService {
     id: number,
     pagination: AllPaginationListOptionsDto,
   ): Promise<Appointment[]> {
-    const { page, filter, showAll } = pagination;
+    const { page, filter, showAll, limit } = pagination;
 
     if (page <= 0) {
       throw new BadRequestException('Page must be greater than 0');
@@ -180,21 +180,23 @@ export class AppointmentsService {
     }
 
     let whereClause: string;
+    let orderClause: Order;
 
     switch (filter) {
       case Filter.today:
         whereClause =
           'appointment.startTime >= :startOfDay AND appointment.endTime <= :endOfDay';
+        orderClause = Order.asc;
         break;
 
       case Filter.future:
-        whereClause =
-          'appointment.startTime >= :nextDayStart AND appointment.endTime <= :nextDayEnd';
+        whereClause = 'appointment.startTime >= :nextDayStart';
+        orderClause = Order.asc;
         break;
 
       case Filter.past:
-        whereClause =
-          'appointment.startTime >= :pastDayStart AND appointment.endTime < :pastDayEnd';
+        whereClause = 'appointment.endTime <= :pastDayStart';
+        orderClause = Order.desc;
         break;
 
       default:
@@ -211,9 +213,7 @@ export class AppointmentsService {
         startOfDay: moment().startOf('day').toDate(),
         endOfDay: moment().endOf('day').toDate(),
         nextDayStart: moment().add(page, 'day').startOf('day').toDate(),
-        nextDayEnd: moment().add(page, 'day').endOf('day').toDate(),
         pastDayStart: moment().subtract(page, 'day').startOf('day').toDate(),
-        pastDayEnd: moment().subtract(page, 'day').endOf('day').toDate(),
       })
       .select([
         'appointment.id',
@@ -248,10 +248,9 @@ export class AppointmentsService {
       );
     }
 
-    appointmentQueryBuilder = appointmentQueryBuilder.orderBy(
-      'appointment.startTime',
-      'ASC',
-    );
+    appointmentQueryBuilder = appointmentQueryBuilder
+      .orderBy('appointment.startTime', orderClause)
+      .take(limit * page);
 
     const appointments = await appointmentQueryBuilder.getMany();
 
