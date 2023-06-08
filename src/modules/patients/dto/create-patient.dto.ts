@@ -10,7 +10,9 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
 import { Gender } from '@common/enums';
+import { maxOverviewLength } from '@common/constants/validation';
 
 export class CreatePatientDto {
   @ApiProperty({ description: "Patient's first name", example: 'Adam' })
@@ -89,7 +91,7 @@ export class CreatePatientDto {
     example: 'Allergy to ambrosia',
   })
   @IsString()
-  @MaxLength(400)
+  @MaxLength(maxOverviewLength)
   @IsOptional()
   overview: string;
 }

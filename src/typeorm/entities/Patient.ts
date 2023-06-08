@@ -8,8 +8,10 @@ import {
 } from 'typeorm';
 
 import { Gender } from '@common/enums';
-import { PatientNotes } from './PatientNotes';
-import { Appointment } from './Appointments';
+import { maxOverviewLength } from '@common/constants/validation';
+
+import { PatientNotes } from '@entities/PatientNotes';
+import { Appointment } from '@entities/Appointments';
 
 @Entity({ name: 'patient' })
 export class Patient {
@@ -40,7 +42,7 @@ export class Patient {
   @Column({ name: 'phone_number' })
   phoneNumber: string;
 
-  @Column({ name: 'overview', type: 'text' })
+  @Column({ name: 'overview', length: maxOverviewLength })
   overview: string;
 
   @OneToMany(() => Appointment, (appointment) => appointment.patient)
