@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 
 import { Gender } from '@common/enums';
-import { maxTextareaLength } from '@common/constants/validation';
+import { maxOverviewLength } from '@common/constants/validation';
 
 export class CreatePatientDto {
   @ApiProperty({ description: "Patient's first name", example: 'Adam' })
@@ -91,7 +91,7 @@ export class CreatePatientDto {
     example: 'Allergy to ambrosia',
   })
   @IsString()
-  @MaxLength(maxTextareaLength)
+  @MaxLength(maxOverviewLength)
   @IsOptional()
   overview: string;
 }
