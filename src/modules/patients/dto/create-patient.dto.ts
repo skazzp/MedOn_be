@@ -89,7 +89,7 @@ export class CreatePatientDto {
     example: 'Allergy to ambrosia',
   })
   @IsString()
-  @MaxLength(400)
+  @MaxLength(1200)
   @IsOptional()
   overview: string;
 }

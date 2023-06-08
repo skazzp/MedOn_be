@@ -17,7 +17,7 @@ export class PatientNotes {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'note' })
+  @Column({ name: 'note', length: 1200 })
   note: string;
 
   @Column({ name: 'doctor_id' })

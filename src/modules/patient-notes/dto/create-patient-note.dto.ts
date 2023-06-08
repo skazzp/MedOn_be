@@ -12,7 +12,7 @@ export class CreatePatientNoteDto {
     example: 'Patient broke his leg',
   })
   @IsString()
-  @MaxLength(400)
+  @MaxLength(1200)
   @IsNotEmpty()
   note: string;
 

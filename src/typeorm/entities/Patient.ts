@@ -40,7 +40,7 @@ export class Patient {
   @Column({ name: 'phone_number' })
   phoneNumber: string;
 
-  @Column({ name: 'overview', type: 'text' })
+  @Column({ name: 'overview', length: 1200 })
   overview: string;
 
   @OneToMany(() => Appointment, (appointment) => appointment.patient)
