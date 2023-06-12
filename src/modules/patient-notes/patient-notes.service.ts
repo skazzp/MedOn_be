@@ -17,7 +17,7 @@ export class PatientNotesService {
   constructor(
     @InjectRepository(PatientNotes)
     private notesRepo: Repository<PatientNotes>,
-  ) { }
+  ) {}
 
   async addPatientNote(dto: CreatePatientNoteDto): Promise<PatientNotes> {
     const note = await this.notesRepo.save(dto);
@@ -47,7 +47,7 @@ export class PatientNotesService {
       })
       .leftJoin('notes.doctor', 'doctor')
       .addSelect(['doctor.firstName', 'doctor.lastName'])
-      .orderBy('notes.updatedAt', order)
+      .orderBy('notes.createdAt', order)
       .getManyAndCount();
 
     return { notes: response[0], total: response[1] };
