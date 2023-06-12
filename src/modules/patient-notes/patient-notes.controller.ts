@@ -5,6 +5,7 @@ import {
   Get,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Query,
   Request,
@@ -26,7 +27,7 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 @Controller('patient-notes')
 @UseGuards(AuthGuard('jwt'))
 export class PatientNotesController {
-  constructor(private readonly notesService: PatientNotesService) {}
+  constructor(private readonly notesService: PatientNotesService) { }
 
   @Get('/:id')
   @ApiOperation({ summary: 'Get patient notes by patients id' })
@@ -76,6 +77,25 @@ export class PatientNotesController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Appointment note was removed',
+    };
+  }
+
+  @Patch('/update/:patientId/:noteId')
+  @ApiOperation({ summary: 'Update patient note' })
+  @ApiResponse({
+    status: 200,
+    description: 'Patient note was updated',
+  })
+  async updatePatientNote(
+    @Param() params: { patientId: number; noteId: number },
+    @Body() updatedNote: CreatePatientNoteDto,
+  ): Promise<IServerResponse<PatientNotes>> {
+    const { patientId, noteId } = params;
+    await this.notesService.updatePatientNote(patientId, noteId, updatedNote);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Patient note was updated',
     };
   }
 }
