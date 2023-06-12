@@ -114,6 +114,23 @@ export class AppointmentsService {
   async getAppointmentsByPatientId(id: number): Promise<Appointment[]> {
     const appointments = await this.appointmentRepository
       .createQueryBuilder('appointment')
+      .leftJoinAndSelect('appointment.remoteDoctor', 'remoteDoctor')
+      .leftJoinAndSelect('appointment.localDoctor', 'localDoctor')
+      .select([
+        'appointment.id',
+        'appointment.link',
+        'appointment.startTime',
+        'appointment.endTime',
+        'appointment.localDoctorId',
+        'appointment.remoteDoctorId',
+        'appointment.patientId',
+        'appointment.createdAt',
+        'appointment.updatedAt',
+        'remoteDoctor.firstName',
+        'remoteDoctor.lastName',
+        'localDoctor.firstName',
+        'localDoctor.lastName',
+      ])
       .where('appointment.patientId = :id', { id })
       .getMany();
 
