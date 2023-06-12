@@ -17,7 +17,7 @@ export class PatientNotesService {
   constructor(
     @InjectRepository(PatientNotes)
     private notesRepo: Repository<PatientNotes>,
-  ) {}
+  ) { }
 
   async addPatientNote(dto: CreatePatientNoteDto): Promise<PatientNotes> {
     const note = await this.notesRepo.save(dto);
@@ -63,5 +63,20 @@ export class PatientNotesService {
       .execute();
 
     if (!response.affected) throw new NotFoundException('Note not found');
+  }
+
+  async updatePatientNote(
+    patientId: number,
+    noteId: number,
+    updatedNote: CreatePatientNoteDto,
+  ): Promise<void> {
+    const result = await this.notesRepo.update(
+      { id: noteId, patientId },
+      updatedNote,
+    );
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Note not found');
+    }
   }
 }
