@@ -97,17 +97,17 @@ jobs:
           envs: ECR_REGISTRY, ECR_REPOSITORY, IMAGE_TAG, BASE_FRONT_URL, BASE_SERVER_URL, DB_USERNAME, DB_PORT, DB_HOST, DB_PASSWORD, DB_NAME, SMTP_LOGIN, SMTP_PASS, SMTP_SERVER,EMAIL_SENDER,JWT_SECRET,JWT_EXPIRATION_TIME,SECRET, MAX_AGE, CONFIRMATION_TOKEN_EXPIRED_AT, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL, AWS_PUBLIC_BUCKET_NAME, AWS_IMAGE_BUCKET_ACCESS_KEY_ID, AWS_IMAGE_BUCKET_SECRET_ACCESS_KEY,DEV_AWS_REGION
           script: |
             aws ecr get-login-password --region $DEV_AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-            docker stop backend_dev || true
-            docker rm backend_dev || true
             docker image prune --all --force
             docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-            docker network create backend_dev || true
+            docker network create backend_dev || echo "Network already exists"
+            docker stop backend_dev || true
+            docker rm backend_dev || true
             docker run -d \
               --name backend_dev \
               --network backend_dev \
               --restart unless-stopped \
               -e PORT=3000 \
-              -p 8080:3000 \
+              -p 3000:3000 \
               -e BASE_FRONT_URL=$BASE_FRONT_URL \
               -e BASE_SERVER_URL=$BASE_SERVER_URL \
               -e NODE_ENV='prod' \
