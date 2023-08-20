@@ -31,13 +31,19 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        type: 'mysql',
+        type: 'postgres',
         host: configService.get('DB_HOST'),
         port: configService.get('DB_PORT'),
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         timezone: '+00:00',
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        },
         entities: [
           Patient,
           Speciality,
@@ -62,7 +68,6 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     PatientNotesModule,
     AppointmentsModule,
     FilesModule,
-    ChatModule,
   ],
   providers: [JwtStrategy, RolesGuard],
 })

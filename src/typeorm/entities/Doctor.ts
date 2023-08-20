@@ -43,7 +43,7 @@ export class Doctor {
   @Column({ name: 'photo', nullable: true })
   photo: string;
 
-  @Column({ name: 'date_of_birth', type: 'datetime', nullable: true })
+  @Column({ name: 'date_of_birth', type: 'date', nullable: true })
   dateOfBirth: Date;
 
   @Column({ name: 'role', type: 'enum', enum: Role, nullable: true })

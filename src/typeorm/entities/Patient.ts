@@ -30,7 +30,7 @@ export class Patient {
   @Column({ name: 'gender', type: 'enum', enum: Gender })
   gender: Gender;
 
-  @Column({ name: 'date_of_birth', type: 'datetime' })
+  @Column({ name: 'date_of_birth', type: 'date' })
   dateOfBirth: Date;
 
   @Column({ name: 'country' })
