@@ -27,7 +27,7 @@ import { IServerResponse } from '@common/interfaces/serverResponses';
 @Controller('patient-notes')
 @UseGuards(AuthGuard('jwt'))
 export class PatientNotesController {
-  constructor(private readonly notesService: PatientNotesService) { }
+  constructor(private readonly notesService: PatientNotesService) {}
 
   @Get('/:id')
   @ApiOperation({ summary: 'Get patient notes by patients id' })
