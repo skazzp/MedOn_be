@@ -15,6 +15,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new GlobalExceptionFilter());
-  await app.listen(app.get(ConfigService).get('PORT'));
+  await app.listen(app.get(ConfigService).get('PORT' || 3000));
 }
 bootstrap();
